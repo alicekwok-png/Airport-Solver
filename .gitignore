@@ -1,0 +1,6 @@
+# build-static.js 產生嘅輸出，Render 每次部署會自己 build，唔使入 repo
+public/
+
+node_modules/
+.DS_Store
+Thumbs.db

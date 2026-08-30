@@ -1,0 +1,21 @@
+# Render Blueprint — Runway Jam（靜態網站，手機測試用）
+# 用法：喺 Render 揀 "New +" → "Blueprint"，指向呢個 repo 就會自動照呢度起。
+services:
+  - type: web
+    name: runway-jam
+    runtime: static
+    # build-static.js 會由 index.html 包出一個有 viewport meta 嘅完整 HTML
+    buildCommand: node build-static.js
+    staticPublishPath: ./public
+    pullRequestPreviewsEnabled: false
+    headers:
+      # 成個 game 得一個 HTML（素材全部 base64 內嵌），改完要即刻見到新版，
+      # 所以唔畀瀏覽器 cache 個 HTML —— 否則喺手機測試會一直開住舊版。
+      - path: /*
+        name: Cache-Control
+        value: no-store, must-revalidate
+    routes:
+      # 單頁：任何路徑都回 index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
