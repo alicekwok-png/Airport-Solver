@@ -20,7 +20,7 @@ const OUT = path.join(OUT_DIR, 'index.html');
 const body = fs.readFileSync(SRC, 'utf8');
 
 /* 抽走 <title>（要擺入 <head>），其餘照搬 */
-let title = 'Runway Jam';
+let title = 'Airport Solver';
 const bodyNoTitle = body.replace(/<title>([\s\S]*?)<\/title>\s*/i, (_, t) => {
   title = t.trim();
   return '';

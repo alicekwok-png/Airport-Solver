@@ -1,4 +1,4 @@
-<title>Runway Jam</title>
+<title>Airport Solver</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap">
 <style>
   :root{
@@ -285,7 +285,10 @@
     padding:12px 14px;
   }
   #hubBrand{
-    font-weight:800;font-size:21px;line-height:1;color:#fff;
+    /* 「AIRPORT SOLVER」比舊名「RUNWAY JAM」長好多，21px 會同右邊材料
+       chip 打交叉，收窄字級 + 用 clamp 喺窄機度自動再縮 */
+    font-weight:800;font-size:clamp(14px,4.2vw,18px);line-height:1;color:#fff;
+    white-space:nowrap;
     text-shadow:0 2px 0 rgba(10,30,60,.55), 0 4px 10px rgba(0,0,0,.35);
   }
   #hubBrand em{font-style:normal;color:var(--paint)}
@@ -419,7 +422,7 @@
   <div id="ovSplash" class="overlay" style="background:none;padding:0;z-index:20">
     <img id="splashBg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
     <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:16px">
-      <div style="font-weight:800;font-size:clamp(32px,9vw,52px);line-height:1.05;color:#fff;text-shadow:0 3px 0 rgba(10,30,60,.5),0 6px 16px rgba(0,0,0,.4)">RUNWAY <em style="font-style:normal;color:var(--paint)">JAM</em></div>
+      <div style="font-weight:800;font-size:clamp(28px,8vw,46px);line-height:1.05;color:#fff;text-shadow:0 3px 0 rgba(10,30,60,.5),0 6px 16px rgba(0,0,0,.4)">AIRPORT <em style="font-style:normal;color:var(--paint)">SOLVER</em></div>
       <div style="font-weight:700;font-size:14px;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6)">撳一下開始</div>
     </div>
   </div>
@@ -444,7 +447,7 @@
   <!-- Home＝機場全景 Hub -->
   <div id="ovHub" class="overlay">
     <div id="hubTop">
-      <div id="hubBrand">RUNWAY <em>JAM</em></div>
+      <div id="hubBrand">AIRPORT <em>SOLVER</em></div>
       <div class="chip gold"><img class="matsicon" id="matsIconHub" alt="材料"><span class="val" id="hubMats">0</span></div>
     </div>
     <button class="hub-badge" id="btnLevels" style="left:14px">
@@ -523,7 +526,7 @@
 <script>
 'use strict';
 /* =========================================================
-   Runway Jam — sort/jam puzzle prototype
+   Airport Solver — sort/jam puzzle prototype
    機制（concept doc 第 2 節 2026-08-29 確認）：
    「固定方向、揀順序」——每架飛機 1 格、箭咀方向係死嘅，
    撳一下：路徑通 → 沿箭咀駛出跑道 → 停入登機閘；
@@ -768,7 +771,7 @@ const DIRV = {
 };
 
 /* ---------- 本地進度 (offline, webview-safe) ---------- */
-const SAVE_KEY = 'runwayjam.progress.v3';
+const SAVE_KEY = 'airportsolver.progress.v3';
 function loadProgress(){
   let p = {unlocked:1, stars:{}, done:{}};
   try{ const s = localStorage.getItem(SAVE_KEY); if(s) p = JSON.parse(s); }catch(e){}
