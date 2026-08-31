@@ -50,7 +50,6 @@
   /* HUD chip icon 全部改用真圖，唔再用 emoji（用戶拍板：「其實我哋個
      星星都有噶，唔好再用 emoji」）*/
   .chip .cicoimg{width:17px;height:17px;object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
-  .ibtnimg{width:20px;height:20px;object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))}
   #hubBrand{height:26px;width:auto;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
   .chip .lbl{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--ink-dim)}
   .chip .val{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
@@ -59,15 +58,25 @@
     border-color:#2e2208;
   }
   /* 剩餘乘客＝呢關嘅主要進度指標（參考遊戲擺喺左上角最當眼位置）。
-     用高對比配色令佢喺一行 chip 入面跳出嚟。 */
+     用戶反饋深藍底淺藍字睇落唔夠清楚，對比返 reference 遊戲個白底
+     深字版本——改做白／米白底 + 深色粗體字，先真係「好清晰睇到」。 */
   .chip.pax{
-    background:linear-gradient(180deg,#2f6ea8,#1b3f66);
-    border-color:#12263f;
+    background:linear-gradient(180deg,#ffffff,#eef1f8);
+    border-color:#c7ceda;
+    box-shadow:0 3px 0 rgba(10,16,32,.35), inset 0 2px 0 rgba(255,255,255,.9);
   }
-  .chip.pax .val{color:#bfe3ff}
+  .chip.pax .lbl{color:#3a4566}
+  .chip.pax .val{color:#0e1526}
   .paxicon{width:18px;height:18px;object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))}
   .chip.gold .val{color:#ffd97a}
   .chip.center{align-self:center}
+  /* 「關卡」徽章：張圖本身個圓圈中間留咗一嚿空白畀個數字疊落去
+     （用戶：「唔需要有呢個藍底...我要放翻大依啲icon」），所以唔再用
+     `.chip` 膠囊底，直接將數字疊喺 icon 上面。 */
+  .lvbadge{position:relative;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  .lvbadge-icon{width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(0,0,0,.4))}
+  .lvbadge-num{position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);
+    font-size:22px;font-weight:800;color:#8a1f1f;font-variant-numeric:tabular-nums}
   /* 建造面板頂部嘅材料顯示：唔要「建造材料」四隻字（用戶反饋文字太多），
      淨返 icon + 數字，兩樣都放大，一眼睇到自己有幾多料。 */
   .chip.matsbig{padding:7px 20px 7px 12px;gap:9px}
@@ -180,10 +189,21 @@
     #hud .chip{padding:3px 6px 3px 4px}
     #hud .chip .lbl{font-size:8px}
     #hud .chip .val{font-size:13px}
-    #hud .ibtn.small{width:36px;height:36px;font-size:15px}
+    #hud .hudicon-btn{width:36px;height:36px}
+    #hud .hudicon{width:28px;height:28px}
+    #hud .lvbadge-icon{width:52px;height:52px}
+    #hud .lvbadge-num{font-size:18px}
   }
   #hud .hud-btns{display:flex;gap:5px;pointer-events:auto;flex-shrink:0}
-  #hud .ibtn.small{width:40px;height:40px;font-size:17px}
+  /* 重玩／返回機場：唔要藍色方框底，直接放大個 icon（用戶：「我唔中意
+     有個籃筐喺度...唔要有個籃框喺度」，同加開閘位/指揮飛機嗰次一樣做法） */
+  .hudicon-btn{
+    background:none;border:none;box-shadow:none;padding:0;margin:0;
+    display:flex;align-items:center;justify-content:center;
+    width:40px;height:40px;
+  }
+  .hudicon-btn:active{transform:translateY(2px)}
+  .hudicon{width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.45))}
   /* Gameplay 兩粒自願廣告掣並排喺 HUD 之下（加開閘位／指揮飛機） */
   .aidbar{
     position:absolute; left:50%; top:66px;
@@ -435,25 +455,34 @@
     <img id="splashBg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
     <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:16px">
       <img id="splashLogo" alt="Airport Solver" style="width:min(74vw,320px);height:auto;filter:drop-shadow(0 8px 16px rgba(0,0,0,.35))">
-      <div style="font-weight:700;font-size:14px;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6)">撳一下開始</div>
+      <div style="font-weight:700;font-size:14px;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6)">點一下開始</div>
     </div>
   </div>
 
   <div id="hud" hidden>
     <div class="chip pax"><img class="paxicon" id="hudPaxIcon" alt=""><span class="lbl">剩餘乘客</span><span class="val" id="hudPax">0</span></div>
-    <div class="chip"><img class="cicoimg" id="hudLevelIcon" alt=""><span class="lbl">關卡</span><span class="val" id="hudLevel">1</span></div>
-    <div class="chip"><img class="cicoimg" id="hudScoreIcon" alt=""><span class="lbl">分數</span><span class="val" id="hudScore">0</span></div>
-    <div class="chip"><img class="cicoimg" id="hudMovesIcon" alt=""><span class="lbl">步數</span><span class="val" id="hudMoves">0</span></div>
     <div class="hud-btns">
-      <button class="ibtn small" id="btnRestart"><img class="ibtnimg" id="btnRestartIcon" alt=""></button>
-      <button class="ibtn small" id="btnMenu"><img class="ibtnimg" id="btnMenuIcon" alt=""></button>
+      <button class="hudicon-btn" id="btnRestart"><img class="hudicon" id="btnRestartIcon" alt="重玩"></button>
+      <button class="hudicon-btn" id="btnMenu"><img class="hudicon" id="btnMenuIcon" alt="返回機場"></button>
     </div>
+    <div class="lvbadge"><img class="lvbadge-icon" id="hudLevelIcon" alt="關卡"><span class="lvbadge-num" id="hudLevel">1</span></div>
   </div>
 
   <!-- 加開閘位（doc 第 7 節：基礎閘位 + 睇廣告最多加開 3 個，單關生效，離開/過關重置） -->
   <div id="aidBar" class="aidbar" hidden>
     <button id="btnAddGate" class="addgate-btn"><img class="aidicon" id="btnAddGateIcon" alt="加開閘位"><span class="aidbadge" id="btnAddGateBadge"></span></button>
     <button id="btnWand" class="addgate-btn"><img class="aidicon" id="btnWandIcon" alt="指揮飛機"><span class="aidbadge" id="btnWandBadge"></span></button>
+  </div>
+
+  <!-- 道具說明彈窗（用戶要求：撳個 icon 要先解釋係咩，參考截圖入面「消除」道具彈窗個模式） -->
+  <div id="ovItemInfo" class="overlay" hidden style="z-index:8">
+    <div class="panel">
+      <div class="ribbon" id="itemInfoTitle"></div>
+      <img id="itemInfoIcon" alt="" style="width:84px;height:84px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))">
+      <div class="note big" id="itemInfoDesc"></div>
+      <button class="btn-main" id="itemInfoUse"><img class="adicon" id="itemInfoUseIcon" alt=""> 使用</button>
+      <button class="btn-sec" id="itemInfoClose">取消</button>
+    </div>
   </div>
 
   <!-- Home＝機場全景 Hub -->
@@ -500,16 +529,16 @@
       <div id="winMats"></div>
       <div id="winMoves"></div>
       <button class="btn-main" id="btnNext">下一班航班 <img class="ctaicon" id="ctaPlaneIconWin" alt=""></button>
-      <button class="btn-sec ad" id="btnDouble"><img class="adicon" id="adIconDouble" alt=""> 睇廣告 雙倍材料</button>
+      <button class="btn-sec ad" id="btnDouble"><img class="adicon" id="adIconDouble" alt=""> 觀看廣告 雙倍材料</button>
       <button class="btn-sec" id="btnWinMenu">返回機場</button>
     </div>
   </div>
 
   <div id="ovStuck" class="overlay" hidden>
     <div class="panel">
-      <div class="ribbon danger" id="stuckTitle">登機閘塞住咗！</div>
-      <div class="note big">排隊區啲乘客冇一個等到位，閘位又泊滿晒。<br>換個次序放飛機，或者加開閘位再試過！</div>
-      <button class="btn-main" id="btnRevive"><img class="adicon" id="adIconRevive" alt=""> 睇廣告救援：加開登機閘</button>
+      <div class="ribbon danger" id="stuckTitle">登機閘已被塞滿！</div>
+      <div class="note big">排隊區沒有任何乘客符合條件，閘位又已經全部停滿。<br>請調整飛機的出發順序，或加開閘位後再試一次！</div>
+      <button class="btn-main" id="btnRevive"><img class="adicon" id="adIconRevive" alt=""> 觀看廣告救援：加開登機閘</button>
       <button class="btn-sec" id="btnRetry"><img class="adicon" id="btnRetryIcon" alt=""> 再試一次</button>
       <button class="btn-sec" id="btnStuckMenu">返回機場</button>
     </div>
@@ -581,7 +610,7 @@ const LEVELS = [
     queue:q('rggggrgrrgrggrrggrgrgggrrgrgrgrgrrggrrgrggggrggbgggbrrrgrrbbbrrbgbgbbgrrbbbbbbbrbbbybbbbgbggbbbbbgybbggbbgbygbgygyyybbgbyggbyyygbgbgbgyybgybbgbyggyyggbgbbygyybbyygggyygggygrgrbggbgbbbrbbgggbggggrbgbbrgbbgbrgrgggrrrrygryrgrrrrrygggggygyryyrggrrrggryyggggggggrrrgyrgrgrrgyyyrrgryrrrgryyyyrrrryyyrryyyyrrrryyryryryyrrryrrryyyrrryrryryyrryryryyyyyrrrrrbybyyyyrbybrybbybryybbyyyybbybbybbbybyybbbbbybyybybbbbbyyyybyyyybbybyyyyybbybbybbybbybbgbbybgyygbyyybygyyybygggbbyybbgggbbgggbgggbbbgbgggggggggggggggggg') },
 
   /* L4：6x6、24 機、4 色 */
-  { w:6,h:6, gates:4, milestone:'解鎖：貴賣室！去建造面板起佢！', planes:[
+  { w:6,h:6, gates:4, milestone:'解鎖：貴賓室！請在建造面板中興建！', planes:[
       {x:4,y:1,d:'d',c:'b',sz:'m'}, {x:5,y:4,d:'l',c:'b'}, {x:3,y:1,d:'d',c:'b',sz:'l'}, {x:4,y:4,d:'d',c:'y'}, {x:2,y:4,d:'l',c:'r',sz:'m'}, {x:5,y:1,d:'u',c:'r',sz:'l'}, {x:1,y:3,d:'r',c:'g',sz:'m'}, {x:0,y:0,d:'r',c:'b',sz:'m'}, {x:3,y:0,d:'u',c:'g'}, {x:3,y:3,d:'r',c:'y',sz:'l'}, {x:0,y:2,d:'r',c:'b'}, {x:5,y:3,d:'r',c:'y',sz:'l'}, {x:5,y:0,d:'r',c:'g',sz:'m'}, {x:2,y:5,d:'d',c:'r'}, {x:0,y:1,d:'l',c:'r'}, {x:0,y:5,d:'l',c:'r',sz:'m'}, {x:2,y:2,d:'u',c:'r'}, {x:1,y:5,d:'d',c:'g',sz:'m'}, {x:4,y:0,d:'u',c:'g',sz:'m'}, {x:5,y:2,d:'r',c:'y',sz:'l'}, {x:1,y:0,d:'u',c:'b',sz:'l'}, {x:0,y:4,d:'l',c:'g',sz:'l'}, {x:0,y:3,d:'l',c:'y',sz:'m'}, {x:4,y:5,d:'d',c:'y',sz:'m'} ],
     queue:q('ygybbgbgbyybbbgygybyyybgygybybyybggybbgyyybygybbyygygbyybyybyybyggbbybybybbyybyyggggyygbbyyyyggbyyybgbgybbygygyyyyyggyyyygyygggggggggyyyggggggggyyggyyyygygrrrgygggrgygggygrrggryyygyyggygyyrryyyggrgrryrrgrggrgrggrrgrrrggrrgggrrrrrgggrrggrrrrrgrrrrrrrrggrrgrgrrrrrrrgggrrgggrrrrrrryrrrrbbyryyyrbgyggyybrgyyybgyyyyygbbbybyygygyybyybbbgbyyybgggyyyyggggyygyygyggygybyybyygygggggybybyybybybyyyyybbbgybbgybgyyyybyybybgggyyyygybgbybbgyrrrrbggbrbgbrrrgrbrrggrygyryrgyrgrgrryrrrrrrgrryygrryyyyrryggyyryrbbrrrgrrgrbrgrrrgrbbrbrbrrrbbbrrbbrrrbbbbrbrbrrbbbbbbbbbbrbbbbrbbbbrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') },
 
@@ -611,7 +640,7 @@ const LEVELS = [
     queue:q('ypypppypypppypprrrpprpyppyrryprrpypyyrppypgryypgrrgggypgpprpyprgpyrbggpbgypbbybpbygpppgppbbbgypbpygyybpbyppggggpgggbppgggpbgpbppgbbbbgpbpgbggggrrrbggggrgggrrbgggrrgggbpgrrbgbgpbbrbpgrgbbbprpbrbrpbbbpppbrbbpppbbbbrbrpbprrprrpppprrbbprbrrrbrrrbrbrpbrprbggbbgbgppbbbbpbppppgpbpgppgppgbgppbpbpbbpypbbpppgpbyyyygppgbgpbbgpygybbbgygpgyygyygbbbyyygbyybgbyyybyyygybgyyyryyyyryyyryyrryyrrgyrgygyrrrpggpprpygrggprrggggpgygpygppyryrgpgpygygrrygyppggyyrprprrgrbyyrgggggggbgyggrbybrybbyggygrrrrrybbrrrbrbbrrrbrbbrrbbrbbbrbrbrbbrbrbrrrbbbrbrrbbrrbrbbgbrbgrggbbbbrrrgrbbbbbrrbrbgrrbgbbbrrggggbggbbrgbrbbbgbgrgbgbbbgbbrgbbbbbbgbggbgrbpbbggpggybbgggybggpypppgggypgybbppbgbbgbbgypbypybyyyyppbppypybyyyypyyyyyyyypyyyyyyyyyyyyyppyyyypyyyypyyyyypypypyypyyyyppyyyyyyyyypyyyyyyrpypyryryyrryryrrpyppyyrgrrrrrprprrgrrprrgppggrgprrrgrrgggrggrprgrprprypypggrgyppprgpgpygrygygggyrrryyyrygygyyyyyyyyyyyyy') },
 
   /* L10：9x8、38 機、5 色、8方向 形狀關（mask 座標未經美術落實，見 doc 第10節⚠️，呢度用幾何佔位輪廓） */
-  { w:9,h:8, gates:4, stars:true, par:38, milestone:'貴賣室擴建 Tier 2！', planes:[
+  { w:9,h:8, gates:4, stars:true, par:38, milestone:'貴賓室擴建 Tier 2！', planes:[
       {x:8,y:5,d:'dl',c:'y',sz:'m'}, {x:0,y:5,d:'u',c:'r',sz:'m'}, {x:5,y:3,d:'l',c:'b'}, {x:2,y:1,d:'d',c:'g',sz:'l'}, {x:1,y:2,d:'u',c:'y',sz:'l'}, {x:6,y:6,d:'dr',c:'b',sz:'l'}, {x:5,y:6,d:'d',c:'b'}, {x:5,y:2,d:'dl',c:'p',sz:'l'}, {x:7,y:2,d:'d',c:'b',sz:'l'}, {x:7,y:3,d:'dl',c:'r'}, {x:4,y:5,d:'dl',c:'y',sz:'l'}, {x:1,y:5,d:'dl',c:'b',sz:'m'}, {x:2,y:5,d:'d',c:'r',sz:'m'}, {x:5,y:5,d:'dl',c:'p',sz:'l'}, {x:4,y:4,d:'r',c:'r',sz:'m'}, {x:6,y:2,d:'ur',c:'b'}, {x:6,y:1,d:'ur',c:'p',sz:'m'}, {x:4,y:3,d:'l',c:'g',sz:'l'}, {x:2,y:4,d:'dr',c:'g'}, {x:2,y:3,d:'l',c:'r',sz:'m'}, {x:3,y:7,d:'dr',c:'g',sz:'m'}, {x:4,y:0,d:'r',c:'r',sz:'l'}, {x:0,y:3,d:'dl',c:'r',sz:'m'}, {x:3,y:6,d:'u',c:'y',sz:'l'}, {x:4,y:7,d:'dl',c:'g',sz:'m'}, {x:4,y:1,d:'ul',c:'b',sz:'m'}, {x:5,y:4,d:'r',c:'y'}, {x:3,y:0,d:'u',c:'g'}, {x:0,y:2,d:'ur',c:'g',sz:'m'}, {x:4,y:2,d:'ul',c:'r',sz:'m'}, {x:8,y:3,d:'dr',c:'p'}, {x:3,y:3,d:'ul',c:'p'}, {x:7,y:1,d:'ur',c:'p'}, {x:6,y:4,d:'r',c:'y'}, {x:2,y:6,d:'dl',c:'p',sz:'m'}, {x:5,y:0,d:'r',c:'y',sz:'m'}, {x:1,y:4,d:'l',c:'y',sz:'l'}, {x:5,y:7,d:'dr',c:'b',sz:'m'} ],
     queue:q('bbbpbbyybyyyyyppybyybybypbyypbyyyypbypybppbypypybypypypbyybybbbypybybyypybpyypyyypyyybpyyyybyyyypyypyyyyypppppppypppppypypyypyppyppyppppypyyyppypppppyrppyprppyypgppppgrggpgggprrpgrgrprpgpgrpgyrggggyggygggrggrgrrgyggrrggggryryrggbbgyrbrrgyyrbybrgyrggggbygbgggbbbggygbbyyybgbggbbyyrbrbyrgrbbgyybbbgrbbrrgryrgyrygggrrryrgrgrgryyyryryryrrgryyygrryrryygggryygrryyyryryryygryrgrgrgrrrrrrryrrryryrggrrrrrrrggrrrgggrrgrrrgrrrgrrrrggrggrrrgrrrrgggrrggggggrggrggggggrrggggggppgrgpggbbggggrbbgbppppgbbggrpgbrrppprpprpbrrprbrpbrpprbrbpgpgrpbrprpggrpbprggprgppprrprgprrgrgrrppggrbpbbrbbbpprrbgpbpprgpggpbgbbgyrrbprprpprbbrprbbrppryppybbpybpryyrrbbrpybypypbpbyrrbrryprpppbrrybbbryrbbbbpbypyrbrpybpryybpryybrbpyrbypbrpbrbbrpbrbbpbbpbyppbbbbbybpbbbppbpbbybbpbypybpbybpbbyybpbybbyyybpbppbpbbpbybpbbybgbgbbgbbpbbbbppbbypgyybyggpgpybybypggyyygyybbgbbgbgyybbbbbybbggbybyygyybbbyyybyybygbbggbgbggbybggggygbybyrgyrryggyyygyygyrggyrrrygyryryyyryyyyyrrryryrryyryyyyryrrrrrrr') },
 
@@ -651,7 +680,7 @@ const LEVELS = [
     queue:q('bgbbbbggbggbgbbgggbgbgbbbgbgbgggbbgbbgggbbbgbggbgbgbggbbgbbbbggbrgbgbggbbbbrrrbbbggrbbbggbbbbgbggbgbrbrrbrbbrrbbrygybbggyrybbggryybbgbbygyybgyyyyrgbybrrgyryryrrrggrrrppbyybpbyygypbybpppybbpyrppppprppprppbrpppbpbpbbpbrrppbprrpbrprrpgppppgpgpprgprgpgpgprrgrprrrggprggrgrrgpgrbbrbpbrrrrrrbrrrbbrrbpprppprppprprrbbbpbbrrrrprbrrpgprgrpbpbgbgrbrbrbrgggbgbbrgggrpgrbbgrprgrrrpprprpgrgrgrprprrrpprrpgrppprrgrrpprrgrgrrrpprgpprrrggrpppgrgrrrrrgprgrprgrgrrrryyryyyyyggrrryrryrrryrgrrygggrgrrrrrrrgyrygyyyyygggyryyygrygyrggrryryyryyyyyyygrrrryggyyggyyyypyygrrrprrprygyggyrypyggryygpgppyppprrpprrrpyppgryyrgrrrygrrrrrrrygyrryryggyrrgrrgrrgyggrryrrrrrrrrryyrrrrrrryyrrrrrryyryrrryyyrrryrryrrryryyryyryrrrrrrrrrryrrrryrrrrrrrrryyyyrrrryrpryyryprrypryyyryggpprgrgprrrprgrrrggrprrrpppppggrrpgrrrrrrrppbgggbpppbgbgggprppggbpgrbrbbgrbppgbrrggpgybbybpyppbppybbbbybbybppbpybbybybbbbbpbpbbbpbpbbppbbbbyyybbbbbybyyybbbbbbbyybyybbbbbbbybbbbbbbbbbbybbbybbbbbbbbbpbbypybbpbybbbypbypbbbggbpypyppppyypgggyygyypbpgpgygyggggybgbyybygbygbgggygygyggyggbgbygygyygbgbgggbybgbggggyyygbggybbyggbbgybggbyybbpbbpbggbggpggpbgyyypgpgypyypggyggpgggggggyyypggpgpyggggbbygpgpbpbppbyybybbbpppbpbpppbpbbbpbpbppbpbbpbpbpppbbbbppypyypypbybppbypbbbybybbbbbbbybbybbbbbbppyppyyyyyppyybypyybyyyyyyyypyppyyyyypypypypypyyypypppypppyyyyyyyypyyppppyppppp') },
 
   /* L18：10x10、54 機、5 色、8方向 */
-  { w:10,h:10, gates:4, stars:true, par:54, milestone:'貴賣室終極擴建 Tier 3！', planes:[
+  { w:10,h:10, gates:4, stars:true, par:54, milestone:'貴賓室終極擴建 Tier 3！', planes:[
       {x:4,y:2,d:'dr',c:'g'}, {x:6,y:2,d:'dr',c:'y',sz:'m'}, {x:3,y:6,d:'u',c:'b'}, {x:4,y:7,d:'dl',c:'b',sz:'m'}, {x:0,y:6,d:'ul',c:'y',sz:'m'}, {x:1,y:9,d:'ur',c:'g',sz:'m'}, {x:9,y:9,d:'r',c:'p',sz:'l'}, {x:0,y:4,d:'ul',c:'b'}, {x:4,y:8,d:'ur',c:'r'}, {x:6,y:3,d:'dr',c:'r',sz:'l'}, {x:7,y:4,d:'dr',c:'g',sz:'m'}, {x:1,y:4,d:'ul',c:'g',sz:'m'}, {x:0,y:0,d:'r',c:'r',sz:'l'}, {x:4,y:1,d:'l',c:'b',sz:'m'}, {x:3,y:3,d:'u',c:'y',sz:'l'}, {x:8,y:7,d:'ul',c:'b',sz:'m'}, {x:9,y:3,d:'ur',c:'g',sz:'l'}, {x:9,y:8,d:'dl',c:'p'}, {x:1,y:0,d:'ur',c:'p'}, {x:7,y:7,d:'ur',c:'r'}, {x:6,y:7,d:'dr',c:'y'}, {x:2,y:9,d:'ul',c:'b'}, {x:7,y:9,d:'dl',c:'y',sz:'l'}, {x:9,y:7,d:'r',c:'p'}, {x:2,y:7,d:'l',c:'r',sz:'m'}, {x:1,y:2,d:'l',c:'r',sz:'l'}, {x:8,y:2,d:'u',c:'r',sz:'m'}, {x:6,y:1,d:'dl',c:'y',sz:'l'}, {x:2,y:8,d:'l',c:'g',sz:'l'}, {x:7,y:3,d:'dr',c:'g',sz:'m'}, {x:8,y:4,d:'dr',c:'g',sz:'l'}, {x:9,y:0,d:'dr',c:'p',sz:'m'}, {x:8,y:9,d:'d',c:'b',sz:'l'}, {x:4,y:4,d:'dl',c:'p',sz:'m'}, {x:5,y:0,d:'ul',c:'b',sz:'l'}, {x:5,y:9,d:'dl',c:'y',sz:'l'}, {x:1,y:7,d:'dl',c:'g',sz:'m'}, {x:3,y:0,d:'ul',c:'g',sz:'m'}, {x:7,y:1,d:'ur',c:'b',sz:'m'}, {x:6,y:8,d:'d',c:'b'}, {x:9,y:4,d:'ur',c:'b'}, {x:2,y:3,d:'l',c:'r',sz:'l'}, {x:8,y:1,d:'dr',c:'r',sz:'m'}, {x:5,y:8,d:'dl',c:'p'}, {x:3,y:8,d:'dr',c:'y',sz:'m'}, {x:9,y:5,d:'l',c:'p',sz:'m'}, {x:1,y:6,d:'dl',c:'g'}, {x:1,y:5,d:'l',c:'p',sz:'l'}, {x:1,y:3,d:'l',c:'y'}, {x:5,y:6,d:'r',c:'y',sz:'l'}, {x:0,y:9,d:'d',c:'p'}, {x:6,y:6,d:'r',c:'r',sz:'m'}, {x:7,y:8,d:'dl',c:'r',sz:'m'}, {x:5,y:1,d:'ur',c:'y',sz:'m'} ],
     queue:q('yryrpprrrrrppppyrrryrrprpypypryrrryyyrrprrrrpyyyryrprrrrrpyrryyrprryrryyyyryyrrryrryyyyyyypyppyyryrpyyyyyyyyyyrrypprrprpypyyppgyygyggggyypyyygpgppppygpppygpygypyyppyyyyppgyypppggpypgyyyppypyyypyyyyypypypppypyppyyyppppppppppypypppppppppppypppppyrrrprppyyprryprybrrbrbyrrybbbrrrbrbbbbbbrbbbrbrbrrbbbbrbbbrrbbbrrrbrbbrrbrrbbrrrrbbbbbbrbrrbbbrgrrgrrrbrrgbrbggrrbbbrrbgrrrgrrbbggrbbgygyggrggyrgbggyygbgybgbbyggbbybgggyggbyyybbggybgygbgbggggbybyggybybyyygybbbggyggpbygybbppbyygggpyggbyppybybbbybbpbbbbbbpbbbyyybbbpbpbbpbbppgpppgbpbppggggbgpggpgpgpbbpbppgpppbppppbpbbpgppgbgpbbggbgppggggbgbggbggbbggpgggpgbgbgpgggggggpggggppgggpggggggpgpgggpggggggrgygyyggggyggggrygrggrrryrrgggyrrrgyrrrgyygyyryrggrrrgrrrggrryrrrryrrgryrygrrgrgrrrrggryryppyrrrrprrrryrryyrrpyypryrrrypryrrpyrrprrrpyppprrrrypppyyrrryyryyyyyyrybrbybrybbbyryybryryyybyrryrybrrybyrryyyrbbryyybyyrrbbrpypprpyyypryyypprppyyypyrpprryrrppyrppygppypbbybgppgbgyggpbppgybgygpyggppgbpgggbgyygppgygyybggbyybyggbgyygygbgybygyybgbyybggbbyggygygrybybbrrrbbbbybybbrbyyrybbbbbrbbrybrbbybbbbrbgrbbrbrrybgybggyggrygyrggrygyggrggggrggrgggrrrrgggrrrrggrggrrgrrgggrrgggrgrrggrrrrrgrrgggrgggrgrrrggrgrrrbrrgrpbbpprrrrbrbbbrbrrprbbrppbrbrrprbbrrrrpbrrprppygryryyrgrygryygpgrrbpbpygppbbybppgbbpggbyybyygppyypgbybgybypypbbypppbbypybgbgpbpyygbgbgygbgbgpgbggpbgppbbpgybgbbgbbbbybbybybggbgggbgygyygygyggyyggyyyyyyyyyyyyyy') },
 
@@ -752,7 +781,7 @@ function adImg(){
 }
 {
   const adSrc = (window.ASSET_SRC||{}).ui_ad || '';
-  for(const id of ['adIconDouble','adIconRevive','adIcon']) document.getElementById(id).src = adSrc;
+  for(const id of ['adIconDouble','adIconRevive','adIcon','itemInfoUseIcon']) document.getElementById(id).src = adSrc;
 }
 {
   const AS = window.ASSET_SRC||{};
@@ -770,8 +799,6 @@ function adImg(){
 {
   const AS = window.ASSET_SRC||{};
   document.getElementById('hudLevelIcon').src = AS.ui_levelbadge || '';
-  document.getElementById('hudScoreIcon').src = AS.star_on || '';
-  document.getElementById('hudMovesIcon').src = AS.pointer || '';
   document.getElementById('btnRestartIcon').src = AS.ui_restart || '';
   document.getElementById('btnMenuIcon').src = AS.ui_world || '';
   document.getElementById('btnRetryIcon').src = AS.ui_restart || '';
@@ -826,8 +853,18 @@ const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 let VW=0, VH=0, DPR=1;
 
+/* 手機 Safari 個網址列會收/展，令 window.innerHeight 喺頁面啱啱載入嗰陣
+   同真正穩定落嚟嗰個高度唔一致（用戶真機報告：「一入game就」成個畫面
+   睇落好似放大咗、被裁走晒邊——其實唔係手指縮放，而係 fitStage() 響
+   載入嗰一刻攞到嘅高度仲未穩定，個 frame 整大咗，中間被裁走。
+   window.innerWidth/Height 淨係喺 `resize` 事件先會再攞，但 iOS Safari
+   淨係網址列收/展唔一定會 fire resize——`visualViewport` 先係專門
+   處理呢種狀況嘅 API，優先用佢；resize/orientationchange 做 fallback，
+   再加幾次 delayed retry 保底捕捉個 toolbar 遲啲先穩定嘅情況。 */
 function fitStage(){
-  const ww = window.innerWidth, wh = window.innerHeight;
+  const vv = window.visualViewport;
+  const ww = vv ? vv.width : window.innerWidth;
+  const wh = vv ? vv.height : window.innerHeight;
   let w = ww, h = wh;
   if (w/h > 9/16) w = Math.round(h*9/16);
   frame.style.width = w+'px';
@@ -839,6 +876,9 @@ function fitStage(){
   layoutBoard();
 }
 window.addEventListener('resize', fitStage);
+window.addEventListener('orientationchange', fitStage);
+if(window.visualViewport) window.visualViewport.addEventListener('resize', fitStage);
+for(const ms of [50,150,300,600,1200]) setTimeout(fitStage, ms);
 
 /* iOS Safari 由 iOS 10 開始，就算 viewport meta 寫咗 user-scalable=no，
    都會為咗 accessibility 照畀 pinch/double-tap zoom 生效（呢個係 Apple
@@ -1068,7 +1108,14 @@ function queueFrontPos(){ return trackPoint(EXIT_FRAC); }
    卡住後面（各座位獨立判斷，見 tryStartBoarding）。 */
 const VISIBLE_CAP = 24;          // 可見圈容量（doc _15 v1 提議 20-40，取中間值）
 const BELT_PX_PER_MS = 20/150;   // rapid-fire 節奏（視覺轉速，用戶已接受）
-const EXIT_WIN_MULT = 0.6;       // 出口判斷窗口闊度（× 座位間距）
+/* 出口判斷窗口闊度（× 座位間距）。2026-08-31 用戶反饋登機太慢，
+   要求好似 reference 遊戲咁可以幾個人（約 3 個）一齊上機，唔好淨係
+   一個一個。舊值 0.6（細過一個座位身位）令任何時刻通常淨係得一個
+   座位啱啱好行到出口窗口，配合下面 tryStartBoarding() 舊版「揾到一個
+   就即刻 return」，變成實際上真係一個一個上。而家兩樣一齊改：呢度
+   放寬到 3 個座位身位闊，令同一時刻可以有多個座位同時喺窗口入面；
+   tryStartBoarding() 改做一次過處理晒窗口入面全部啱色嘅座位（見下面）。 */
+const EXIT_WIN_MULT = 3.0;
 let hiddenQueue = [];            // 隱藏隊列：定死順序嘅顏色 array，玩家見唔到
 /* 側邊人龍「行一步」嘅動畫：平時企定，有人上到機先滑前一個身位 */
 const FEED_STEP_MS = 190;
@@ -1136,8 +1183,6 @@ function startLevel(i){
 
 function updateHud(){
   document.getElementById('hudLevel').textContent = levelIdx+1;
-  document.getElementById('hudMoves').textContent = moves;
-  document.getElementById('hudScore').textContent = score;
   document.getElementById('hudPax').textContent = passengersLeft();
 }
 function show(id){ document.getElementById(id).hidden = false; }
@@ -1260,7 +1305,7 @@ cv.addEventListener('pointerdown', e=>{
   if(freeSlotIdx()===-1){
     hit.shakeT = 0.32;
     const c = planeCenter(hit);
-    floats.push({x:c.x, y:c.y-cs*0.6, txt:'冇空閘位！', life:1, big:false, start:performance.now()});
+    floats.push({x:c.x, y:c.y-cs*0.6, txt:'沒有空置閘位！', life:1, big:false, start:performance.now()});
     ping(120,0.12,'square',0.08);
     checkStuck();
     return;
@@ -1305,8 +1350,14 @@ function tryStartBoarding(nowMs){
   if(gameState!=='playing' || queue.length===0) return;
   const bf = beltBeadFrac();
   const win = bf*EXIT_WIN_MULT;
-  let anyAtExit = false;
-  for(let i=0;i<queue.length;i++){
+  let anyAtExit = false, matched = false;
+  /* 由尾行到頭：EXIT_WIN_MULT 加闊咗之後，同一時刻可能有幾個座位
+     一齊喺出口窗口入面（用戶反饋：想好似 reference 遊戲咁幾個人
+     一齊上，唔好一個一個）。呢度一次過處理晒窗口入面全部啱色嘅
+     座位（每個開放閘位每次 tick 淨係接一個，靠 boardings.some() 天然
+     防重複——3 個人分別對應 3 個唔同色閘位就可以同一時刻一齊起步）。
+     由尾行到頭嚟 splice 先唔會喺循環中途搞亂前面未處理嗰啲嘅 index。 */
+  for(let i=queue.length-1;i>=0;i--){
     const e = queue[i];
     const dist = fracDistFromExit(slotFrac(e.slot, nowMs));
     /* `fresh` ＝啱啱由隱藏隊補入嚟、仲未行出過出口窗口嗰個。佢係喺
@@ -1320,6 +1371,7 @@ function tryStartBoarding(nowMs){
     const gateIdx = slotPlanes.findIndex((s,gi)=>
       s && s.state==='docked' && s.c===e.c && s.boarded<s.cap && !boardings.some(b=>b.slotIdx===gi));
     if(gateIdx!==-1){
+      matched = true;
       const freedSlot = e.slot;
       queue.splice(i,1);
       boardings.push({c:e.c, slotIdx:gateIdx, start:nowMs,
@@ -1330,10 +1382,9 @@ function tryStartBoarding(nowMs){
         queue.push({c: hiddenQueue.shift(), slot: freedSlot, fresh:true});
         feedShiftAt = nowMs;   // 側邊人龍向前行一步（唯一會令佢郁嘅時刻）
       }
-      return;
     }
   }
-  if(anyAtExit) checkStuck();
+  if(anyAtExit && !matched) checkStuck();
 }
 
 function finishBoarding(b){
@@ -1397,7 +1448,7 @@ function checkWin(){
     progress.unlocked = Math.max(progress.unlocked, Math.min(levelIdx+2, LEVELS.length));
     saveProgress(progress);
     document.getElementById('winMats').innerHTML =
-      matsGain>0 ? `${matsImg()} +${matsGain} 建造材料` : `${matsImg()} 已領晒呢關嘅材料（攞更高星有補差額）`;
+      matsGain>0 ? `${matsImg()} +${matsGain} 建造材料` : `${matsImg()} 已領取本關卡材料（獲得更高星級可補領差額）`;
     document.getElementById('btnDouble').hidden = matsGain<=0;
     setTimeout(()=>{
       ping(660,0.1); setTimeout(()=>ping(880,0.1),120); setTimeout(()=>ping(1100,0.18),240);
@@ -1708,7 +1759,7 @@ function drawIdlePlane(p, nowMs, dt){
       ctx.font=`700 ${Math.round(cs*0.3)}px 'Baloo 2',sans-serif`;
       ctx.textAlign='center';
       ctx.fillStyle='#f5c84c';
-      ctx.fillText('撳呢度', c.x, c.y - cs*0.85);
+      ctx.fillText('點這裡', c.x, c.y - cs*0.85);
     }
     ctx.restore();
   }
@@ -2201,7 +2252,18 @@ setInterval(pump, 60);   // 背景 tab watchdog，唔拖慢 rapid-fire 登機節
 
 /* ---------- main loop ---------- */
 let lastT = performance.now();
+/* rAF 排程搬咗出嚟做 wrapper：舊版 `requestAnimationFrame(tick)` 擺喺
+   tickInner() 最尾一行，如果中途嗰幀拋咗 exception，呢行就唔會執行到，
+   成個 render loop 會靜靜雞停死（畫面凍結、冇任何提示）——實測發現過
+   一次真實個案（每次載入都會撞到，見下面 tickInner 入面嘅修正）。
+   而家改做 wrapper 包住 try/catch，就算某一幀真係有 bug，都淨係嗰幀
+   跳過、log 返個 error，下一幀照跳，唔會成個遊戲死埋。 */
 function tick(now){
+  try{ tickInner(now); }
+  catch(e){ console.error('tick() frame error (game keeps running):', e); }
+  requestAnimationFrame(tick);
+}
+function tickInner(now){
   const dt = Math.min(0.25,(now-lastT)/1000); lastT = now;
 
   ctx.setTransform(DPR,0,0,DPR,0,0);
@@ -2255,8 +2317,6 @@ function tick(now){
       ctx.globalAlpha=1;
     }
   }
-
-  requestAnimationFrame(tick);
 }
 
 /* ---------- Ad Manager（誠實廣告，doc 第 7 節） ----------
@@ -2281,7 +2341,7 @@ const Ads = {
   _show(kind, cb){
     const btn = document.getElementById('btnAdClose');
     const note = document.getElementById('adNote');
-    note.textContent = kind==='rewarded' ? '睇完廣告即攞獎勵！' : '多謝支持，廣告後繼續！';
+    note.textContent = kind==='rewarded' ? '觀看完廣告即可領取獎勵！' : '多謝支持，廣告後繼續！';
     let sec = 3;
     btn.disabled = true; btn.textContent = sec;
     show('ovAd');
@@ -2339,6 +2399,17 @@ function updateAddGateBtn(){
   else{ wb.disabled = false; wbadge.textContent = wleft; }
 }
 
+/* 撳道具 icon 先解釋係咩、要真係撳「使用」先真正觸發（睇廣告）流程,
+   跟返用戶提供嘅 reference 遊戲個「消除」道具彈窗模式。 */
+function showItemInfo(title, iconSrc, desc, onUse){
+  document.getElementById('itemInfoTitle').textContent = title;
+  document.getElementById('itemInfoIcon').src = iconSrc;
+  document.getElementById('itemInfoDesc').textContent = desc;
+  document.getElementById('itemInfoUse').onclick = ()=>{ hide('ovItemInfo'); onUse(); };
+  show('ovItemInfo');
+}
+document.getElementById('itemInfoClose').addEventListener('click',()=>hide('ovItemInfo'));
+
 function unlockExtraGate(onDone){
   if(adGatesUsed >= MAX_AD_GATES) return;
   Ads.showRewarded(()=>{
@@ -2352,7 +2423,12 @@ function unlockExtraGate(onDone){
     if(onDone) onDone();
   });
 }
-document.getElementById('btnAddGate').addEventListener('click',()=>unlockExtraGate());
+document.getElementById('btnAddGate').addEventListener('click',()=>{
+  if(adGatesUsed >= MAX_AD_GATES) return;
+  showItemInfo('加開閘位', (window.ASSET_SRC||{}).ui_addgate||'',
+    '額外解鎖一個登機閘位，以紓緩排隊壓力（僅限本關卡生效，過關或離開後重置）。',
+    ()=>unlockExtraGate());
+});
 
 document.getElementById('btnWand').addEventListener('click',()=>{
   if(wandArmed){            // 再撳一次＝取消上膛，唔會白白蝕咗個道具
@@ -2360,17 +2436,21 @@ document.getElementById('btnWand').addEventListener('click',()=>{
   }
   if(adWandsUsed >= MAX_AD_WANDS) return;
   if(freeSlotIdx()===-1){   // 冇空閘位就算送到出去都冇位泊，唔好呃人睇廣告
-    floats.push({x:VW/2, y:slotY-14, txt:'冇空閘位！', life:1, big:true, start:performance.now()});
+    floats.push({x:VW/2, y:slotY-14, txt:'沒有空置閘位！', life:1, big:true, start:performance.now()});
     ping(120,0.12,'square',0.08);
     return;
   }
-  Ads.showRewarded(()=>{
-    adWandsUsed++;
-    wandArmed = true;
-    updateAddGateBtn();
-    floats.push({x:VW/2, y:slotY-14, txt:'撳一架飛機！', life:1, big:true, start:performance.now()});
-    ping(760,0.1); setTimeout(()=>ping(980,0.15),110);
-  });
+  showItemInfo('指揮飛機', (window.ASSET_SRC||{}).ui_wand||'',
+    '選擇盤面上任何一架飛機，不需理會路徑是否暢通，直接將它送入閘口登機——專門用於拯救被困住、無法移動的飛機（僅限本關卡生效）。',
+    ()=>{
+      Ads.showRewarded(()=>{
+        adWandsUsed++;
+        wandArmed = true;
+        updateAddGateBtn();
+        floats.push({x:VW/2, y:slotY-14, txt:'請選擇一架飛機！', life:1, big:true, start:performance.now()});
+        ping(760,0.1); setTimeout(()=>ping(980,0.15),110);
+      });
+    });
 });
 
 /* 獎勵廣告：雙倍材料（doc 第 7/11 節 — 追建造進度嘅自願 catch-up 機制） */
@@ -2446,7 +2526,7 @@ function renderBuildList(){
       if(pl < t.lv) act = `<span class="block">L${t.lv} 解鎖</span>`;
       else if(progress.mats >= t.cost)
         act = `<button class="btn-up" data-b="${b.id}">升級 ${matsImg()}${t.cost}</button>`;
-      else act = `<span class="bneed">仲差 ${t.cost-progress.mats} 材料<br>返去玩多幾關！</span>`;
+      else act = `<span class="bneed">還差 ${t.cost-progress.mats} 材料<br>回去多玩幾關吧！</span>`;
     }
     const iconSrc = (window.ASSET_SRC||{})['b_'+b.id];
     const iconHtml = iconSrc
