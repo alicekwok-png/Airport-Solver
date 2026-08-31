@@ -1432,7 +1432,22 @@ function queueFrontPos(){ return trackPoint(EXIT_FRAC); }
    座位平均分佈成個圈（slot/VISIBLE_CAP），所以任何時候得一個座位喺
    出口窗口——維持「一個一個經過出口判斷」嘅節奏，同時唔啱色嗰個唔會
    卡住後面（各座位獨立判斷，見 tryStartBoarding）。 */
-const VISIBLE_CAP = 24;          // 可見圈容量（doc _15 v1 提議 20-40，取中間值）
+/* doc _29 v4 二次修訂（2026-08-31）：可見圈由 24→40→**密集 4 排、
+   約 120-160 人**（reference 遊戲效果係一嚿實色色塊，唔係疏落單行）。
+   實際數字交返 IT 定，呢度揀 140（120-160 中間偏高，因為 4 排要夠
+   闊先睇到密集效果）。 */
+const VISIBLE_CAP = 140;
+/* 隊形由單行改做橫向 4 排緊密並排（doc 拍板，全部關卡統一 4 排）：
+   座位唔再逐個沿路徑攤開，而係每 QUEUE_ROWS 個座位共用同一個沿路徑
+   嘅「列」位置（frac 一樣），再用路徑切線嘅法向量喺兩側攤開，做出
+   「一嚿人一齊行、一齊到出口」嘅密集色塊效果。 */
+const QUEUE_ROWS = 4;
+const QUEUE_ROW_SPACING = 26;    // 排與排之間嘅側向身位（px，貼實冇乜縫隙）
+function queueCols(){ return Math.ceil(VISIBLE_CAP/QUEUE_ROWS); }
+function queueRowOffsetPx(slot){
+  const row = slot % QUEUE_ROWS;
+  return (row - (QUEUE_ROWS-1)/2) * QUEUE_ROW_SPACING;
+}
 const BELT_PX_PER_MS = 20/150;   // rapid-fire 節奏（視覺轉速，用戶已接受）
 /* 出口判斷窗口闊度（× 座位間距）。2026-08-31 用戶反饋登機太慢，
    要求好似 reference 遊戲咁可以幾個人（約 3 個）一齊上機，唔好淨係
@@ -1466,10 +1481,33 @@ function beltTotal(){
   beltTotalCache = {key, a:box.a, r:box.r, total};
   return total;
 }
-function beltBeadFrac(){ return 1/VISIBLE_CAP; }   // 座位間距（佔圈嘅比例）
+/* 「座位間距」而家指緊一「列」（4 個座位橫排）之間嘅間距，唔再係
+   逐個座位獨立間距——4 排一齊行、一齊到出口，先做到密集色塊效果。 */
+function beltBeadFrac(){ return 1/queueCols(); }
 function beltPhase(nowMs){ return (nowMs*BELT_PX_PER_MS)/beltTotal(); }
 function slotFrac(slot, nowMs){
-  return ((slot/VISIBLE_CAP - beltPhase(nowMs))%1+1)%1;
+  const col = Math.floor(slot/QUEUE_ROWS);
+  return ((col/queueCols() - beltPhase(nowMs))%1+1)%1;
+}
+/* 沿路徑嘅切線方向（有限差分），用嚟計法向量做橫向排位偏移。唔靠
+   形狀方程本身提供導數——所有形狀（包括自動旋轉之後嘅 LUT）都可以
+   直接用呢個通用做法。 */
+function trackTangent(frac){
+  const eps = 0.004;
+  const p0 = trackPoint(frac - eps), p1 = trackPoint(frac + eps);
+  const dx = p1.x-p0.x, dy = p1.y-p0.y;
+  const len = Math.hypot(dx,dy) || 1;
+  return {x: dx/len, y: dy/len};
+}
+/* 座位嘅實際畫面位置＝路徑中線位置 + 法向量方向嘅橫向偏移（第幾排）。
+   取代單純嘅 trackPoint(slotFrac(...))，畀 drawQueue／boarding 動畫
+   起點共用，確保「畫喺邊」同「由邊度飛去閘位」一致。 */
+function slotPos(slot, nowMs){
+  const frac = slotFrac(slot, nowMs);
+  const p = trackPoint(frac);
+  const t = trackTangent(frac);
+  const off = queueRowOffsetPx(slot);
+  return {x: p.x - t.y*off, y: p.y + t.x*off, frac};
 }
 /* 成關仲有幾多乘客未上機（可見＋隱藏＋登緊機嗰啲） */
 function passengersLeft(){ return queue.length + hiddenQueue.length + boardings.length; }
@@ -1721,7 +1759,7 @@ function tryStartBoarding(nowMs){
       const freedSlot = e.slot;
       queue.splice(i,1);
       boardings.push({c:e.c, slotIdx:gateIdx, start:nowMs,
-        from:trackPoint(slotFrac(freedSlot, nowMs)), to:slotAnchor(gateIdx)});
+        from:slotPos(freedSlot, nowMs), to:slotAnchor(gateIdx)});
       /* 隱藏隊即刻吐一個補返**同一個座位**（＝出口位置），配合上面個
          `fresh` 閘，佢要行足一個圈先再輪到佢（doc _15）。 */
       if(hiddenQueue.length){
@@ -2247,11 +2285,13 @@ function drawQueue(now){
 
   drawFeedLine(now);
 
-  /* 可見圈：每人揸住一個平均分佈嘅座位號（0..VISIBLE_CAP-1），
-     position = trackPoint(slot/VISIBLE_CAP - phase)。座位號同陣列 index
-     脫鈎，所以邊個上咗機被 splice 走都唔會令第二個人跳位；隱藏隊補人
-     入返嗰個空咗嘅座位（見 tryStartBoarding）。邊個座位啱啱行到出口
-     窗口（樓梯位置），就邊個發光、邊個被判斷。 */
+  /* 可見圈：每人揸住一個座位號（0..VISIBLE_CAP-1），4 個一組（QUEUE_ROWS）
+     共用同一個沿路徑嘅「列」位置，橫向用切線法向量攤開做 4 排密集
+     色塊（doc 拍板，取代舊版逐個沿路徑攤開嘅單行）。座位號同陣列
+     index 脫鈎，所以邊個上咗機被 splice 走都唔會令第二個人跳位；
+     隱藏隊補人入返嗰個空咗嘅座位（見 tryStartBoarding）。邊個座位
+     啱啱行到出口窗口（樓梯位置），就邊個發光、邊個被判斷——同一列
+     4 個座位嘅 frac 一樣，會一齊到、一齊發光。 */
   const winForGlow = beadFrac*EXIT_WIN_MULT;
   for(let i=queue.length-1;i>=0;i--){
     const e = queue[i];
@@ -2259,7 +2299,7 @@ function drawQueue(now){
     /* `fresh`（啱啱補入、要行足一圈先算數）唔好發光，唔係會誤導玩家
        以為佢而家可以上機 */
     const atExit = !e.fresh && fracDistFromExit(frac) <= winForGlow;
-    const p = trackPoint(frac);
+    const p = slotPos(e.slot, now);
     drawPassenger(p.x, p.y, e.c, 0.95, atExit, phase*46 + e.slot*1.3);
   }
   /* 「剩餘乘客」而家擺咗上 HUD 做主要進度指標（參考遊戲左上角嗰個
