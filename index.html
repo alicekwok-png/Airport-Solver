@@ -50,7 +50,7 @@
   /* HUD chip icon 全部改用真圖，唔再用 emoji（用戶拍板：「其實我哋個
      星星都有噶，唔好再用 emoji」）*/
   .chip .cicoimg{width:17px;height:17px;object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
-  #hubBrand{height:26px;width:auto;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
+  #hubBrand{height:56px;width:auto;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
   .chip .lbl{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--ink-dim)}
   .chip .val{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
   .chip.gold{
@@ -319,11 +319,12 @@
   #ovHub #hubTop,#ovHub #hubDock,#ovHub .hub-badge{pointer-events:auto}
   #hubTop{
     position:absolute;top:0;left:0;right:0;
-    display:flex;align-items:center;justify-content:space-between;
+    display:flex;align-items:center;justify-content:center;
     padding:12px 14px;
   }
-  /* #hubBrand 而家係真正遊戲 logo 圖（唔再係文字排版），
-     尺寸規則見上面 `.cicoimg` 附近嗰條 `#hubBrand{height:26px...}`。 */
+  /* 用戶反饋 logo 擠喺左上角太細粒「完全睇唔到」——改做置中、放大，
+     材料 chip 拆出嚟獨立擺返右上角，唔再同 logo 爭返同一行位置。 */
+  #hubTop .chip.gold{position:absolute; right:14px; top:12px}
   #hubDock{
     display:flex;align-items:center;justify-content:center;
   }
