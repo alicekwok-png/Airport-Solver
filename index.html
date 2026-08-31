@@ -1433,17 +1433,20 @@ function queueFrontPos(){ return trackPoint(EXIT_FRAC); }
    出口窗口——維持「一個一個經過出口判斷」嘅節奏，同時唔啱色嗰個唔會
    卡住後面（各座位獨立判斷，見 tryStartBoarding）。 */
 /* doc _29 v4 二次修訂（2026-08-31）：可見圈由 24→40→**密集 4 排、
-   約 120-160 人**（reference 遊戲效果係一嚿實色色塊，唔係疏落單行）。
-   實際數字交返 IT 定，呢度揀 140（120-160 中間偏高，因為 4 排要夠
-   闊先睇到密集效果）。 */
-const VISIBLE_CAP = 140;
-/* 隊形由單行改做橫向 4 排緊密並排（doc 拍板，全部關卡統一 4 排）：
-   座位唔再逐個沿路徑攤開，而係每 QUEUE_ROWS 個座位共用同一個沿路徑
-   嘅「列」位置（frac 一樣），再用路徑切線嘅法向量喺兩側攤開，做出
-   「一嚿人一齊行、一齊到出口」嘅密集色塊效果。 */
+   一嚿實色色塊**（reference 圖係成嚿貼實冇縫隙，唔係疏落單行）。
+   **2026-08-31 用戶再反饋：見到中間有巷（沿路徑方向嘅座位間距太
+   闊，形成一格格輻射狀空隙）——問題唔喺「幾多人」，而係固定總數
+   140 人 ÷ 固定 35 列，喺唔同形狀／唔同螢幕嘅實際路徑長度下未必啱
+   啱好貼實。改做由路徑實際長度反推列數（`queueCols()`），確保沿路徑
+   同橫向都用返同一個貼實步距，總人數（`visibleCap()`）自動跟路徑
+   長度浮動，唔再係寫死嘅數字。 */
 const QUEUE_ROWS = 4;
-const QUEUE_ROW_SPACING = 26;    // 排與排之間嘅側向身位（px，貼實冇乜縫隙）
-function queueCols(){ return Math.ceil(VISIBLE_CAP/QUEUE_ROWS); }
+const QUEUE_ROW_SPACING = 22;      // 排與排之間嘅側向身位（px，貼實冇縫隙）
+const QUEUE_PASSENGER_SPACING = 22; // 沿路徑方向嘅步距（px），同側向睇齊先貼實冇巷
+function queueCols(){
+  return Math.max(6, Math.round(beltTotal()/QUEUE_PASSENGER_SPACING));
+}
+function visibleCap(){ return queueCols()*QUEUE_ROWS; }
 function queueRowOffsetPx(slot){
   const row = slot % QUEUE_ROWS;
   return (row - (QUEUE_ROWS-1)/2) * QUEUE_ROW_SPACING;
@@ -1537,11 +1540,13 @@ function startLevel(i){
     else { base.x=p.x; base.y=p.y; base.d=p.d; }
     return base;
   });
-  /* 頭 VISIBLE_CAP 個入可見圈（平均分佈落各座位），其餘全部入隱藏隊列，
-     順序照 L.queue 定死唔洗牌（doc _15：隱藏隊順序係關卡設計嘅一部分）。 */
+  /* 頭 visibleCap() 個入可見圈（4 排貼實分佈落各座位），其餘全部入
+     隱藏隊列，順序照 L.queue 定死唔洗牌（doc _15：隱藏隊順序係關卡
+     設計嘅一部分）。visibleCap() 跟返呢關實際路徑長度反推，確保貼實
+     密度一致，唔會因為形狀/螢幕唔同而有時密有時疏。 */
   {
     const all = L.queue.slice();
-    const nVis = Math.min(VISIBLE_CAP, all.length);
+    const nVis = Math.min(visibleCap(), all.length);
     queue = [];
     for(let k=0;k<nVis;k++) queue.push({c: all[k], slot:k});
     hiddenQueue = all.slice(nVis);
