@@ -387,11 +387,14 @@
     display:flex;
     background:linear-gradient(180deg,#1c2747,#0e1526);
     border-top:2px solid #33436f;
-    /* 用戶反饋：standalone webapp 模式下底部畀 home indicator 讓出嘅
-       安全區,加埋原本嘅 8px,睇落係一大截「唔知係咩」嘅空白——用 max()
-       淨係取安全區本身（有先算,冇就跌返 8px 保底),唔好再兩個疊埋一齊
-       加,盡量令空白幅度貼近實際需要,唔好睇落好似斷咗。 */
-    padding:8px 4px max(8px, env(safe-area-inset-bottom));
+    /* 用戶對比咗兩個情況，判斷返真正原因：喺一般 Safari 分頁開，
+       底部本身有瀏覽器自己嘅網址列頂住，所以就算加咗安全區都睇唔出
+       「多咗嚿嘢」；但 standalone webapp（加咗落主畫面）冇呢條網址列，
+       安全區就變成一截好明顯、灰藍色、唔知做咩嘅空白——用戶明確話
+       「app 版本唔應該有最低嗰個 bar」，即係 standalone 模式要直接
+       貼到底，唔使留呢截安全區（第一版 8px+inset、第二版 max(8px,
+       inset) 都仲係會留返一截,今次直接唔留)。 */
+    padding:8px 4px 8px;
     pointer-events:auto;
     z-index:7;
   }
