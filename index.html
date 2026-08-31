@@ -222,10 +222,12 @@
   .speed-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #123f66, inset 0 2px 0 rgba(255,255,255,.4)}
   .speed-btn.on{background:linear-gradient(180deg,#ffd166 0%,#f5a93c 60%,#d9861c 100%);border-color:#8a5c12;box-shadow:0 4px 0 #7a4d10, inset 0 2px 0 rgba(255,255,255,.5)}
   /* Gameplay 兩粒自願廣告掣並排喺 HUD 之下（加開閘位／指揮飛機） */
+  /* 用戶反饋：呢兩粒道具掣同 HUD 右邊嗰堆 icon（重玩/世界/關卡徽章）
+     全部癡埋一齊，冇晒分隔——改做企定喺畫面最右邊、HUD 下面一行，
+     同上面嗰堆分開返，唔會再迭埋。 */
   .aidbar{
-    position:absolute; left:50%; top:66px;
-    transform:translateX(-50%);
-    display:flex; gap:8px; align-items:center;
+    position:absolute; right:10px; top:82px;
+    display:flex; flex-direction:column; gap:8px; align-items:center;
     pointer-events:none;
     z-index:3;
   }
