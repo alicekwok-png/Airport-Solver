@@ -800,8 +800,14 @@ const LEVELS = [
     queue:q('rrrrrryyyyyyygggggggggggggggggggggggggrrrrrrrrrrrrrbbbbbbbbbbbbbbbbyyyyyyyyyybbbbbbbyyyyyrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrryyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbyyyyybbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbrrrrrrrrrrryyyrrrrrrrbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyygggggggyyyyyyyyrrrrrrggggggggggggggggggrrrrrrrrrrrrrrrbbbbbbbbyyyyyyyyyyyybbbbbbbgggggggggggyyrrrrrrrrrrrrrrrbbbbbbbbgggggggggggbbbbbbbrrrrrggggggggggggggggggbbbbbbbgggggggggggbbbbbbbbbbbbbggggggggggrrrrrggggggggggggggggggggggggggbbbbyyyyyyyyyyyyyyyggggggggggggggggyyyyyyyyyyyyyyybgggggggggggggggggggggg') },
 
   /* L6：7x6、30 機、4 色、8方向 */
-  { queueShape:'squareSpiralTail', w:7,h:6, gates:4, planes:[
-      {x:5,y:4,d:'d',c:'b',sz:'m'}, {x:3,y:0,d:'ul',c:'y'}, {x:4,y:2,d:'d',c:'r'}, {x:3,y:2,d:'ur',c:'r',sz:'l'}, {x:0,y:0,d:'dr',c:'y',sz:'l'}, {x:5,y:3,d:'ur',c:'g',sz:'m'}, {x:2,y:5,d:'dl',c:'g',sz:'m'}, {x:1,y:4,d:'u',c:'b'}, {x:4,y:1,d:'dr',c:'g'}, {x:6,y:1,d:'d',c:'r'}, {x:6,y:3,d:'r',c:'r',sz:'l'}, {x:3,y:4,d:'dr',c:'y',sz:'m'}, {x:0,y:3,d:'d',c:'g'}, {x:4,y:0,d:'ul',c:'r',sz:'m'}, {x:1,y:5,d:'l',c:'g',sz:'m'}, {x:2,y:0,d:'ul',c:'y',sz:'l'}, {x:2,y:4,d:'dr',c:'y',sz:'m'}, {x:0,y:4,d:'dl',c:'b',sz:'l'}, {x:6,y:0,d:'u',c:'b'}, {x:4,y:4,d:'d',c:'g'}, {x:2,y:1,d:'ul',c:'b',sz:'m'}, {x:1,y:3,d:'u',c:'y',sz:'m'}, {x:6,y:2,d:'r',c:'b',sz:'l'}, {x:5,y:5,d:'dr',c:'g',sz:'l'}, {x:2,y:3,d:'ul',c:'r',sz:'l'}, {x:0,y:2,d:'l',c:'r',sz:'m'}, {x:6,y:5,d:'r',c:'b',sz:'m'}, {x:3,y:5,d:'dl',c:'b',sz:'m'}, {x:1,y:2,d:'ul',c:'y'}, {x:0,y:1,d:'l',c:'r',sz:'l'} ],
+  { queueShape:'squareSpiralTail', w:7,h:6, gates:4,
+    /* 隧道格首次登場（doc _29 第2節，HK L6 拍板）：將原本擺喺 (5,4)
+       同 (3,0) 呢兩架飛機（藍色中型 + 黃色細型）疊埋一格，逐架自動
+       揭曉，唔改總飛機數／乘客總需求。已用 pathClear 純物理模擬確認
+       （30 架全部順利清晒，冇死局）。 */
+    tunnels:[{x:5,y:4,d:'d',stack:[{c:'b',sz:'m'},{c:'y'}]}],
+    planes:[
+      {x:4,y:2,d:'d',c:'r'}, {x:3,y:2,d:'ur',c:'r',sz:'l'}, {x:0,y:0,d:'dr',c:'y',sz:'l'}, {x:5,y:3,d:'ur',c:'g',sz:'m'}, {x:2,y:5,d:'dl',c:'g',sz:'m'}, {x:1,y:4,d:'u',c:'b'}, {x:4,y:1,d:'dr',c:'g'}, {x:6,y:1,d:'d',c:'r'}, {x:6,y:3,d:'r',c:'r',sz:'l'}, {x:3,y:4,d:'dr',c:'y',sz:'m'}, {x:0,y:3,d:'d',c:'g'}, {x:4,y:0,d:'ul',c:'r',sz:'m'}, {x:1,y:5,d:'l',c:'g',sz:'m'}, {x:2,y:0,d:'ul',c:'y',sz:'l'}, {x:2,y:4,d:'dr',c:'y',sz:'m'}, {x:0,y:4,d:'dl',c:'b',sz:'l'}, {x:6,y:0,d:'u',c:'b'}, {x:4,y:4,d:'d',c:'g'}, {x:2,y:1,d:'ul',c:'b',sz:'m'}, {x:1,y:3,d:'u',c:'y',sz:'m'}, {x:6,y:2,d:'r',c:'b',sz:'l'}, {x:5,y:5,d:'dr',c:'g',sz:'l'}, {x:2,y:3,d:'ul',c:'r',sz:'l'}, {x:0,y:2,d:'l',c:'r',sz:'m'}, {x:6,y:5,d:'r',c:'b',sz:'m'}, {x:3,y:5,d:'dl',c:'b',sz:'m'}, {x:1,y:2,d:'ul',c:'y'}, {x:0,y:1,d:'l',c:'r',sz:'l'} ],
     queue:q('gggggggggggggggrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrbbbbbbbbbbbbyyyyyyyyyyyygggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyggyyyyyyyyyyyybbbbbbbbbbbbbyyyyyyyyyyyyyybbbbbyyyyyyyyyyyyyyyyyrrrrrrrrrrrryyyyyrrrrrbbbbbbbbbbbbbbbbbyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrgggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyrrrrrgbbbbbbbbbbbbggggggggggggyyyyyyyyyyyyyyrrrbbbbbbbbbbbgggggggggggbbbbbbbbbbbbbbbbbbbbbbbggggggggbbbbbbbbbbbbrrrrrrrrrrgggggggggggrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyygggggbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrr') },
 
   /* L7：6x6、26 機、5 色 */
@@ -1153,14 +1159,15 @@ let hintOn = false;                    // L1 手指提示（首撳前）
    覆蓋喺新圖度量出嚟。 */
 const SCENE_IMG = {
   queueTop:  240,   // 樹籬/欄杆之下，乘客排隊區可用範圍開始（最頂）
-  queueBottom: 560, // 排隊區可用範圍底，留返啲淨空畀閘位行
+  queueBottom: 480, // 排隊區可用範圍底，留返啲淨空畀閘位行（用戶反饋：圈中間個窿太大、同埋同下面閘位卡撞埋，由560收到480）
   gateRow:   620,   // 中間閘位／樓梯一行嘅中線
   planeTop:  730,   // 樓梯之下，飛機棋盤區開始（最底，一路去到畫面底）
 };
 /* 乘客隊伍路徑嘅「擺位框」：橢圓印刷線大致座標，做 fit box 中心／
    半闊（唔使追求同印刷線像素完全重疊——而家個路徑係逐關動態形狀，
-   印刷線淨係一個鬆散嘅視覺暗示，唔係要精準描邊嘅硬邊界）。 */
-const QUEUE_IMG = {cx: 470, halfW: 330};
+   印刷線淨係一個鬆散嘅視覺暗示，唔係要精準描邊嘅硬邊界）。用戶反饋
+   個圈太大、中間空洞太多，由 330 收到 250。 */
+const QUEUE_IMG = {cx: 470, halfW: 250};
 function sceneY(imgY){
   const bg = sprite('scene');
   if(!bg) return null;
@@ -1302,6 +1309,13 @@ const QUEUE_SHAPES_RAW = {
     return {x:p0[0]+(p1[0]-p0[0])*f, y:p0[1]+(p1[1]-p0[1])*f};
   },
   squareSpiralTail: t => {
+    /* ⚠️（修正）尾巴一定要接返正方形沿邊嗰段實際完結嘅位置，唔可以
+       寫死一個固定角——`pts4` 呢個順序之下，正方形沿邊行到 t 就快到
+       1-tailFrac 嗰陣，實際會行返去 (-1,-1)（因為最後一段係 pts4[3]
+       →pts4[0]，即 (-1,1)→(-1,-1)）。之前尾巴寫死由 (1,1) 出發，同
+       正方形實際完結位相隔成個對角，令成條隊嘅路徑喺呢一點突然「彈
+       線」，畫出嚟會係一條由呢個角直插到嗰個角嘅假對角線（用戶
+       截圖發現）。而家尾巴改做由 (-1,-1) 出發，先啱啱好接得上。 */
     const tailFrac = 0.14;
     if(t < 1-tailFrac){
       const u = t/(1-tailFrac);
@@ -1313,7 +1327,7 @@ const QUEUE_SHAPES_RAW = {
     }
     const u = (t-(1-tailFrac))/tailFrac;
     const v = u<0.5? u*2 : (1-u)*2;
-    return {x:1+v*0.5, y:1-v*0.3};
+    return {x:-1-v*0.5, y:-1-v*0.3};
   },
   /* Tier 3（複雜／裝飾性） */
   heart: t => {
@@ -2322,14 +2336,14 @@ function drawPassenger(x, y, ckey, scale, glow, walkPhase){
    排緊隊入場。 */
 function drawFeedLine(now){
   if(!hiddenQueue.length) return;
-  const exit = queueFrontPos();          // 出口位（frac=0，隊形自動旋轉去嘅底部中央）
   const box = trackGeom();               // 擺位框，a=半闊 r=半高
-  /* 行喺出口位之下一條行人路上：由出口右邊一路排出畫面右邊。試過由
-     隊形嘅右上角斜住出去，但唔同形狀嘅右上角位置差好遠，會忽而貼實
-     忽而離晒個圈；出口正下方呢條帶反而每個形狀都空、排喺度先穩陣，
-     而且啱返「排緊隊行去出口入場」個意思。 */
   const step = QUEUE_PASSENGER_SPACING;  // 一「列」之間嘅步距，同主圈睇齊
-  const start = {x: exit.x + box.a*0.12, y: exit.y + 18};   // 出口右邊＝入口
+  /* 錨點由「貼住出口位」改做「貼住成個擺位框嘅右邊，留大截安全距離」
+   ——用戶反饋 squareSpiralTail 呢類有「尾巴」伸出嚟嘅形狀,個尾同呢條
+   出面等候線會交叉疊埋。出口位置企喺形狀自己嘅幾何入面,唔同形狀伸
+   出嚟嘅範圍差好遠(squareSpiralTail 尾巴仲伸出到 1.5 倍框闊之外),
+   改錨住喺框本身嘅右邊界 + 充足空間，先保證唔會撞到任何形狀。 */
+  const start = {x: box.cx + box.a*1.7, y: box.cy + box.r*0.55};
   const dir = {x: 0.99, y: 0.12};        // 沿行人路向右伸出畫面
   const dlen = Math.hypot(dir.x, dir.y)||1;
   const dirN = {x: dir.x/dlen, y: dir.y/dlen};
@@ -2387,8 +2401,8 @@ function drawFeedLine(now){
    （淺色路面）＋描邊（圍欄），先畫呢層做底，乘客再企喺上面。 */
 function drawQueueTrack(){
   const SAMPLES = 96;
-  const innerScale = queueRowScale(-0.7);
-  const outerScale = queueRowScale(QUEUE_ROWS-1+0.7);
+  const innerScale = queueRowScale(-0.4);
+  const outerScale = queueRowScale(QUEUE_ROWS-1+0.4);
   ctx.save();
   ctx.beginPath();
   for(let i=0;i<=SAMPLES;i++){
