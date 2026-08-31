@@ -397,9 +397,12 @@
     font-family:'Nunito',system-ui,sans-serif;font-weight:800;font-size:12px;
     color:var(--ink-dim);
   }
-  .tab-btn .tdot{width:6px;height:6px;border-radius:50%;background:transparent;margin-bottom:1px}
+  /* 用戶反饋：「我哋本身有icon㗎嘛你做乜唔用」——主頁／地圖已有現成
+     素材（分別係環球航線 icon `ui_world`、摺地圖 icon `ui_map`），
+     商店冇對應素材（未出過 prompt），暫時淨係得文字。 */
+  .tab-icon{width:26px;height:26px;object-fit:contain;opacity:.55;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
+  .tab-btn.active .tab-icon{opacity:1}
   .tab-btn.active{color:#ffd97a}
-  .tab-btn.active .tdot{background:#ffd97a}
 
   /* ============ 環球旅程（世界地圖，doc 第 5 節，2026-08-31 新增） ============ */
   #ovWorldMap{
@@ -675,9 +678,9 @@
   </div>
 
   <div id="tabBar">
-    <button class="tab-btn active" id="tabHome" data-tab="home"><span class="tdot"></span>主頁</button>
-    <button class="tab-btn" id="tabMap" data-tab="map"><span class="tdot"></span>地圖</button>
-    <button class="tab-btn" id="tabShop" data-tab="shop"><span class="tdot"></span>商店</button>
+    <button class="tab-btn active" id="tabHome" data-tab="home"><img class="tab-icon" id="tabHomeIcon" alt="">主頁</button>
+    <button class="tab-btn" id="tabMap" data-tab="map"><img class="tab-icon" id="tabMapIcon" alt="">地圖</button>
+    <button class="tab-btn" id="tabShop" data-tab="shop"><span class="tab-icon"></span>商店</button>
   </div>
 
   <div id="ovBuild" class="overlay" hidden>
@@ -933,6 +936,8 @@ document.getElementById('matsIconHub').src = (window.ASSET_SRC||{}).mats || '';
 document.getElementById('matsIconBuild').src = (window.ASSET_SRC||{}).mats || '';
 document.getElementById('matsIconWorldMap').src = (window.ASSET_SRC||{}).mats || '';
 document.getElementById('wmBg').src = (window.ASSET_SRC||{}).worldmap_bg || '';
+document.getElementById('tabHomeIcon').src = (window.ASSET_SRC||{}).ui_world || '';
+document.getElementById('tabMapIcon').src = (window.ASSET_SRC||{}).ui_map || '';
 
 /* 星級 icon（取代 ★，doc 唔用 emoji 拍板）：filled=實心金星／空心銀星 */
 function starImg(filled){
