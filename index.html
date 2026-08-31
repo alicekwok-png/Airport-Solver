@@ -840,6 +840,25 @@ function fitStage(){
 }
 window.addEventListener('resize', fitStage);
 
+/* iOS Safari 由 iOS 10 開始，就算 viewport meta 寫咗 user-scalable=no，
+   都會為咗 accessibility 照畀 pinch/double-tap zoom 生效（呢個係 Apple
+   刻意行為，唔係 bug，淨靠個 meta tag 擋唔到）。遊戲要求「撳得密、
+   rapid-fire」，好易誤觸發變成成頁面放大咗但縮唔返（用戶實測報告：
+   「無啦啦會放大咗...跟住就縮唔返細就玩唔到」）。要喺 JS 層再擋一次：
+   gesturestart 係 Safari 專有嘅 pinch-開始事件，攔咗佢先真正阻到 pinch；
+   多隻手指 touchmove 都會觸發縮放，一齊擋埋；連續兩下 touchend 相隔
+   太近會被當做 double-tap-zoom，都要擋。三個都淨係 preventDefault
+   瀏覽器原生手勢，唔會影響遊戲自己用緊嘅 pointerdown 揀機邏輯。 */
+document.addEventListener('gesturestart', e=>e.preventDefault());
+document.addEventListener('gesturechange', e=>e.preventDefault());
+document.addEventListener('touchmove', e=>{ if(e.touches.length>1) e.preventDefault(); }, {passive:false});
+let lastTouchEndAt = 0;
+document.addEventListener('touchend', e=>{
+  const now = Date.now();
+  if(now - lastTouchEndAt <= 350) e.preventDefault();
+  lastTouchEndAt = now;
+}, {passive:false});
+
 /* ---------- game state ---------- */
 let gameState = 'menu';       // menu | playing | levelClear | stuck | allClear
 let levelIdx = 0;
