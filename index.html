@@ -1441,8 +1441,11 @@ function queueFrontPos(){ return trackPoint(EXIT_FRAC); }
    同橫向都用返同一個貼實步距，總人數（`visibleCap()`）自動跟路徑
    長度浮動，唔再係寫死嘅數字。 */
 const QUEUE_ROWS = 4;
-const QUEUE_ROW_SPACING = 22;      // 排與排之間嘅側向身位（px，貼實冇縫隙）
-const QUEUE_PASSENGER_SPACING = 22; // 沿路徑方向嘅步距（px），同側向睇齊先貼實冇巷
+/* 用戶反饋「貼啲細粒啲」——乘客畫圖 scale 由 0.95 收細到 0.68，排距
+   同步收窄先貼得實（原本 22px 係跟 0.95 嗰個大細校準嘅）。 */
+const QUEUE_PAX_SCALE = 0.68;
+const QUEUE_ROW_SPACING = 17;      // 排與排之間嘅側向身位（px，貼實冇縫隙）
+const QUEUE_PASSENGER_SPACING = 17; // 沿路徑方向嘅步距（px），同側向睇齊先貼實冇巷
 function queueCols(){
   return Math.max(6, Math.round(beltTotal()/QUEUE_PASSENGER_SPACING));
 }
@@ -2325,9 +2328,16 @@ function drawFeedLine(now){
      隊形嘅右上角斜住出去，但唔同形狀嘅右上角位置差好遠，會忽而貼實
      忽而離晒個圈；出口正下方呢條帶反而每個形狀都空、排喺度先穩陣，
      而且啱返「排緊隊行去出口入場」個意思。 */
-  const step = 20;                       // 人與人之間嘅身位
+  const step = QUEUE_PASSENGER_SPACING;  // 一「列」之間嘅步距，同主圈睇齊
   const start = {x: exit.x + box.a*0.12, y: exit.y + 18};   // 出口右邊＝入口
   const dir = {x: 0.99, y: 0.12};        // 沿行人路向右伸出畫面
+  const dlen = Math.hypot(dir.x, dir.y)||1;
+  const dirN = {x: dir.x/dlen, y: dir.y/dlen};
+  const normal = {x: -dirN.y, y: dirN.x};
+  /* 用戶反饋：出面呢條「等候排隊」都要同主圈一樣 4 排、仲要有個圍欄
+     圈住（唔係得返單行企晒喺露天）。圍欄闊度跟返主圈嘅
+     QUEUE_ROW_SPACING 校準，先至同主圈嗰個圍欄粗細一致。 */
+  const fenceHalfSpan = ((QUEUE_ROWS-1)/2 + 0.7) * QUEUE_ROW_SPACING;
   /* 條龍**唔會自己一路郁**（用戶反饋：「即使冇上去點解佢都不停郁緊」
      「係咁循環係咁 loop 喎」）。舊版用 `(now*速度) % step`，個 modulo
      令佢永遠滑一格又彈返轉頭，變成無限 loop 嘅假動作。
@@ -2337,36 +2347,72 @@ function drawFeedLine(now){
      行一步」，之後又企定——即係「要上飛機嗰刻先行」。 */
   const t = (performance.now() - feedShiftAt) / FEED_STEP_MS;
   const slide = t < 1 ? (1-t)*step : 0;
-  const maxShow = Math.ceil((VW-start.x)/step) + 2;
-  const n = Math.min(hiddenQueue.length, maxShow);
-  for(let i=n-1;i>=0;i--){
-    const d = i*step + slide;
-    const x = start.x + dir.x*d, y = start.y + dir.y*d;
+  const maxCols = Math.ceil((VW-start.x)/step) + 2;
+  const nCols = Math.min(Math.ceil(hiddenQueue.length/QUEUE_ROWS), maxCols);
+  if(nCols<=0) return;
+
+  /* 圍欄：一條沿住 dir 方向嘅長方形色帶，同主圈嗰個圍欄用返同一套
+     視覺（淺色路面＋描邊），先畫底，乘客企喺上面。 */
+  const nearD = -step*0.7, farD = nCols*step + slide + step*0.7;
+  const A = {x:start.x+dirN.x*nearD - normal.x*fenceHalfSpan, y:start.y+dirN.y*nearD - normal.y*fenceHalfSpan};
+  const B = {x:start.x+dirN.x*farD  - normal.x*fenceHalfSpan, y:start.y+dirN.y*farD  - normal.y*fenceHalfSpan};
+  const C = {x:start.x+dirN.x*farD  + normal.x*fenceHalfSpan, y:start.y+dirN.y*farD  + normal.y*fenceHalfSpan};
+  const D = {x:start.x+dirN.x*nearD + normal.x*fenceHalfSpan, y:start.y+dirN.y*nearD + normal.y*fenceHalfSpan};
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y); ctx.lineTo(C.x,C.y); ctx.lineTo(D.x,D.y); ctx.closePath();
+  ctx.fillStyle = 'rgba(238,242,250,0.94)';
+  ctx.fill();
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = 'rgba(200,66,66,0.55)';
+  ctx.stroke();
+  ctx.restore();
+
+  const n = Math.min(hiddenQueue.length, nCols*QUEUE_ROWS);
+  for(let k=n-1;k>=0;k--){
+    const col = Math.floor(k/QUEUE_ROWS), row = k%QUEUE_ROWS;
+    const d = col*step + slide;
+    const off = (row - (QUEUE_ROWS-1)/2) * QUEUE_ROW_SPACING;
+    const x = start.x + dirN.x*d + normal.x*off, y = start.y + dirN.y*d + normal.y*off;
     if(x > VW+30 || y < -30) continue;   // 出咗畫面就唔使畫
-    drawPassenger(x, y, hiddenQueue[i], 0.82, false);
+    drawPassenger(x, y, hiddenQueue[k], QUEUE_PAX_SCALE, false);
   }
+}
+
+/* 排隊圍欄／路軌（用戶反饋：要好似 reference 圖咁有個實體圍欄圈住
+   啲人，唔淨係一條幼虛線做提示）。做法：用 queueRowScale() 攞返
+   「貼實成 4 排嘅內外邊界」（第 -0.7 排到第 QUEUE_ROWS-1+0.7 排嘅
+   同心縮放，即係喺最貼邊嗰排之外再讓少少氣位做圍欄闊度），逐點沿
+   外圈、逆序沿內圈取樣，砌成一個閉合嘅「圈狀色帶」路徑，實色填底
+   （淺色路面）＋描邊（圍欄），先畫呢層做底，乘客再企喺上面。 */
+function drawQueueTrack(){
+  const SAMPLES = 96;
+  const innerScale = queueRowScale(-0.7);
+  const outerScale = queueRowScale(QUEUE_ROWS-1+0.7);
+  ctx.save();
+  ctx.beginPath();
+  for(let i=0;i<=SAMPLES;i++){
+    const p = trackPointRow(i/SAMPLES, outerScale);
+    if(i===0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+  }
+  for(let i=SAMPLES;i>=0;i--){
+    const p = trackPointRow(i/SAMPLES, innerScale);
+    ctx.lineTo(p.x, p.y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(238,242,250,0.94)';
+  ctx.fill();
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = 'rgba(200,66,66,0.55)';
+  ctx.stroke();
+  ctx.restore();
 }
 
 function drawQueue(now){
   const beadFrac = beltBeadFrac();
   const phase = beltPhase(now);
 
-  /* 隊形虛線：逐點取樣現時關卡嘅 LUT 路徑畫出嚟，唔再係寫死嘅膠囊形
-     ——形狀由 QUEUE_SHAPES_RAW[L.queueShape] 決定，呢度淨係負責畫。 */
-  ctx.save();
-  ctx.beginPath();
-  const SAMPLES = 72;
-  for(let i=0;i<=SAMPLES;i++){
-    const p = trackPoint(i/SAMPLES);
-    if(i===0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
-  }
-  ctx.closePath();
-  ctx.strokeStyle='rgba(154,165,191,.28)';
-  ctx.setLineDash([5,6]);
-  ctx.lineWidth=2;
-  ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.restore();
+  drawQueueTrack();
 
   /* 出口位＝隊形底部中央（EXIT_FRAC=0，buildQueueLUT() 自動旋轉去嘅
      位置，貼近下方嘅登機閘位）。唔使加一個 procedural 閘口標記，淨係
@@ -2389,7 +2435,7 @@ function drawQueue(now){
        以為佢而家可以上機 */
     const atExit = !e.fresh && fracDistFromExit(frac) <= winForGlow;
     const p = slotPos(e.slot, now);
-    drawPassenger(p.x, p.y, e.c, 0.95, atExit, phase*46 + e.slot*1.3);
+    drawPassenger(p.x, p.y, e.c, QUEUE_PAX_SCALE, atExit, phase*46 + e.slot*1.3);
   }
   /* 「剩餘乘客」而家擺咗上 HUD 做主要進度指標（參考遊戲左上角嗰個
      顯眼 chip），呢度唔再重複畫一次細細粒嘅灰字。 */
