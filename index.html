@@ -191,6 +191,7 @@
     #hud .chip .val{font-size:13px}
     #hud .hudicon-btn{width:36px;height:36px}
     #hud .hudicon{width:28px;height:28px}
+    #hud .speed-btn{width:36px;height:36px;font-size:13px}
     #hud .lvbadge-icon{width:52px;height:52px}
     #hud .lvbadge-num{font-size:18px}
   }
@@ -204,6 +205,19 @@
   }
   .hudicon-btn:active{transform:translateY(2px)}
   .hudicon{width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.45))}
+  /* 「X1／X2」加速掣（用戶反饋登機仲係太慢，參考人哋個 fast-forward
+     掣要求加）。冇對應美術素材，用返同 .btn-sec 一致嘅立體藍色小掣
+     風格（唔係淨 icon，因為呢粒掣本身係文字/數字，唔係圖形符號）。 */
+  .speed-btn{
+    font-family:'Nunito',system-ui,sans-serif;
+    font-size:15px;font-weight:800;color:#fff;
+    width:40px;height:40px;border-radius:12px;
+    background:linear-gradient(180deg,#5cb8ff 0%,#2f8fe0 60%,#1c6bb0 100%);
+    border:2px solid #124a7a;
+    box-shadow:0 4px 0 #123f66, inset 0 2px 0 rgba(255,255,255,.4);
+  }
+  .speed-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #123f66, inset 0 2px 0 rgba(255,255,255,.4)}
+  .speed-btn.on{background:linear-gradient(180deg,#ffd166 0%,#f5a93c 60%,#d9861c 100%);border-color:#8a5c12;box-shadow:0 4px 0 #7a4d10, inset 0 2px 0 rgba(255,255,255,.5)}
   /* Gameplay 兩粒自願廣告掣並排喺 HUD 之下（加開閘位／指揮飛機） */
   .aidbar{
     position:absolute; left:50%; top:66px;
@@ -477,6 +491,7 @@
   <div id="hud" hidden>
     <div class="chip pax"><img class="paxicon" id="hudPaxIcon" alt=""><span class="lbl">剩餘乘客</span><span class="val" id="hudPax">0</span></div>
     <div class="hud-btns">
+      <button class="speed-btn" id="btnSpeed">1x</button>
       <button class="hudicon-btn" id="btnRestart"><img class="hudicon" id="btnRestartIcon" alt="重玩"></button>
       <button class="hudicon-btn" id="btnMenu"><img class="hudicon" id="btnMenuIcon" alt="返回機場"></button>
     </div>
@@ -948,6 +963,29 @@ let slotY = 0, slotW = 0, slotH = 0, queueY = 0;
 let particles = [], floats = [];
 let boardings = [];   // 支援同一種色嘅多個閘位同時上客
 const BOARD_MS = 150;   // rapid-fire 登機（doc 第 2 節修正：短促高頻，唔係悠閒漫步）
+
+/* 「X1／X2」加速掣（2026-08-31 用戶反饋登機仲係太慢、參考人哋個
+   fast-forward 掣要求加）。用一個獨立嘅虛擬遊戲時鐘 `gameClockMs`
+   （只喺 playing/levelClear/stuck 先累加），淨係畀「乘客迴圈＋登機」
+   呢一組用（`drawQueue`／`tryStartBoarding`／`drawBoarding`），飛機
+   本身嘅滑出/泊入動畫（`drawTransitPlanes`／`drawIdlePlane`）刻意
+   維持真實時鐘唔郁——用戶原句係話「上飛機」慢，即係登機呢步，唔係
+   飛機郁動嗰步，收窄範圍先夠精準。`tick()`（rAF）同 `pump()`（60ms
+   setInterval，背景 tab 用）兩條路都會叫 `syncGameClock()`，但淨係
+   計「由 `lastClockSyncMs` 到而家」嗰段 delta，邊條路先叫都得，唔會
+   因為兩條路都行緊就計多咗（唔似直接各自加дельта咁會撞埋）。 */
+let gameSpeed = 1;
+let gameClockMs = 0;
+let lastClockSyncMs = performance.now();
+function syncGameClock(){
+  const real = performance.now();
+  const delta = Math.min(250, real - lastClockSyncMs);
+  lastClockSyncMs = real;
+  if(gameState==='playing' || gameState==='levelClear' || gameState==='stuck'){
+    gameClockMs += delta*gameSpeed;
+  }
+  return gameClockMs;
+}
 let shakeT = 0;
 let hintOn = false;                    // L1 手指提示（首撳前）
 
@@ -2270,10 +2308,10 @@ function drawBuildingArt(id, tier, x, baseY, s, now){
 
 /* ---------- logic pump：rAF 停都照行（背景 webview 保障） ---------- */
 function pump(){
+  const gNow = syncGameClock();
   if(gameState!=='playing') return;
-  const nowMs = performance.now();
-  for(const b of boardings.slice()) if(nowMs-b.start >= BOARD_MS) finishBoarding(b);
-  tryStartBoarding(nowMs);
+  for(const b of boardings.slice()) if(gNow-b.start >= BOARD_MS) finishBoarding(b);
+  tryStartBoarding(gNow);
 }
 setInterval(pump, 60);   // 背景 tab watchdog，唔拖慢 rapid-fire 登機節奏
 
@@ -2307,12 +2345,13 @@ function tickInner(now){
     drawGameplayBackdrop();
     drawBoard();
     drawSlots();
-    drawQueue(now);
+    const gNow = syncGameClock();
+    drawQueue(gNow);
 
     for(const p of planes) if(p.state==='idle') drawIdlePlane(p, now, dt);
     drawTransitPlanes(now);
-    drawBoarding(now);
-    if(gameState==='playing') tryStartBoarding(now);
+    drawBoarding(gNow);
+    if(gameState==='playing') tryStartBoarding(gNow);
 
     if(comboTimer>0){ comboTimer-=dt; if(comboTimer<=0) combo=0; }
   }
@@ -2604,6 +2643,12 @@ document.getElementById('btnBuild').addEventListener('click',()=>{
   renderBuildList(); hide('ovHub'); show('ovBuild');
 });
 document.getElementById('btnBuildClose').addEventListener('click',toHub);
+document.getElementById('btnSpeed').addEventListener('click',()=>{
+  gameSpeed = gameSpeed===1 ? 2 : 1;
+  const btn = document.getElementById('btnSpeed');
+  btn.textContent = gameSpeed+'x';
+  btn.classList.toggle('on', gameSpeed===2);
+});
 document.getElementById('btnRestart').addEventListener('click',()=>startLevel(levelIdx));
 document.getElementById('btnRetry').addEventListener('click',()=>startLevel(levelIdx));
 document.getElementById('btnMenu').addEventListener('click',toHub);
