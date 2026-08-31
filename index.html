@@ -447,6 +447,20 @@
   }
 </style>
 
+<!-- 開機 loader：成個 game 係單一 HTML 檔（連全部素材 base64 內嵌，
+     ~10MB），中間嗰段 <script id="assets"> 係阻塞式解析，喺佢執行完
+     之前瀏覽器都畫唔到後面嘅嘢——用戶手機實測見過一段明顯嘅白畫面
+     （截片逐格拆過確認）。呢個 div 特登擺喺最開頭、用晒 inline style
+     （唔靠後面先解析嘅 <style> 表／唔靠任何素材圖），保證瀏覽器一
+     攞到頭幾 KB HTML 就即刻畫到嘢出嚟，唔會再係一片死白。等 boot
+     行到尾（素材、splash 背景都準備好）先由 JS 攞走呢層。 -->
+<div id="bootLoader" style="position:fixed;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#141b2d;font-family:system-ui,sans-serif">
+  <div style="font-size:24px;font-weight:800;color:#fff;letter-spacing:.02em">Airport Solver</div>
+  <div style="width:38px;height:38px;border:4px solid rgba(245,200,76,.25);border-top-color:#f5c84c;border-radius:50%;animation:bootspin .8s linear infinite"></div>
+  <div style="font-size:13px;color:#aeb9d6">載入中…</div>
+  <style>@keyframes bootspin{to{transform:rotate(360deg)}}</style>
+</div>
+
 <div id="stage"><div id="frame">
   <canvas id="cv"></canvas>
 
@@ -806,6 +820,18 @@ function adImg(){
   document.getElementById('btnWandIcon').src = AS.ui_wand || '';
   document.getElementById('hubBrand').src = AS.logo || '';
   document.getElementById('splashLogo').src = AS.logo || '';
+  /* App icon（已有素材 `appicon`，之前只係存低做 Capacitor 打包用，
+     瀏覽器分頁／加入主畫面嘅 icon 一直冇 wire——用戶發現「我哋有個
+     game icon 喎」，補返 favicon／apple-touch-icon。單檔 game 冇固定
+     <head>（Artifact 同 build-static.js 兩邊都係執行時先組裝 head），
+     所以呢度用 JS 動態建立 <link>，同其他 icon 一致做法。 */
+  if(AS.appicon){
+    for(const rel of ['icon','apple-touch-icon']){
+      const link = document.createElement('link');
+      link.rel = rel; link.href = AS.appicon;
+      document.head.appendChild(link);
+    }
+  }
 }
 /* 畫機頭朝 faceAngle 嘅飛機 sprite；len = 沿機身軸嘅長度 */
 function drawPlaneSprite(key, cx, cy, len, faceAngle, alpha=1){
@@ -2608,5 +2634,6 @@ updateMatsChips();
   else document.getElementById('ovSplash').style.background =
     'linear-gradient(180deg,#1e93e0,#141b2d)';
 }
+document.getElementById('bootLoader')?.remove();
 requestAnimationFrame(tick);
 </script>
