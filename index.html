@@ -387,7 +387,11 @@
     display:flex;
     background:linear-gradient(180deg,#1c2747,#0e1526);
     border-top:2px solid #33436f;
-    padding:8px 4px calc(8px + env(safe-area-inset-bottom));
+    /* 用戶反饋：standalone webapp 模式下底部畀 home indicator 讓出嘅
+       安全區,加埋原本嘅 8px,睇落係一大截「唔知係咩」嘅空白——用 max()
+       淨係取安全區本身（有先算,冇就跌返 8px 保底),唔好再兩個疊埋一齊
+       加,盡量令空白幅度貼近實際需要,唔好睇落好似斷咗。 */
+    padding:8px 4px max(8px, env(safe-area-inset-bottom));
     pointer-events:auto;
     z-index:7;
   }
