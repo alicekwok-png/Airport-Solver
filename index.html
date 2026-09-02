@@ -750,7 +750,7 @@
     <div class="panel">
       <div class="ribbon danger" id="stuckTitle">登機閘已被塞滿！</div>
       <div class="note big">排隊區沒有任何乘客符合條件，閘位又已經全部停滿。<br>請調整飛機的出發順序，或加開閘位後再試一次！</div>
-      <div class="note" id="reviveDesc">復活：加開 1 個登機閘，並立即把停在閘位的飛機全部配對後方乘客、載滿起飛，清空閘位。</div>
+      <div class="note" id="reviveDesc">復活：立即把停在閘位的飛機全部配對後方的乘客、載滿起飛，一次清空閘位。</div>
       <button class="btn-main" id="btnRevive"><img class="adicon" id="adIconRevive" alt=""> 觀看廣告復活</button>
       <button class="btn-sec" id="btnRetry"><img class="adicon" id="btnRetryIcon" alt=""> 再試一次</button>
       <button class="btn-sec" id="btnStuckMenu">返回機場</button>
@@ -2055,7 +2055,7 @@ function checkStuck(){
     gameState='stuck';
     ping(150,0.3,'square',0.1);
     setTimeout(()=>{
-      document.getElementById('btnRevive').hidden = adGatesUsed >= MAX_AD_GATES;
+      document.getElementById('btnRevive').hidden = false;   // 復活唔受加閘位次數限制
       show('ovStuck');
     }, 450);
   }
@@ -3145,9 +3145,10 @@ function unlockExtraGate(onDone){
   });
 }
 /* ---------- 復活（2026-09-03 用戶要求，參考 Bus Jam 類 reference video 嘅「復活」）----------
-   卡關嗰陣睇一次獎勵廣告：(a) 加開一個閘位，(b) 將**而家停晒喺閘位嗰啲飛機**
-   即刻由排隊區任何位置（唔限於隊頭嗰列）抽返同色乘客填到滿座、即刻起飛，
-   一次過清空登機閘 —— 正正就係解決「閘位冇位」呢個死局。
+   卡關嗰陣睇一次獎勵廣告，將**而家停晒喺閘位嗰啲飛機**即刻由排隊區任何
+   位置（唔限於隊頭嗰列）抽返同色乘客填到滿座、即刻起飛，一次過清空登機
+   閘 —— 正正就係解決「閘位冇位」呢個死局。**唔會加開閘位**（用戶明確
+   更正：加閘位係另一個獨立道具，兩樣嘢唔好溝埋）。
 
    點解一定要填到滿座先起飛：成關嘅乘客總數同飛機總載客量係啱啱好對等，
    放一架未滿嘅機走，剩返嗰啲乘客就會冇位坐，成關變成永遠贏唔到。數學上
@@ -3239,12 +3240,14 @@ document.getElementById('btnDouble').addEventListener('click',()=>{
   });
 });
 
+/* 復活淨係「清空閘位」（2026-09-03 用戶更正：唔會加開閘位，加閘位係另一
+   個獨立道具）。所以唔碰 adGatesUsed／nSlots，亦都唔受加閘位嘅 3 次上限
+   限制——每次都係睇一次獎勵廣告換一次清空。 */
 document.getElementById('btnRevive').addEventListener('click',()=>{
-  if(adGatesUsed >= MAX_AD_GATES) return;
-  unlockExtraGate(()=>{
+  Ads.showRewarded(()=>{
     hide('ovStuck');
     gameState = 'playing';
-    reviveClearGates();     // 加咗閘位仲要清返啲塞住咗嘅閘，否則落一秒又即刻卡返
+    reviveClearGates();
   });
 });
 
