@@ -402,6 +402,14 @@
   .toggle.on{background:var(--green)}
   .toggle.on::after{transform:translateX(26px)}
   .toggle[disabled]{opacity:.45}
+  /* 語言：兩粒細掣（中文／English），揀咗嗰粒填實色 */
+  .langpick{display:flex;gap:6px;flex-shrink:0}
+  .langbtn{
+    font-family:'Nunito',system-ui,sans-serif;font-size:13px;font-weight:800;
+    padding:6px 10px;border-radius:10px;
+    background:#3a4767;border:2px solid #12233f;color:var(--ink-dim);
+  }
+  .langbtn.on{background:var(--green);border-color:#14663a;color:#06301b}
   #hubDock{
     display:flex;align-items:center;justify-content:center;
   }
@@ -685,7 +693,6 @@
     <div class="chip pax"><img class="paxicon" id="hudPaxIcon" alt=""><span class="lbl">剩餘乘客</span><span class="val" id="hudPax">0</span></div>
     <div class="hud-btns">
       <button class="hudicon-btn speed-icon-btn" id="btnSpeed"><img class="hudicon" id="btnSpeedIcon" alt="登機速度"></button>
-      <button class="hudicon-btn" id="btnRestart"><img class="hudicon" id="btnRestartIcon" alt="重玩"></button>
       <button class="hudicon-btn" id="btnMenu"><img class="hudicon" id="btnMenuIcon" alt="設定"></button>
     </div>
     <div class="lvbadge"><img class="lvbadge-icon" id="hudLevelIcon" alt="關卡"><span class="lvbadge-num" id="hudLevel">1</span></div>
@@ -706,7 +713,12 @@
       <button class="xbtn" id="btnSettingsClose">✕</button>
       <div class="setrow"><span class="lbl">音效</span><button class="toggle" id="tgSfx"></button></div>
       <div class="setrow"><span class="lbl">震動</span><button class="toggle" id="tgVibe"></button></div>
-      <div class="setrow"><span class="lbl">語言<br><span class="sub">暫時只有繁體中文</span></span><button class="toggle" disabled></button></div>
+      <div class="setrow"><span class="lbl">語言</span>
+        <span class="langpick">
+          <button class="langbtn" data-lang="zh">中文</button>
+          <button class="langbtn" data-lang="en">English</button>
+        </span>
+      </div>
       <button class="btn-sec" id="btnSettingsRestart" hidden>重新開始這一關</button>
       <button class="btn-sec" id="btnSettingsHome" hidden>返回機場</button>
       <button class="btn-main" id="btnSettingsResume">繼續遊戲</button>
@@ -1575,7 +1587,6 @@ function syncSpeedBtn(){
 {
   const AS = window.ASSET_SRC||{};
   document.getElementById('hudLevelIcon').src = AS.ui_levelbadge || '';
-  document.getElementById('btnRestartIcon').src = AS.ui_restart || '';
   document.getElementById('btnSpeedIcon').src = AS.ui_speed1 || '';   // 開場一定係 1x
   document.getElementById('btnMenuIcon').src = AS.ui_gear || AS.ui_world || '';
   document.getElementById('gearIconHub').src = AS.ui_gear || '';
@@ -2359,11 +2370,154 @@ function planeAngle(p){
   return Math.atan2(vy,vx);
 }
 
+/* ---------- 多語言（用戶要求：加返英文版）----------
+   中文係「源語言」——所有字串喺 code／markup 入面本身就係中文，字典淨係
+   由中文 map 去英文。噉樣做嘅好處：字典漏咗一句都唔會變空白（搵唔到就
+   照用返中文），而且靜態 markup 可以自動處理：載入時影低成份文件入面
+   每一個含中文嘅 text node，切語言就逐個換返。
+   帶 %1 %2 嘅係有變數嘅句式，用 TP() 填。 */
+const I18N_EN = {
+  "點一下開始": "Tap to start",
+  "剩餘乘客": "Passengers",
+  "設定": "Settings",
+  "音效": "Sound",
+  "震動": "Vibration",
+  "語言": "Language",
+  "重新開始這一關": "Restart level",
+  "返回機場": "Back to airport",
+  "繼續遊戲": "Resume",
+  "使用": "Use",
+  "取消": "Cancel",
+  "建造": "Build",
+  "下一班航班": "Next flight",
+  "環球旅程": "World tour",
+  "關卡選擇": "Levels",
+  "商店": "Shop",
+  "即將推出，敬請期待！": "Coming soon!",
+  "你的 $DST：": "Your $DST: ",
+  "·　NFT 卡：": "· NFT cards: ",
+  "張": "",
+  "Web3 錢包／NFT 卡（測試版）": "Web3 wallet / NFT cards (beta)",
+  "主頁": "Home",
+  "地圖": "Map",
+  "機場建造": "Airport build",
+  "全部乘客起飛！": "All passengers away!",
+  "觀看廣告 雙倍材料": "Watch ad: double materials",
+  "登機閘已被塞滿！": "Every gate is full!",
+  "排隊區沒有任何乘客符合條件，閘位又已經全部停滿。": "No passenger in the queue matches a docked plane, and every gate is taken.",
+  "請調整飛機的出發順序，或加開閘位後再試一次！": "Send the planes out in a different order, or open another gate and try again.",
+  "復活：立即把停在閘位的飛機全部配對後方的乘客、載滿起飛，一次清空閘位。": "Revive: every plane at a gate is filled from the queue behind it and takes off, clearing all gates at once.",
+  "觀看廣告復活": "Watch ad to revive",
+  "再試一次": "Try again",
+  "廣告": "Ad",
+  "測試廣告位 — 正式版由 AdMob 提供。": "Test ad slot — AdMob in the live build.",
+  "每完成一關會播放一次插頁廣告（代碼層面強制執行）。": "An interstitial plays after every level (enforced in code).",
+  "第一章完成！": "Chapter 1 complete!",
+  "你已完成第一章全部 20 關。": "You cleared all 20 levels of Chapter 1.",
+  "下一難度層開發中…": "More levels are in development…",
+  "解鎖：控制塔！": "Unlocked: control tower!",
+  "解鎖：貴賓室！請在建造面板中興建！": "Unlocked: VIP lounge! Build it from the Build panel.",
+  "解鎖：機庫！": "Unlocked: hangar!",
+  "航廈擴建 Tier 2！": "Terminal upgraded to tier 2!",
+  "控制塔擴建 Tier 2！": "Control tower upgraded to tier 2!",
+  "貴賓室擴建 Tier 2！": "VIP lounge upgraded to tier 2!",
+  "機庫擴建 Tier 2！": "Hangar upgraded to tier 2!",
+  "航廈終極擴建 Tier 3！": "Terminal fully upgraded to tier 3!",
+  "控制塔終極擴建 Tier 3！": "Control tower fully upgraded to tier 3!",
+  "貴賓室終極擴建 Tier 3！": "VIP lounge fully upgraded to tier 3!",
+  "機庫終極擴建 Tier 3！第一章完成！": "Hangar fully upgraded to tier 3! Chapter 1 complete!",
+  "航廈擴建 Tier 2！形狀關：航廈圓頂": "Terminal tier 2! Shape level: terminal dome",
+  "貴賓室擴建 Tier 2！形狀關：飛機輪廓": "VIP lounge tier 2! Shape level: airship outline",
+  "航廈終極擴建 Tier 3！形狀關：鳥居": "Terminal tier 3! Shape level: torii gate",
+  "機庫擴建 Tier 2！新機制：冰封格登場": "Hangar tier 2! New mechanic: ice-locked planes",
+  "控制塔終極擴建 Tier 3！新機制：特大型客機登場": "Control tower tier 3! New mechanic: extra-large airships",
+  "形狀關：富士山": "Shape level: Mount Fuji",
+  "機庫終極擴建 Tier 3！形狀關：五重塔．第二章完成！": "Hangar tier 3! Shape level: pagoda · Chapter 2 complete!",
+  "香港": "Hong Kong",
+  "日本": "Japan",
+  "韓國": "Korea",
+  "德國": "Germany",
+  "荷蘭": "Netherlands",
+  "歐洲地區": "Europe",
+  "第一章．20 關": "Chapter 1 · 20 levels",
+  "第二章．20 關（冰封格／特大型客機）": "Chapter 2 · 20 levels (ice locks / XL airships)",
+  "完成香港 20 關解鎖": "Clear all 20 Hong Kong levels to unlock",
+  "完成日本解鎖": "Clear Japan to unlock",
+  "完成韓國解鎖": "Clear Korea to unlock",
+  "完成德國解鎖": "Clear Germany to unlock",
+  "完成荷蘭解鎖": "Clear the Netherlands to unlock",
+  "航廈": "Terminal",
+  "控制塔": "Control tower",
+  "貴賓室": "VIP lounge",
+  "機庫": "Hangar",
+  "終極形態": "Max tier",
+  "未建造": "Not built",
+  "加開閘位": "Extra gate",
+  "指揮飛機": "Direct plane",
+  "額外解鎖一個登機閘位，以紓緩排隊壓力（僅限本關卡生效，過關或離開後重置）。": "Opens one more boarding gate to ease the queue. This level only — it resets when you finish or leave.",
+  "選擇盤面上任何一架飛機，不需理會路徑是否暢通，直接將它送入閘口登機——專門用於拯救被困住、無法移動的飛機（僅限本關卡生效）。": "Pick any plane on the board and send it straight to a gate, blocked path or not. Made for rescuing planes that are boxed in. This level only.",
+  "指揮出發！": "Cleared for takeoff!",
+  "沒有空置閘位！": "No free gate!",
+  "加開閘位！": "Gate opened!",
+  "閘位已清空！": "Gates cleared!",
+  "請選擇一架飛機！": "Pick a plane!",
+  "可建造!": "Build now!",
+  "建造中…": "Building…",
+  "完成！": "Finished!",
+  "點這裡": "Tap here",
+  "觀看完廣告即可領取獎勵！": "Watch the whole ad to claim your reward!",
+  "多謝支持，廣告後繼續！": "Thanks for the support — back after this ad!",
+  "領取獎勵 ✓": "Claim reward ✓",
+  "關閉 ✕": "Close ✕",
+  "仲差 %1 架解凍": "Unlocks in %1 more",
+  "+%1 建造材料": "+%1 materials",
+  "已領取本關卡材料（獲得更高星級可補領差額）": "Materials already claimed (earn more stars to top up)",
+  "+%1 建造材料（已雙倍！）": "+%1 materials (doubled!)",
+  "分數 %1　·　%2 步（Par %3）": "Score %1 · %2 moves (par %3)",
+  "分數 %1　·　%2 步": "Score %1 · %2 moves",
+  "前往%1．第二章": "Go to %1 · chapter 2",
+  "%1．關卡選擇": "%1 · levels",
+  "L%1 解鎖": "Unlocks at L%1",
+  "升級": "Upgrade",
+  "還差 %1 材料<br>回去多玩幾關吧！": "Need %1 more materials<br>Play a few more levels!",
+};
+function T(zh){ return settings.lang==='en' ? (I18N_EN[zh] ?? zh) : zh; }
+function TP(zh, ...args){
+  let t = T(zh);
+  args.forEach((v,i)=>{ t = t.split('%'+(i+1)).join(v); });
+  return t;
+}
+/* 靜態 markup：載入時影低每個含中文嘅 text node，之後切語言逐個換 */
+let i18nNodes = null;
+function snapshotI18n(){
+  if(i18nNodes) return;
+  i18nNodes = [];
+  const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for(let n = walk.nextNode(); n; n = walk.nextNode()){
+    if(/[\u4e00-\u9fff]/.test(n.data)) i18nNodes.push({node:n, zh:n.data});
+  }
+}
+function applyLang(){
+  snapshotI18n();
+  for(const e of i18nNodes){
+    const key = e.zh.trim();
+    const t = T(key);
+    e.node.data = (t===key) ? e.zh : e.zh.replace(key, t);
+  }
+  document.documentElement.lang = settings.lang==='en' ? 'en' : 'zh-HK';
+  /* 已經 render 咗嘅動態面板要重出一次先跟到新語言 */
+  const open = id => { const el=document.getElementById(id); return el && !el.hidden; };
+  try{ if(open('ovLevels')) buildMenu(); }catch(e){}
+  try{ if(open('ovBuild')) renderBuildList(); }catch(e){}
+  try{ if(open('ovWorldMap')) renderWorldMap(); }catch(e){}
+  try{ if(open('ovShop')) renderShop(); }catch(e){}
+}
+
 /* ---------- 設定（doc _35：齒輪 modal）----------
    音效／震動兩個開關存喺 localStorage，同進度分開（唔屬於遊戲進度）。 */
 const SETTINGS_KEY = 'airportsolver.settings.v1';
 let settings = (function(){
-  let o = {sfx:true, vibe:true};
+  let o = {sfx:true, vibe:true, lang:'zh'};
   try{ const raw = localStorage.getItem(SETTINGS_KEY); if(raw) o = Object.assign(o, JSON.parse(raw)); }catch(e){}
   return o;
 })();
@@ -2434,7 +2588,7 @@ cv.addEventListener('pointerdown', e=>{
   if(frozen(hit)){
     hit.shakeT = 0.32;
     const ci = planeCenter(hit);
-    floats.push({x:ci.x, y:ci.y-cs*0.6, txt:'仲差 '+iceLeft(hit)+' 架解凍', life:1, big:false, start:performance.now()});
+    floats.push({x:ci.x, y:ci.y-cs*0.6, txt:TP('仲差 %1 架解凍', iceLeft(hit)), life:1, big:false, start:performance.now()});
     ping(140,0.12,'square',0.08);
     return;
   }
@@ -2449,7 +2603,7 @@ cv.addEventListener('pointerdown', e=>{
     wandArmed = false;
     updateAddGateBtn();
     const c0 = planeCenter(hit);
-    floats.push({x:c0.x, y:c0.y-cs*0.6, txt:'指揮出發！', life:1, big:false, start:performance.now()});
+    floats.push({x:c0.x, y:c0.y-cs*0.6, txt:T('指揮出發！'), life:1, big:false, start:performance.now()});
     departPlane(hit);
     return;
   }
@@ -2462,7 +2616,7 @@ cv.addEventListener('pointerdown', e=>{
   if(freeSlotIdx()===-1){
     hit.shakeT = 0.32;
     const c = planeCenter(hit);
-    floats.push({x:c.x, y:c.y-cs*0.6, txt:'沒有空置閘位！', life:1, big:false, start:performance.now()});
+    floats.push({x:c.x, y:c.y-cs*0.6, txt:T('沒有空置閘位！'), life:1, big:false, start:performance.now()});
     ping(120,0.12,'square',0.08);
     checkStuck();
     return;
@@ -2632,7 +2786,8 @@ function checkWin(){
     chapterProg().unlocked = Math.max(chapterProg().unlocked, Math.min(levelIdx+2, LEVELS.length));
     saveProgress(progress);
     document.getElementById('winMats').innerHTML =
-      matsGain>0 ? `${matsImg()} +${matsGain} 建造材料` : `${matsImg()} 已領取本關卡材料（獲得更高星級可補領差額）`;
+      matsGain>0 ? matsImg()+' '+TP('+%1 建造材料', matsGain)
+                  : matsImg()+' '+T('已領取本關卡材料（獲得更高星級可補領差額）');
     document.getElementById('btnDouble').hidden = matsGain<=0;
     setTimeout(()=>{
       ping(660,0.1); setTimeout(()=>ping(880,0.1),120); setTimeout(()=>ping(1100,0.18),240);
@@ -2641,19 +2796,19 @@ function checkWin(){
         starsEl.hidden = false;
         starsEl.innerHTML = [1,2,3].map(n=>`<span>${starImg(n<=stars)}</span>`).join('');
         document.getElementById('winMoves').textContent =
-          `分數 ${score}　·　${moves} 步（Par ${L.par}）`;
+          TP('分數 %1　·　%2 步（Par %3）', score, moves, L.par);
       }else{
         starsEl.hidden = true;
-        document.getElementById('winMoves').textContent = `分數 ${score}　·　${moves} 步`;
+        document.getElementById('winMoves').textContent = TP('分數 %1　·　%2 步', score, moves);
       }
       const ms = document.getElementById('winMilestone');
-      if(L.milestone){ ms.hidden=false; ms.textContent = L.milestone; }
+      if(L.milestone){ ms.hidden=false; ms.textContent = T(L.milestone); }
       else ms.hidden=true;
       /* 打爆一章最後一關：如果下一個章節已經解鎖，粒掣直接帶你過去 */
       const nextCh = chapterId==='hk' && chapterDone('hk') ? CHAPTERS.find(c=>c.id==='jp') : null;
       document.getElementById('btnNext').innerHTML =
-        levelIdx+1 < LEVELS.length ? `下一班航班 ${ctaImg()}`
-        : nextCh ? `前往${nextCh.name}．第二章 ${ctaImg()}` : '完成！';
+        levelIdx+1 < LEVELS.length ? T('下一班航班')+' '+ctaImg()
+        : nextCh ? TP('前往%1．第二章', T(nextCh.name))+' '+ctaImg() : T('完成！');
       show('ovWin');
     }, 500);
   }
@@ -2944,7 +3099,7 @@ function drawIdlePlane(p, nowMs, dt){
       ctx.font=`700 ${Math.round(cs*0.3)}px 'Baloo 2',sans-serif`;
       ctx.textAlign='center';
       ctx.fillStyle='#f5c84c';
-      ctx.fillText('點這裡', c.x, c.y - cs*0.85);
+      ctx.fillText(T('點這裡'), c.x, c.y - cs*0.85);
     }
     ctx.restore();
   }
@@ -3496,8 +3651,8 @@ function drawBuilding(b, tier, x, y, baseW, now){
         const cw = Math.round(baseW*0.24), ch = cw*craneIm.naturalHeight/craneIm.naturalWidth;
         ctx.drawImage(craneIm, x-cw/2, cy-ch/2-fsz*0.3, cw, ch);
       }
-      ctx.strokeText('可建造!', x, cy + fsz*1.15);
-      ctx.fillText('可建造!', x, cy + fsz*1.15);
+      ctx.strokeText(T('可建造!'), x, cy + fsz*1.15);
+      ctx.fillText(T('可建造!'), x, cy + fsz*1.15);
     }else{
       /* gatelock 素材係灰色閘位底板，喺灰階建築上面睇唔清；用 code 畫嘅
          金色鎖頭，同灰 ghost 對比夠強 */
@@ -3555,9 +3710,9 @@ function drawBuilding(b, tier, x, y, baseW, now){
     if(craneIm2){
       const cw = Math.max(14,Math.round(w*0.16)), ch = cw*craneIm2.naturalHeight/craneIm2.naturalWidth;
       ctx.drawImage(craneIm2, x-cw/2, y+h*0.56-ch-4, cw, ch);
-      ctx.fillText('建造中…', x, y + h*0.56+ch*0.4);
+      ctx.fillText(T('建造中…'), x, y + h*0.56+ch*0.4);
     }else{
-      ctx.fillText('🏗️ 建造中…', x, y + h*0.56);
+      ctx.fillText('🏗️ '+T('建造中…'), x, y + h*0.56);
     }
     ctx.restore();
   }
@@ -3761,7 +3916,7 @@ const Ads = {
   _show(kind, cb){
     const btn = document.getElementById('btnAdClose');
     const note = document.getElementById('adNote');
-    note.textContent = kind==='rewarded' ? '觀看完廣告即可領取獎勵！' : '多謝支持，廣告後繼續！';
+    note.textContent = T(kind==='rewarded' ? '觀看完廣告即可領取獎勵！' : '多謝支持，廣告後繼續！');
     let sec = 3;
     btn.disabled = true; btn.textContent = sec;
     show('ovAd');
@@ -3770,7 +3925,7 @@ const Ads = {
       if(sec<=0){
         clearInterval(iv);
         btn.disabled = false;
-        btn.textContent = kind==='rewarded' ? '領取獎勵 ✓' : '關閉 ✕';
+        btn.textContent = T(kind==='rewarded' ? '領取獎勵 ✓' : '關閉 ✕');
       } else btn.textContent = sec;
     }, 1000);
     btn.onclick = ()=>{
@@ -3874,7 +4029,7 @@ function unlockExtraGate(onDone){
     slotPlanes.push(null);
     layoutBoard();
     updateAddGateBtn();
-    floats.push({x:VW/2, y:slotY-14, txt:'加開閘位！', life:1, big:true, start:performance.now()});
+    floats.push({x:VW/2, y:slotY-14, txt:T('加開閘位！'), life:1, big:true, start:performance.now()});
     ping(660,0.1); setTimeout(()=>ping(880,0.15),110);
     if(onDone) onDone();
   });
@@ -3923,7 +4078,7 @@ function reviveClearGates(){
   }
   updateHud();
   if(cleared){
-    floats.push({x:VW/2, y:slotY+slotH*0.4, txt:'閘位已清空！', life:1, big:true, start:performance.now()});
+    floats.push({x:VW/2, y:slotY+slotH*0.4, txt:T('閘位已清空！'), life:1, big:true, start:performance.now()});
     ping(720,0.1); setTimeout(()=>ping(960,0.16),120);
   }
   return cleared;
@@ -3931,8 +4086,8 @@ function reviveClearGates(){
 
 document.getElementById('btnAddGate').addEventListener('click',()=>{
   if(adGatesUsed >= MAX_AD_GATES) return;
-  showItemInfo('加開閘位', (window.ASSET_SRC||{}).ui_addgate||'',
-    '額外解鎖一個登機閘位，以紓緩排隊壓力（僅限本關卡生效，過關或離開後重置）。',
+  showItemInfo(T('加開閘位'), (window.ASSET_SRC||{}).ui_addgate||'',
+    T('額外解鎖一個登機閘位，以紓緩排隊壓力（僅限本關卡生效，過關或離開後重置）。'),
     ()=>unlockExtraGate());
 });
 
@@ -3942,18 +4097,18 @@ document.getElementById('btnWand').addEventListener('click',()=>{
   }
   if(adWandsUsed >= MAX_AD_WANDS) return;
   if(freeSlotIdx()===-1){   // 冇空閘位就算送到出去都冇位泊，唔好呃人睇廣告
-    floats.push({x:VW/2, y:slotY-14, txt:'沒有空置閘位！', life:1, big:true, start:performance.now()});
+    floats.push({x:VW/2, y:slotY-14, txt:T('沒有空置閘位！'), life:1, big:true, start:performance.now()});
     ping(120,0.12,'square',0.08);
     return;
   }
-  showItemInfo('指揮飛機', (window.ASSET_SRC||{}).ui_wand||'',
-    '選擇盤面上任何一架飛機，不需理會路徑是否暢通，直接將它送入閘口登機——專門用於拯救被困住、無法移動的飛機（僅限本關卡生效）。',
+  showItemInfo(T('指揮飛機'), (window.ASSET_SRC||{}).ui_wand||'',
+    T('選擇盤面上任何一架飛機，不需理會路徑是否暢通，直接將它送入閘口登機——專門用於拯救被困住、無法移動的飛機（僅限本關卡生效）。'),
     ()=>{
       Ads.showRewarded(()=>{
         adWandsUsed++;
         wandArmed = true;
         updateAddGateBtn();
-        floats.push({x:VW/2, y:slotY-14, txt:'請選擇一架飛機！', life:1, big:true, start:performance.now()});
+        floats.push({x:VW/2, y:slotY-14, txt:T('請選擇一架飛機！'), life:1, big:true, start:performance.now()});
         ping(760,0.1); setTimeout(()=>ping(980,0.15),110);
       });
     });
@@ -3969,7 +4124,7 @@ document.getElementById('btnDouble').addEventListener('click',()=>{
     saveProgress(progress);
     updateMatsChips();
     document.getElementById('winMats').innerHTML =
-      `${matsImg()} +${lastMatsGain*2} 建造材料（已雙倍！）`;
+      matsImg()+' '+TP('+%1 建造材料（已雙倍！）', lastMatsGain*2);
     document.getElementById('btnDouble').hidden = true;
     ping(880,0.1); setTimeout(()=>ping(1320,0.15),120);
   });
@@ -4020,7 +4175,7 @@ function renderWorldMap(){
   COUNTRIES.forEach((c,i)=>{
     /* 章節國家：香港永遠開；日本要打完香港 20 關先開。其餘仲未有內容。 */
     c.unlocked = c.id==='hk' ? true : c.id==='jp' ? chapterDone('hk') : false;
-    if(c.id==='jp' && !c.unlocked) c.sub = '完成香港 20 關解鎖';
+    if(c.id==='jp') c.sub = c.unlocked ? '第二章．20 關（冰封格／特大型客機）' : '完成香港 20 關解鎖';
     const node = document.createElement('div');
     node.className = 'wm-node '+(i%2===0?'left':'right');
     const thumbSrc = AS['island_'+c.id] || AS.island;
@@ -4035,8 +4190,8 @@ function renderWorldMap(){
       ${planeHtml}
       ${nodeArt}
       <div class="wm-pill${c.unlocked?'':' locked'}">
-        <div class="wm-name">${c.name}</div>
-        <div class="wm-sub">${c.sub}</div>
+        <div class="wm-name">${T(c.name)}</div>
+        <div class="wm-sub">${T(c.sub)}</div>
       </div>
     </div>`;
     if(c.unlocked) node.addEventListener('click',()=>{
@@ -4059,7 +4214,7 @@ function switchTab(tab){
 }
 
 function buildMenu(){
-  document.getElementById('levelsTitle').textContent = chapter().name + '．關卡選擇';
+  document.getElementById('levelsTitle').textContent = TP('%1．關卡選擇', T(chapter().name));
   const grid = document.getElementById('levelGrid');
   grid.innerHTML='';
   LEVELS.forEach((Lv,i)=>{
@@ -4087,13 +4242,13 @@ function renderBuildList(){
     row.className='brow';
     let act;
     if(tier>=3){
-      act = `<span class="bmax">終極形態</span>`;
+      act = `<span class="bmax">${T('終極形態')}</span>`;
     }else{
       const t = b.tiers[tier];
-      if(pl < t.lv) act = `<span class="block">L${t.lv} 解鎖</span>`;
+      if(pl < t.lv) act = `<span class="block">${TP('L%1 解鎖', t.lv)}</span>`;
       else if(progress.mats >= t.cost)
-        act = `<button class="btn-up" data-b="${b.id}">升級 ${matsImg()}${t.cost}</button>`;
-      else act = `<span class="bneed">還差 ${t.cost-progress.mats} 材料<br>回去多玩幾關吧！</span>`;
+        act = `<button class="btn-up" data-b="${b.id}">${T('升級')} ${matsImg()}${t.cost}</button>`;
+      else act = `<span class="bneed">${TP('還差 %1 材料<br>回去多玩幾關吧！', t.cost-progress.mats)}</span>`;
     }
     const AS0 = window.ASSET_SRC||{};
     const iconSrc = AS0[bKey(b.id,1)] || AS0['b_'+b.id];
@@ -4101,8 +4256,8 @@ function renderBuildList(){
       ? `<img src="${iconSrc}" alt="${b.name}">`
       : b.icon;   // fallback（正常唔會用到，asset 已內嵌）
     row.innerHTML = `<div class="bicon">${iconHtml}</div>
-      <div class="binfo"><div class="bname">${b.name}</div>
-      <div class="btier">${tier===0?'未建造':'Tier '+tier}${tier<3?' → Tier '+(tier+1):''}</div></div>
+      <div class="binfo"><div class="bname">${T(b.name)}</div>
+      <div class="btier">${tier===0?T('未建造'):'Tier '+tier}${tier<3?' → Tier '+(tier+1):''}</div></div>
       <div class="bact">${act}</div>`;
     list.appendChild(row);
   });
@@ -4151,7 +4306,6 @@ document.getElementById('btnSpeed').addEventListener('click',()=>{
   gameSpeed = gameSpeed===1 ? 2 : 1;
   syncSpeedBtn();
 });
-document.getElementById('btnRestart').addEventListener('click',()=>startLevel(levelIdx));
 document.getElementById('btnRetry').addEventListener('click',()=>startLevel(levelIdx));
 /* doc _35：頂部原本嗰粒 globe 實際功能係「返首頁」，造型同功能對唔上，
    改做設定齒輪開 modal，「返回機場」變成 modal 入面其中一個選項。 */
@@ -4171,7 +4325,17 @@ document.getElementById('tgVibe').addEventListener('click',()=>{
 function syncSettingsUI(){
   document.getElementById('tgSfx').classList.toggle('on', !!settings.sfx);
   document.getElementById('tgVibe').classList.toggle('on', !!settings.vibe);
+  for(const b of document.querySelectorAll('.langbtn'))
+    b.classList.toggle('on', (settings.lang||'zh') === b.dataset.lang);
 }
+for(const b of document.querySelectorAll('.langbtn')){
+  b.addEventListener('click',()=>{
+    settings.lang = b.dataset.lang; saveSettings();
+    applyLang(); syncSettingsUI();
+    ping(760,0.07);
+  });
+}
+applyLang();          // 開機跟返上次揀嘅語言
 /* inGame=true → 多兩個動作掣（重新開始呢一關／返回機場） */
 function openSettings(inGame){
   syncSettingsUI();
