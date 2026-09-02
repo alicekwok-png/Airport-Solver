@@ -2689,31 +2689,87 @@ function drawPlot(x, y, w, highlight, now){
   ctx.restore();
 }
 
+/* 鎖定建築嘅灰階 ghost：同一張 Tier 1 sprite 去色＋壓暗，離屏 canvas 只做一次。
+   唔用 ctx.filter='grayscale()'，因為 iOS Safari 對 canvas filter 支援唔穩。 */
+const GHOSTS = {};
+function ghostSprite(key){
+  if(GHOSTS[key]) return GHOSTS[key];
+  const im = sprite(key);
+  if(!im) return null;
+  const c = document.createElement('canvas');
+  c.width = im.naturalWidth; c.height = im.naturalHeight;
+  const g = c.getContext('2d');
+  g.drawImage(im, 0, 0);
+  try{
+    const d = g.getImageData(0,0,c.width,c.height), px = d.data;
+    for(let i=0;i<px.length;i+=4){
+      const l = (0.299*px[i] + 0.587*px[i+1] + 0.114*px[i+2]) * 0.72;
+      px[i] = l*0.92; px[i+1] = l*0.96; px[i+2] = l*1.08 + 8;   // 微微偏藍灰
+    }
+    g.putImageData(d, 0, 0);
+  }catch(e){ /* 極端情況（tainted canvas）就用返原圖 */ return im; }
+  GHOSTS[key] = c;
+  return c;
+}
+/* 冇 gatelock 素材時嘅簡單鎖頭 */
+function drawPadlock(x, y, sz){
+  ctx.save();
+  ctx.lineWidth = sz*0.14; ctx.strokeStyle = '#f5c84c'; ctx.lineCap='round';
+  ctx.beginPath(); ctx.arc(x, y - sz*0.12, sz*0.26, Math.PI, 0); ctx.stroke();
+  roundRect(x - sz*0.36, y - sz*0.12, sz*0.72, sz*0.56, sz*0.12);
+  ctx.fillStyle = '#f5c84c'; ctx.fill();
+  ctx.strokeStyle = 'rgba(20,40,70,.6)'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = '#3b2a08';
+  ctx.beginPath(); ctx.arc(x, y + sz*0.14, sz*0.08, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
 function drawBuilding(b, tier, x, y, baseW, now){
   const anim = buildAnim && buildAnim.id===b.id ? buildAnim : null;
-  /* 地基框淨係未起（tier 0）先畫，起好咗就唔畫框，落地陰影已夠 */
-  if(DRAW_PLOTS && tier===0 && !anim){
-    const can = passedLv() >= b.tiers[0].lv;
-    drawPlot(x, y, baseW*1.12, can, now);
-  }
-  /* Tier 0：地基上顯示解鎖狀態 */
+  /* doc 第 4 節：Home 唔再用虛線框住嘅鎖定建築卡片，改喺場景模型本身做
+     灰階／半透明＋鎖頭 overlay。Tier 0 → 直接畫 Tier 1 建築嘅灰階 ghost
+     ＋鎖頭＋解鎖關卡；到咗可建造就轉返彩色半透明脈動＋吊機＋「可建造!」。
+     （舊 drawPlot 虛線地基框唔再用。） */
   if(tier===0 && !anim){
     const t1 = b.tiers[0];
     const can = passedLv() >= t1.lv;
+    const key = 'b_'+b.id;
+    const im1 = sprite(key);
+    const w = baseW*0.8;
+    const h = im1 ? w*im1.naturalHeight/im1.naturalWidth : w*0.9;
+    ctx.save();
+    ctx.globalAlpha = can ? 0.55 + 0.15*Math.sin(now*0.005) : 0.42;
+    if(im1){
+      const g = can ? im1 : ghostSprite(key);
+      ctx.drawImage(g, x-w/2, y-h*0.62, w, h);
+    }else{
+      drawBuildingArt(b.id, 1, x, y, w/90, now);
+    }
+    ctx.restore();
+    /* overlay：鎖頭（未到關卡）／吊機（可建造） */
     ctx.save();
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.font=`800 ${Math.max(11, Math.round(baseW*0.17))}px 'Baloo 2',sans-serif`;
-    if(can) ctx.globalAlpha = 0.7 + 0.3*Math.sin(now*0.005);
-    ctx.fillStyle = can ? '#ffffff' : 'rgba(255,255,255,.8)';
-    ctx.strokeStyle='rgba(20,40,70,.6)'; ctx.lineWidth=4; ctx.lineJoin='round';
-    const label = can ? '可建造!' : 'L'+t1.lv;
-    const craneIm = can ? sprite('ui_crane') : null;
-    if(craneIm){
-      const cw = Math.round(baseW*0.2), ch = cw*craneIm.naturalHeight/craneIm.naturalWidth;
-      ctx.drawImage(craneIm, x-cw/2, y-ch-6, cw, ch);
+    const fsz = Math.max(11, Math.round(baseW*0.15));
+    ctx.font=`800 ${fsz}px 'Baloo 2',sans-serif`;
+    ctx.strokeStyle='rgba(20,40,70,.7)'; ctx.lineWidth=4; ctx.lineJoin='round';
+    ctx.fillStyle='#ffffff';
+    const cy = y - h*0.22;
+    if(can){
+      ctx.globalAlpha = 0.7 + 0.3*Math.sin(now*0.005);
+      const craneIm = sprite('ui_crane');
+      if(craneIm){
+        const cw = Math.round(baseW*0.24), ch = cw*craneIm.naturalHeight/craneIm.naturalWidth;
+        ctx.drawImage(craneIm, x-cw/2, cy-ch/2-fsz*0.3, cw, ch);
+      }
+      ctx.strokeText('可建造!', x, cy + fsz*1.15);
+      ctx.fillText('可建造!', x, cy + fsz*1.15);
+    }else{
+      /* gatelock 素材係灰色閘位底板，喺灰階建築上面睇唔清；用 code 畫嘅
+         金色鎖頭，同灰 ghost 對比夠強 */
+      const lw = Math.round(baseW*0.30);
+      drawPadlock(x, cy - fsz*0.2, lw);
+      ctx.strokeText('L'+t1.lv, x, cy + lw*0.45 + fsz*0.75);
+      ctx.fillText('L'+t1.lv, x, cy + lw*0.45 + fsz*0.75);
     }
-    ctx.strokeText(label, x, y);
-    ctx.fillText(label, x, y);
     ctx.restore();
     return;
   }
