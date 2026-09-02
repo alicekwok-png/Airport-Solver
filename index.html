@@ -223,8 +223,20 @@
   .speed-btn.on{background:linear-gradient(180deg,#ffd166 0%,#f5a93c 60%,#d9861c 100%);border-color:#8a5c12;box-shadow:0 4px 0 #7a4d10, inset 0 2px 0 rgba(255,255,255,.5)}
   /* 2026-09-03：速度掣改用主題化牌仔素材（doc _34 v2），唔再用藍色文字方框。
      牌面本身有紅白配色同螺旋槳，所以淨係要一個乾淨嘅 icon 掣＋加速時微微放大。 */
-  .speed-icon-btn .hudicon{width:36px;height:36px}
-  .speed-icon-btn.on .hudicon{transform:scale(1.06)}
+  /* 加速掣：浮喺閘口上面條空帶左邊（top 由 layoutBoard 計） */
+  .speed-float{
+    position:absolute; left:10px; top:0;
+    width:52px; height:52px; padding:0; margin:0;
+    background:none; border:none; box-shadow:none;
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:auto; z-index:6;
+  }
+  .speed-float img{
+    width:100%; height:100%; object-fit:contain;
+    filter:drop-shadow(0 3px 4px rgba(0,0,0,.45));
+  }
+  .speed-float:active{transform:translateY(2px)}
+  .speed-float.on img{transform:scale(1.06)}
   /* Gameplay 兩粒自願廣告掣並排喺 HUD 之下（加開閘位／指揮飛機） */
   /* 用戶反饋：呢兩粒道具掣同 HUD 右邊嗰堆 icon（重玩/世界/關卡徽章）
      全部癡埋一齊，冇晒分隔——改做企定喺畫面最右邊、HUD 下面一行，
@@ -691,8 +703,11 @@
 
   <div id="hud" hidden>
     <div class="chip pax"><img class="paxicon" id="hudPaxIcon" alt=""><span class="lbl">剩餘乘客</span><span class="val" id="hudPax">0</span></div>
+    <!-- 加速掣（doc _34；2026-09-03 用戶參考競品搬位）：唔喺頂部一行，
+         而係浮喺登機閘口上面嗰條空帶嘅左邊。實際 top 由 layoutBoard()
+         按閘位位置計，所以任何屏幕比例都貼得啱。 -->
+    <button class="speed-float" id="btnSpeed"><img id="btnSpeedIcon" alt="登機速度"></button>
     <div class="hud-btns">
-      <button class="hudicon-btn speed-icon-btn" id="btnSpeed"><img class="hudicon" id="btnSpeedIcon" alt="登機速度"></button>
       <button class="hudicon-btn" id="btnMenu"><img class="hudicon" id="btnMenuIcon" alt="設定"></button>
     </div>
     <div class="lvbadge"><img class="lvbadge-icon" id="hudLevelIcon" alt="關卡"><span class="lvbadge-num" id="hudLevel">1</span></div>
@@ -1894,6 +1909,12 @@ function layoutBoard(){
                      : Math.max(60, topPad - slotH - 16);
   slotY = Math.min(slotY, VH - slotH - 8);
   queueY = sceneY(SCENE_IMG.queueTop) ?? 40;   // 保留畀舊 call site 讀取用，唔再驅動排位計算
+  /* 加速掣坐喺閘位上面嗰條空帶度（用戶參考競品要求嘅位置）。掣本身
+     52px，留 10px 空隙，噉樣任何機都唔會撞到閘位或者上面條隊。 */
+  {
+    const sb = document.getElementById('btnSpeed');
+    if(sb) sb.style.top = Math.round(Math.max(4, slotY - 62)) + 'px';
+  }
 }
 
 /* 呢關總共會擺幾多個閘位格（已開放 + 仲鎖住等睇廣告解鎖）。呢個數
