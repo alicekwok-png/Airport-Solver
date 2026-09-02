@@ -1278,95 +1278,72 @@ function slotAnchor(i){
    點，將條 LUT 旋轉到嗰度做 frac=0，仲會做 arc-length 重新參數化
    （唔同形狀嘅原生參數化速度唔平均，例如心形喺尖位轉得急、圓滑位
    轉得慢，唔重新做的話乘客會有啲位疊埋有啲位散開）。 */
+/* 2026-09-02：迴旋處係一條**轉動嘅閉合輸送帶**（見排隊層註解），形狀一定要
+   係簡單、唔自交、大致凸嘅閉合圈（reference video：圓、橢圓、圓角方、膠囊），
+   否則 4 排＋圍欄畫出嚟會自己疊自己（舊 squareSpiralTail 嘅尖角＋尾巴實測
+   畫出嚟成幅畫面都係人）。舊 key 一律保留（LEVELS／gen-levels 用緊），淨係
+   換幾何；buildQueueLUT() 仲會用閉合 chaikin 打圓所有角。 */
+function shapePolygon(t, n, r, rot){
+  const perim=t*n, seg=Math.floor(perim)%n, f=perim-Math.floor(perim);
+  const pt=i=>{ const a=rot+i*Math.PI*2/n; return [Math.cos(a)*r, Math.sin(a)*r]; };
+  const p0=pt(seg), p1=pt((seg+1)%n);
+  return {x:p0[0]+(p1[0]-p0[0])*f, y:p0[1]+(p1[1]-p0[1])*f};
+}
+/* 圓角矩形（順時針，由頂邊中間出發）：4 條直邊 + 4 個 90° 圓角，按周長參數化 */
+function shapeRoundedRect(t, hw, hh, r){
+  const w=hw*2-2*r, h=hh*2-2*r, arc=Math.PI*r/2, per=2*w+2*h+4*arc;
+  let s=(((t%1)+1)%1)*per;
+  const segs=[
+    ['l', w/2, [0,-hh], [1,0]],
+    ['a', arc, [hw-r,-hh+r], -Math.PI/2],
+    ['l', h, [hw,-hh+r], [0,1]],
+    ['a', arc, [hw-r,hh-r], 0],
+    ['l', w, [hw-r,hh], [-1,0]],
+    ['a', arc, [-hw+r,hh-r], Math.PI/2],
+    ['l', h, [-hw,hh-r], [0,-1]],
+    ['a', arc, [-hw+r,-hh+r], Math.PI],
+    ['l', w/2, [-hw+r,-hh], [1,0]],
+  ];
+  for(const sg of segs){
+    const len=sg[1];
+    if(s<=len){
+      if(sg[0]==='a'){ const ang=sg[3]+(s/len)*(Math.PI/2); return {x:sg[2][0]+Math.cos(ang)*r, y:sg[2][1]+Math.sin(ang)*r}; }
+      return {x:sg[2][0]+sg[3][0]*s, y:sg[2][1]+sg[3][1]*s};
+    }
+    s-=len;
+  }
+  return {x:0, y:-hh};
+}
+function shapeSuperellipse(t, a, b, n){
+  const th=t*Math.PI*2, c=Math.cos(th), s=Math.sin(th);
+  return {x: a*Math.sign(s)*Math.pow(Math.abs(s), 2/n), y: -b*Math.sign(c)*Math.pow(Math.abs(c), 2/n)};
+}
 const QUEUE_SHAPES_RAW = {
-  /* Tier 1（簡單） */
-  /* 擺位框而家近乎正方（見 QUEUE_IMG／SCENE_IMG），太扁嘅形狀頂／底
-     曲率會迫爆內圈，所以 y 方向唔好壓得太扁。 */
   oRing: t => { const a=t*Math.PI*2; return {x:Math.sin(a)*0.95, y:-Math.cos(a)*0.95}; },
   ellipseRing: t => { const a=t*Math.PI*2; return {x:Math.sin(a)*1.0, y:-Math.cos(a)*0.8}; },
-  horseshoe: (()=>{
-    const gapFrac = 0.22, squashY = 0.95;
-    const arcFrac = 1-gapFrac;
-    return t => {
-      if(t < arcFrac){
-        const a = (gapFrac/2 + t) * Math.PI*2;
-        return {x:Math.sin(a), y:-Math.cos(a)*squashY};
-      }
-      const u = (t-arcFrac)/gapFrac;
-      const a0 = (gapFrac/2+arcFrac)*Math.PI*2, a1 = (gapFrac/2)*Math.PI*2 + Math.PI*2;
-      const p0={x:Math.sin(a0),y:-Math.cos(a0)*squashY}, p1={x:Math.sin(a1),y:-Math.cos(a1)*squashY};
-      return {x:p0.x+(p1.x-p0.x)*u, y:p0.y+(p1.y-p0.y)*u};
-    };
-  })(),
-  /* Tier 2（中等） */
-  sWave: t => {
-    /* 一個真正嘅 S 只有兩隻尾，唔係閉合圈——沿 S 中線行去（0..0.5）、
-       貼實偏移少少嘅軌返轉頭（0.5..1），變成一條幼長閉合絲帶。 */
-    const half = t<0.5;
-    const u = half? t*2 : (1-t)*2;
-    const side = half? 1 : -1;
-    const y = u*2-1;
-    const x = Math.sin(u*Math.PI*2.4)*0.55 + side*0.16;
-    return {x, y};
-  },
-  hexRing: t => {
-    const perim = t*6;
-    const seg = Math.floor(perim)%6, f = perim-Math.floor(perim);
-    const pt = i => { const a=Math.PI/6 + i*Math.PI/3; return [Math.cos(a), Math.sin(a)]; };
-    const p0=pt(seg), p1=pt((seg+1)%6);
-    return {x:p0[0]+(p1[0]-p0[0])*f, y:p0[1]+(p1[1]-p0[1])*f};
-  },
-  squareSpiralTail: t => {
-    /* ⚠️（修正）尾巴一定要接返正方形沿邊嗰段實際完結嘅位置，唔可以
-       寫死一個固定角——`pts4` 呢個順序之下，正方形沿邊行到 t 就快到
-       1-tailFrac 嗰陣，實際會行返去 (-1,-1)（因為最後一段係 pts4[3]
-       →pts4[0]，即 (-1,1)→(-1,-1)）。之前尾巴寫死由 (1,1) 出發，同
-       正方形實際完結位相隔成個對角，令成條隊嘅路徑喺呢一點突然「彈
-       線」，畫出嚟會係一條由呢個角直插到嗰個角嘅假對角線（用戶
-       截圖發現）。而家尾巴改做由 (-1,-1) 出發，先啱啱好接得上。 */
-    const tailFrac = 0.14;
-    if(t < 1-tailFrac){
-      const u = t/(1-tailFrac);
-      const perim = u*4;
-      const seg = Math.floor(perim)%4, f = perim-Math.floor(perim);
-      const pts4 = [[-1,-1],[1,-1],[1,1],[-1,1]];
-      const p0 = pts4[seg], p1 = pts4[(seg+1)%4];
-      return {x:p0[0]+(p1[0]-p0[0])*f, y:p0[1]+(p1[1]-p0[1])*f};
-    }
-    const u = (t-(1-tailFrac))/tailFrac;
-    const v = u<0.5? u*2 : (1-u)*2;
-    return {x:-1-v*0.5, y:-1-v*0.3};
-  },
-  /* Tier 3（複雜／裝飾性） */
-  heart: t => {
-    const a = t*Math.PI*2;
-    const x = 16*Math.pow(Math.sin(a),3);
-    const y = -(13*Math.cos(a) - 5*Math.cos(2*a) - 2*Math.cos(3*a) - Math.cos(4*a));
-    return {x:x/16, y:y/16};
-  },
-  figure8: t => {
-    const a = t*Math.PI*2;
-    const denom = 1+Math.sin(a)*Math.sin(a);
-    return {x: Math.cos(a)/denom, y: Math.sin(a)*Math.cos(a)/denom*1.4};
-  },
-  cloverPetals: t => {
-    const a = t*Math.PI*2;
-    const r = Math.cos(2*a);
-    return {x:r*Math.cos(a), y:r*Math.sin(a)};
-  },
-  spiral: t => {
-    const half = t<0.5;
-    const u = half? t*2 : (1-t)*2;
-    const side = half? 1 : -1;
-    const turns = 2.2;
-    const rad = 0.15 + u*0.75;
-    const a = u*Math.PI*2*turns;
-    return {x: Math.sin(a)*rad + side*0.03, y: -Math.cos(a)*rad + side*0.03};
-  },
+  horseshoe: t => shapeSuperellipse(t, 0.95, 0.88, 3.2),          // 方圓（squircle）
+  sWave: t => shapeRoundedRect(t, 1.0, 0.72, 0.36),               // 橫向膠囊
+  hexRing: t => shapePolygon(t, 6, 0.98, Math.PI/6),               // 六角（chaikin 打圓）
+  squareSpiralTail: t => shapeRoundedRect(t, 0.92, 0.92, 0.34),   // 圓角方（video L7 嗰款）
+  heart: t => shapeRoundedRect(t, 0.98, 0.82, 0.5),              // 用戶明講唔要心形：改做闊圓角矩形（key 保留）
+  figure8: t => shapeRoundedRect(t, 0.78, 0.98, 0.4),             // 直向膠囊
+  cloverPetals: t => shapePolygon(t, 8, 0.96, Math.PI/8),          // 八角（打圓後似圓角方）
+  spiral: t => { const a=t*Math.PI*2; return {x:0.88*Math.sin(a)*(1-0.15*Math.cos(a)), y:-Math.cos(a)*0.95}; },   // 蛋形
 };
-function buildQueueLUT(rawFn, samples=240){
-  const pts = [];
+function buildQueueLUT(rawFn, samples=64){
+  let pts = [];
   for(let i=0;i<samples;i++) pts.push(rawFn(i/samples));
+  /* 閉合 chaikin ×3：打圓所有角（六角形／八角形嘅角位，4 排先唔會迫爆）。
+     取樣要少啲先有明顯圓角（圓角半徑 ≈ 取樣點間距），之後 512 點夠滑。 */
+  for(let k=0;k<3;k++){
+    const out=[]; const N=pts.length;
+    for(let i=0;i<N;i++){
+      const a=pts[i], b=pts[(i+1)%N];
+      out.push({x:a.x*0.75+b.x*0.25, y:a.y*0.75+b.y*0.25});
+      out.push({x:a.x*0.25+b.x*0.75, y:a.y*0.25+b.y*0.75});
+    }
+    pts = out;
+  }
   /* 揾成條 loop 入面最貼近「底部中央」嗰個 sample 做起點，令所有
      形狀嘅 frac=0 都自動企喺出口（樓梯）方向，唔使逐個形狀手動對齊。 */
   let bestI=0, bestScore=-Infinity;
@@ -1464,12 +1441,26 @@ function trackGeom(){
    - 冇再分「可見／隱藏」：迴旋處 + 兩條尾巴就係成條隊，尾巴伸出畫面外。 */
 const QUEUE_ROWS = 4;
 /* 2026-09-02 用戶對比 reference 圖：人仔要大粒、貼實成嚿（似氣球咁迫埋），
-   唔係細細粒疏疏落落。人仔 scale 0.68→1.15，排距 17→28、步距 17→26，
-   令 sprite 差唔多同間距一樣大（貼實）。 */
-const QUEUE_PAX_SCALE = 1.15;
-const QUEUE_ROW_SPACING = 28;       // 排與排之間嘅側向身位（px）
-const QUEUE_PASSENGER_SPACING = 26; // 一列同一列之間嘅步距（px）
-const BELT_PX_PER_MS = 20/150;      // 迴旋處轉速（px/ms）；配合 video 約 3.5 秒轉四成圈
+   唔係細細粒疏疏落落。**全部尺度跟場景比例 s（941 闊嘅場景圖 cover-fit
+   放大率）走**，唔可以寫死 px——固定 px 喺唔同 DPR／螢幕闊度下比例會走
+   樣（實測 980 闊 canvas 度啱啱好，去到 490 闊 4 排就粗過個圈半徑）。
+   按 reference 量出嚟（390px 闊手機）：帶闊 ≈ 60px、圓圈直徑 ≈ 55% 螢幕闊、
+   人仔 ≈ 18px → 換算做場景單位：排距 30、步距 28、人仔高 ≈ 44。 */
+let QUEUE_PAX_SCALE = 1.15;
+let QUEUE_ROW_SPACING = 28;         // 排與排之間嘅側向身位（px，applyQueueMetrics 逐次校準）
+let QUEUE_PASSENGER_SPACING = 26;   // 一列同一列之間嘅步距（px）
+let BELT_PX_PER_MS = 20/150;        // 迴旋處轉速（px/ms）；video 約 3.5 秒轉四成圈
+function sceneScale(){
+  const bg = sprite('scene');
+  return bg ? Math.max(VW/bg.naturalWidth, VH/bg.naturalHeight) : Math.max(VW/941, VH/1672);
+}
+function applyQueueMetrics(){
+  const s = sceneScale();
+  QUEUE_ROW_SPACING = 30*s;
+  QUEUE_PASSENGER_SPACING = 25*s;   // 人仔係高窄嘅 chibi（唔係圓波），步距要比排距窄少少先貼實
+  QUEUE_PAX_SCALE = 1.3*s;          // drawPassenger 高 34×scale ⇒ ≈ 44 場景單位
+  BELT_PX_PER_MS = 0.133*s;
+}
 let ring = [];                      // 迴旋處每個位：null（窿）或 {c, n}
 let ringCols = 0;                   // 迴旋處有幾多個位（周長 ÷ 步距）
 let ringPhase = 0;                  // 已轉咗幾多（圈嘅比例，單調遞增）
@@ -1534,6 +1525,7 @@ function ringPoint(frac, rowScale){
 /* 細關人少就縮細個迴旋處（目標：迴旋處裝到約六成人，其餘喺兩條尾巴），
    唔好開波就半空。錨住底部（出口）位置唔郁。 */
 function buildRingGeom(){
+  applyQueueMetrics();
   const {lut} = ensureQueueLUT();
   const base = queueFitBox();
   let basePer=0;
@@ -2442,10 +2434,11 @@ function drawQueueTrack(){
   };
   ctx.save();
   ctx.lineJoin='round'; ctx.lineCap='round';
-  ctx.save(); ctx.translate(0, 9);
-  ctx.lineWidth=15; ctx.strokeStyle='#8a92a4'; strokeAll();
+  const ws = sceneScale();
+  ctx.save(); ctx.translate(0, 9*ws);
+  ctx.lineWidth=15*ws; ctx.strokeStyle='#8a92a4'; strokeAll();
   ctx.restore();
-  ctx.lineWidth=15; ctx.strokeStyle='#f7f8fb'; strokeAll();
+  ctx.lineWidth=15*ws; ctx.strokeStyle='#f7f8fb'; strokeAll();
   ctx.fillStyle='#dfe3ec';
   ringPath(); ctx.fill();
   queueRibbon(g.tails.R.path, halfSpan); ctx.fill();
@@ -2463,7 +2456,8 @@ function drawQueue(now){
     const p = ringPoint(0, 1);
     const pulse = 0.55+0.45*Math.sin(now*0.006);
     ctx.save();
-    ctx.beginPath(); ctx.ellipse(p.x, p.y, 30, 22, 0, 0, Math.PI*2);
+    const gs = sceneScale();
+    ctx.beginPath(); ctx.ellipse(p.x, p.y, 30*gs, 22*gs, 0, 0, Math.PI*2);
     ctx.fillStyle=`rgba(245,200,76,${0.28*pulse})`; ctx.fill();
     ctx.restore();
   }
