@@ -1815,7 +1815,9 @@ let hintOn = false;                    // L1 手指提示（首撳前）
    （750），飛機棋盤由 850 起。棋盤矮咗約 12%，格仔細少少，可接受。 */
 const SCENE_IMG = {
   queueTop:  250,   // 樹籬/欄杆之下，乘客排隊區可用範圍開始（最頂）
-  queueBottom: 590, // 迴旋處最底（出口）——之下係落閘位嘅樓梯
+  queueBottom: 548, // 迴旋處最底（出口）——之下係落閘位嘅樓梯
+                    // 2026-09-03 用戶：參考競品，登機閘口上面要留返少少空位，
+                    // 由 590 抬高到 548（迴旋處整體上移，同時矮少少）
   gateRow:   750,   // 閘位一行嘅中線
   planeTop:  850,   // 飛機棋盤區開始（最底，一路去到畫面底）
 };
@@ -2218,7 +2220,8 @@ function buildRingGeom(){
   const down = f => ((ringStep*f)%1+1)%1;
   const first = down(tR.frac) <= down(tL.frac) ? 'R' : 'L';
   const E = pts[0];
-  const stubEndY = Math.max(E.y + QUEUE_PASSENGER_SPACING, slotY - QUEUE_ROW_SPACING*1.1);
+  /* 樓梯尾唔好貼到閘位——上面要留返一條可見嘅空隙（用戶參考競品提出） */
+  const stubEndY = Math.max(E.y + QUEUE_PASSENGER_SPACING, slotY - QUEUE_ROW_SPACING*1.8);
   return {box, perim, tails:{R:tR, L:tL}, first, E, stubEndY};
 }
 function ensureRingGeom(){
