@@ -699,7 +699,7 @@
 
   <div id="ovLevels" class="overlay" hidden>
     <div class="panel">
-      <div class="ribbon">關卡選擇</div>
+      <div class="ribbon" id="levelsTitle">關卡選擇</div>
       <button class="xbtn" id="btnLevelsClose">✕</button>
       <div class="panel-scroll"><div id="levelGrid"></div></div>
     </div>
@@ -805,7 +805,7 @@
 const CKEY = {r:'red', b:'blue', y:'yellow', g:'green', p:'purple'};
 function q(s){ return [...s].map(ch=>CKEY[ch]); }
 
-const LEVELS = [
+const LEVELS_HK = [
   /* L1 純互動教學：羅盤雙圈（內外各 8 位＝16 機），全部外向零阻礙。
      密度大幅提高（doc 第10節拍板），保留 hint 教學提示。 */
   { queueShape:'oRing', queueSplit:140, type:'radial', cap:24, gates:4, hint:true, planes:[
@@ -913,6 +913,486 @@ const LEVELS = [
     queue:q('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggppppppppppppppppggggggggggggggggrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppggggggggggggggggggggggggggggggggggggggggpppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbpppppppppppppppppppppppp') },
 ];
 
+/* ---------- 第二章：日本（doc _33 第 10／11 節）----------
+   20 關，全部由 scratchpad/make-jp.js「倒轉建構」產生：由空盤逐架加機，
+   每架落嘅位置／方向喺當時盤面都要路清，加入次序倒轉就係一個保證行得通
+   嘅釋放次序；排隊字串按呢個次序串 (顏色 × 載客量)，所以每列純色。
+   日本專屬新機制：冰封格（L14 起，plane.ice = 全盤累計清走幾多架先解凍）、
+   特大型客機（L15 起，sz:'xl'，48 座 —— doc 寫 50，但載客量一定要係一排
+   人數 4 嘅倍數，所以取 48）。隧道格由 HK L6 起已經係常態，日本全程延續。 */
+const LEVELS_JP = [
+  /* 日本 L1：60 架 / 1500 人 / 10x10 / 4 閘 */
+  { queueShape:'squareSpiralTail', w:10, h:10, gates:4, stars:true, par:60, planes:[
+      {x:7,y:1,d:'ur',c:'r',sz:'m'}, {x:5,y:9,d:'dr',c:'r',sz:'l'}, {x:9,y:2,d:'r',c:'p',sz:'m'}, {x:9,y:1,d:'dr',c:'p',sz:'m'},
+      {x:9,y:7,d:'ur',c:'p',sz:'m'}, {x:0,y:7,d:'ul',c:'y'}, {x:7,y:5,d:'dr',c:'y'}, {x:4,y:5,d:'dr',c:'y',sz:'m'},
+      {x:4,y:9,d:'dl',c:'y'}, {x:3,y:0,d:'ul',c:'b',sz:'m'}, {x:9,y:0,d:'r',c:'b',sz:'m'}, {x:9,y:5,d:'ur',c:'b',sz:'m'},
+      {x:2,y:7,d:'l',c:'r'}, {x:1,y:0,d:'ul',c:'r'}, {x:0,y:2,d:'ul',c:'r',sz:'l'}, {x:4,y:6,d:'ul',c:'y',sz:'m'},
+      {x:9,y:8,d:'ur',c:'y',sz:'l'}, {x:7,y:6,d:'dr',c:'y',sz:'m'}, {x:4,y:1,d:'u',c:'y',sz:'l'}, {x:9,y:9,d:'d',c:'p'},
+      {x:0,y:8,d:'ul',c:'p'}, {x:2,y:2,d:'ur',c:'b'}, {x:8,y:2,d:'ur',c:'b'}, {x:7,y:9,d:'dl',c:'b',sz:'l'},
+      {x:8,y:8,d:'dr',c:'y',sz:'l'}, {x:1,y:8,d:'ul',c:'y',sz:'m'}, {x:5,y:1,d:'r',c:'g'}, {x:6,y:0,d:'ur',c:'g',sz:'l'},
+      {x:6,y:9,d:'dr',c:'g',sz:'m'}, {x:3,y:9,d:'dr',c:'g'}, {x:3,y:3,d:'ur',c:'p'}, {x:6,y:8,d:'ur',c:'p',sz:'m'},
+      {x:0,y:6,d:'dl',c:'b',sz:'l'}, {x:0,y:9,d:'r',c:'b',sz:'l'}, {x:1,y:1,d:'ur',c:'b',sz:'m'}, {x:8,y:4,d:'dr',c:'b'},
+      {x:5,y:7,d:'r',c:'g',sz:'m'}, {x:5,y:8,d:'dr',c:'g'}, {x:0,y:0,d:'dl',c:'r'}, {x:4,y:3,d:'u',c:'r',sz:'l'},
+      {x:9,y:4,d:'r',c:'r',sz:'l'}, {x:3,y:2,d:'ul',c:'b',sz:'m'}, {x:6,y:5,d:'ul',c:'b',sz:'l'}, {x:6,y:3,d:'dl',c:'r',sz:'l'},
+      {x:0,y:5,d:'dl',c:'r',sz:'m'}, {x:7,y:2,d:'r',c:'r'}, {x:7,y:0,d:'ul',c:'r',sz:'l'}, {x:0,y:3,d:'l',c:'g',sz:'m'},
+      {x:3,y:8,d:'d',c:'g',sz:'l'}, {x:1,y:6,d:'d',c:'g'}, {x:0,y:4,d:'r',c:'g',sz:'l'}, {x:5,y:0,d:'u',c:'b'},
+      {x:6,y:6,d:'ur',c:'b',sz:'l'}, {x:1,y:2,d:'dr',c:'g',sz:'m'}, {x:2,y:8,d:'u',c:'g',sz:'l'}, {x:5,y:3,d:'ur',c:'g',sz:'m'},
+      {x:4,y:7,d:'ul',c:'y'}, {x:9,y:6,d:'u',c:'y'}
+    ],
+    tunnels:[{x:2,y:0,d:'ul',stack:[{c:'r',sz:'l'},{c:'r'}]}],
+    queue:q('rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy') },
+  /* 日本 L2：62 架 / 1552 人 / 10x10 / 4 閘 */
+  { queueShape:'heart', w:10, h:10, gates:4, stars:true, par:62, milestone:'解鎖：控制塔！', planes:[
+      {x:2,y:1,d:'ul',c:'g',sz:'l'}, {x:1,y:4,d:'ul',c:'g'}, {x:7,y:7,d:'ur',c:'b',sz:'l'}, {x:3,y:6,d:'ul',c:'b'},
+      {x:1,y:9,d:'dl',c:'b',sz:'m'}, {x:9,y:3,d:'dr',c:'b'}, {x:0,y:0,d:'u',c:'g',sz:'m'}, {x:1,y:2,d:'dl',c:'g',sz:'m'},
+      {x:0,y:7,d:'l',c:'g'}, {x:3,y:7,d:'l',c:'p'}, {x:2,y:9,d:'dr',c:'p',sz:'m'}, {x:0,y:2,d:'l',c:'p',sz:'l'},
+      {x:6,y:9,d:'dr',c:'p',sz:'m'}, {x:1,y:8,d:'dr',c:'g',sz:'m'}, {x:8,y:3,d:'r',c:'g'}, {x:9,y:8,d:'r',c:'g',sz:'m'},
+      {x:2,y:8,d:'dr',c:'r',sz:'m'}, {x:3,y:8,d:'dl',c:'r'}, {x:8,y:4,d:'r',c:'r',sz:'m'}, {x:8,y:8,d:'r',c:'r',sz:'l'},
+      {x:0,y:1,d:'u',c:'b',sz:'m'}, {x:5,y:5,d:'dl',c:'b',sz:'l'}, {x:7,y:2,d:'dr',c:'b'}, {x:0,y:6,d:'dl',c:'b',sz:'m'},
+      {x:6,y:1,d:'l',c:'g',sz:'m'}, {x:7,y:0,d:'ul',c:'g'}, {x:8,y:9,d:'dl',c:'g',sz:'l'}, {x:9,y:6,d:'r',c:'y',sz:'l'},
+      {x:1,y:3,d:'ul',c:'y',sz:'m'}, {x:6,y:0,d:'u',c:'y'}, {x:3,y:0,d:'dl',c:'g'}, {x:8,y:2,d:'dr',c:'g'},
+      {x:0,y:9,d:'ul',c:'y'}, {x:5,y:2,d:'ur',c:'y',sz:'l'}, {x:0,y:8,d:'dl',c:'y',sz:'l'}, {x:5,y:3,d:'dl',c:'y',sz:'m'},
+      {x:9,y:7,d:'dl',c:'r',sz:'m'}, {x:5,y:0,d:'dr',c:'r',sz:'l'}, {x:5,y:8,d:'ul',c:'b'}, {x:3,y:2,d:'u',c:'b',sz:'m'},
+      {x:8,y:0,d:'u',c:'p',sz:'l'}, {x:4,y:9,d:'d',c:'p',sz:'l'}, {x:4,y:0,d:'ul',c:'p',sz:'m'}, {x:2,y:3,d:'l',c:'y',sz:'l'},
+      {x:6,y:8,d:'l',c:'y'}, {x:5,y:9,d:'dl',c:'y'}, {x:9,y:9,d:'ur',c:'p',sz:'m'}, {x:9,y:2,d:'dr',c:'p',sz:'l'},
+      {x:6,y:7,d:'r',c:'p',sz:'l'}, {x:5,y:7,d:'l',c:'p'}, {x:7,y:5,d:'dr',c:'r'}, {x:4,y:2,d:'d',c:'r',sz:'l'},
+      {x:2,y:0,d:'dl',c:'r',sz:'m'}, {x:9,y:0,d:'u',c:'r',sz:'l'}, {x:3,y:3,d:'r',c:'y',sz:'l'}, {x:6,y:2,d:'u',c:'y'},
+      {x:0,y:5,d:'l',c:'r',sz:'m'}, {x:9,y:1,d:'r',c:'r'}, {x:1,y:6,d:'ul',c:'y',sz:'l'}, {x:0,y:4,d:'ur',c:'y',sz:'l'}
+    ],
+    tunnels:[{x:1,y:0,d:'ur',stack:[{c:'g'},{c:'g'}]}],
+    queue:q('ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyypppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy') },
+  /* 日本 L3：64 架 / 1600 人 / 10x10 / 4 閘 */
+  { queueShape:'hexRing', w:10, h:10, gates:4, stars:true, par:64, planes:[
+      {x:9,y:5,d:'r',c:'p',sz:'l'}, {x:6,y:0,d:'u',c:'r',sz:'l'}, {x:6,y:8,d:'d',c:'r',sz:'m'}, {x:6,y:2,d:'ur',c:'r'},
+      {x:0,y:3,d:'l',c:'g',sz:'m'}, {x:7,y:8,d:'dl',c:'g'}, {x:0,y:9,d:'dl',c:'g',sz:'l'}, {x:9,y:2,d:'r',c:'y',sz:'m'},
+      {x:8,y:3,d:'ur',c:'y'}, {x:1,y:0,d:'u',c:'y',sz:'l'}, {x:0,y:5,d:'l',c:'y'}, {x:1,y:8,d:'dl',c:'b'},
+      {x:7,y:5,d:'ur',c:'b',sz:'m'}, {x:0,y:2,d:'dl',c:'b',sz:'m'}, {x:3,y:9,d:'dl',c:'r',sz:'l'}, {x:9,y:8,d:'ur',c:'r',sz:'m'},
+      {x:9,y:0,d:'r',c:'p'}, {x:4,y:8,d:'dl',c:'p',sz:'m'}, {x:1,y:3,d:'ul',c:'r',sz:'m'}, {x:9,y:6,d:'ur',c:'r',sz:'l'},
+      {x:9,y:9,d:'d',c:'r',sz:'l'}, {x:5,y:4,d:'ur',c:'r'}, {x:5,y:7,d:'ur',c:'y',sz:'l'}, {x:0,y:0,d:'u',c:'y',sz:'m'},
+      {x:2,y:3,d:'l',c:'y',sz:'m'}, {x:8,y:7,d:'dr',c:'y',sz:'l'}, {x:1,y:9,d:'dr',c:'p'}, {x:9,y:1,d:'r',c:'p'},
+      {x:8,y:9,d:'r',c:'p'}, {x:0,y:1,d:'u',c:'p',sz:'l'}, {x:5,y:0,d:'ur',c:'y'}, {x:8,y:2,d:'u',c:'y'},
+      {x:3,y:1,d:'ul',c:'r',sz:'l'}, {x:2,y:1,d:'u',c:'r',sz:'m'}, {x:4,y:7,d:'dr',c:'r'}, {x:7,y:3,d:'dr',c:'r'},
+      {x:4,y:0,d:'u',c:'p'}, {x:7,y:0,d:'ul',c:'p'}, {x:4,y:3,d:'ul',c:'p',sz:'m'}, {x:9,y:7,d:'d',c:'p'},
+      {x:6,y:7,d:'dr',c:'b',sz:'l'}, {x:4,y:9,d:'ul',c:'b'}, {x:6,y:1,d:'ur',c:'b',sz:'m'}, {x:2,y:9,d:'dl',c:'b',sz:'l'},
+      {x:0,y:4,d:'ul',c:'p',sz:'m'}, {x:7,y:4,d:'l',c:'p',sz:'m'}, {x:5,y:6,d:'ul',c:'p',sz:'l'}, {x:5,y:2,d:'ur',c:'p',sz:'l'},
+      {x:7,y:7,d:'d',c:'g',sz:'m'}, {x:3,y:0,d:'r',c:'g',sz:'l'}, {x:1,y:1,d:'ul',c:'g',sz:'m'}, {x:5,y:3,d:'dr',c:'p',sz:'m'},
+      {x:0,y:8,d:'ul',c:'p',sz:'l'}, {x:1,y:7,d:'u',c:'g',sz:'m'}, {x:4,y:6,d:'r',c:'g',sz:'l'}, {x:0,y:6,d:'r',c:'g',sz:'m'},
+      {x:2,y:5,d:'ul',c:'g',sz:'m'}, {x:5,y:9,d:'r',c:'p',sz:'m'}, {x:2,y:2,d:'l',c:'p'}, {x:8,y:8,d:'dl',c:'p',sz:'l'},
+      {x:9,y:4,d:'u',c:'r'}, {x:8,y:5,d:'ur',c:'r'}
+    ],
+    tunnels:[{x:0,y:7,d:'dl',stack:[{c:'p'},{c:'p',sz:'l'}]}],
+    queue:q('pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrpppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr') },
+  /* 日本 L4：66 架 / 1652 人 / 10x10 / 4 閘 */
+  { queueShape:'sWave', w:10, h:10, gates:4, stars:true, par:66, milestone:'解鎖：貴賓室！請在建造面板中興建！', planes:[
+      {x:0,y:5,d:'ul',c:'r',sz:'m'}, {x:0,y:4,d:'ul',c:'r'}, {x:2,y:0,d:'u',c:'r'}, {x:8,y:6,d:'ur',c:'r',sz:'m'},
+      {x:9,y:2,d:'ur',c:'y',sz:'l'}, {x:9,y:6,d:'r',c:'y',sz:'m'}, {x:8,y:2,d:'r',c:'p',sz:'m'}, {x:8,y:1,d:'dr',c:'p',sz:'l'},
+      {x:9,y:9,d:'dr',c:'p',sz:'m'}, {x:6,y:0,d:'ul',c:'p',sz:'l'}, {x:2,y:2,d:'u',c:'r',sz:'m'}, {x:6,y:9,d:'d',c:'r'},
+      {x:2,y:9,d:'dl',c:'r'}, {x:6,y:3,d:'dr',c:'g'}, {x:1,y:5,d:'dl',c:'g'}, {x:4,y:7,d:'dr',c:'g',sz:'l'},
+      {x:3,y:0,d:'ur',c:'g'}, {x:0,y:9,d:'ul',c:'b',sz:'l'}, {x:2,y:3,d:'u',c:'b',sz:'l'}, {x:7,y:9,d:'dl',c:'b',sz:'m'},
+      {x:1,y:9,d:'dl',c:'r'}, {x:6,y:5,d:'dl',c:'r',sz:'m'}, {x:0,y:0,d:'ul',c:'y',sz:'m'}, {x:2,y:4,d:'dl',c:'y',sz:'l'},
+      {x:0,y:1,d:'dl',c:'y'}, {x:7,y:1,d:'ur',c:'p',sz:'m'}, {x:9,y:1,d:'dr',c:'p'}, {x:2,y:7,d:'dl',c:'p',sz:'l'},
+      {x:1,y:3,d:'dl',c:'p',sz:'l'}, {x:1,y:1,d:'ul',c:'y',sz:'m'}, {x:8,y:9,d:'r',c:'y',sz:'l'}, {x:0,y:8,d:'dr',c:'y',sz:'l'},
+      {x:9,y:0,d:'u',c:'r'}, {x:4,y:0,d:'ur',c:'r'}, {x:8,y:8,d:'dr',c:'g'}, {x:0,y:3,d:'dl',c:'g',sz:'l'},
+      {x:1,y:2,d:'ul',c:'y',sz:'l'}, {x:6,y:2,d:'dr',c:'y'}, {x:5,y:1,d:'l',c:'y',sz:'m'}, {x:5,y:5,d:'ul',c:'y',sz:'m'},
+      {x:7,y:0,d:'u',c:'r',sz:'m'}, {x:3,y:6,d:'dl',c:'r',sz:'l'}, {x:4,y:5,d:'dr',c:'r'}, {x:3,y:9,d:'l',c:'r'},
+      {x:5,y:7,d:'dl',c:'g'}, {x:4,y:9,d:'u',c:'g'}, {x:5,y:2,d:'ul',c:'y',sz:'l'}, {x:7,y:6,d:'r',c:'y'},
+      {x:3,y:5,d:'ur',c:'p',sz:'l'}, {x:5,y:4,d:'l',c:'p'}, {x:3,y:7,d:'d',c:'g',sz:'l'}, {x:6,y:6,d:'d',c:'g'},
+      {x:0,y:7,d:'l',c:'g',sz:'l'}, {x:2,y:8,d:'d',c:'p',sz:'m'}, {x:0,y:2,d:'dl',c:'p',sz:'m'}, {x:9,y:7,d:'dr',c:'r',sz:'m'},
+      {x:6,y:1,d:'r',c:'r',sz:'m'}, {x:1,y:6,d:'ul',c:'r',sz:'m'}, {x:8,y:3,d:'ur',c:'r'}, {x:7,y:5,d:'u',c:'b',sz:'l'},
+      {x:7,y:7,d:'l',c:'b',sz:'m'}, {x:9,y:4,d:'l',c:'b',sz:'m'}, {x:3,y:2,d:'dr',c:'b',sz:'l'}, {x:5,y:0,d:'r',c:'g'}
+    ],
+    tunnels:[{x:9,y:3,d:'ur',stack:[{c:'p',sz:'m'},{c:'p',sz:'l'}]}],
+    queue:q('pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyypppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggpppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbgggggggggggggggg') },
+  /* 日本 L5：68 架 / 1700 人 / 10x11 / 4 閘 */
+  { queueShape:'figure8', w:10, h:11, gates:4, stars:true, par:68, milestone:'航廈擴建 Tier 2！形狀關：航廈圓頂', planes:[
+      {x:0,y:3,d:'l',c:'p'}, {x:1,y:1,d:'ul',c:'r'}, {x:0,y:5,d:'dl',c:'r',sz:'l'}, {x:1,y:0,d:'ul',c:'r',sz:'l'},
+      {x:2,y:1,d:'l',c:'g'}, {x:9,y:5,d:'ur',c:'g',sz:'l'}, {x:9,y:7,d:'r',c:'p',sz:'l'}, {x:0,y:8,d:'l',c:'p',sz:'m'},
+      {x:5,y:9,d:'d',c:'p',sz:'m'}, {x:8,y:7,d:'dr',c:'p',sz:'m'}, {x:3,y:10,d:'dl',c:'r',sz:'m'}, {x:7,y:3,d:'dr',c:'r',sz:'l'},
+      {x:8,y:10,d:'dr',c:'r',sz:'m'}, {x:0,y:4,d:'dl',c:'g',sz:'m'}, {x:1,y:10,d:'dl',c:'g'}, {x:4,y:9,d:'l',c:'g',sz:'l'},
+      {x:6,y:9,d:'l',c:'p'}, {x:4,y:10,d:'d',c:'p',sz:'m'}, {x:9,y:6,d:'dr',c:'p'}, {x:7,y:1,d:'ul',c:'p'},
+      {x:4,y:8,d:'d',c:'y',sz:'m'}, {x:3,y:7,d:'d',c:'y'}, {x:2,y:6,d:'dl',c:'p',sz:'m'}, {x:9,y:2,d:'r',c:'p'},
+      {x:4,y:7,d:'d',c:'p',sz:'l'}, {x:1,y:8,d:'d',c:'g',sz:'l'}, {x:2,y:0,d:'ur',c:'g'}, {x:6,y:8,d:'dl',c:'g',sz:'m'},
+      {x:2,y:2,d:'u',c:'r',sz:'m'}, {x:1,y:5,d:'ul',c:'r',sz:'l'}, {x:0,y:10,d:'dr',c:'r',sz:'m'}, {x:6,y:10,d:'ul',c:'b'},
+      {x:4,y:0,d:'u',c:'b'}, {x:2,y:8,d:'l',c:'b',sz:'m'}, {x:9,y:4,d:'r',c:'b'}, {x:6,y:1,d:'dr',c:'g'},
+      {x:7,y:5,d:'dr',c:'g',sz:'l'}, {x:5,y:1,d:'ul',c:'g',sz:'l'}, {x:6,y:7,d:'ur',c:'g',sz:'l'}, {x:2,y:4,d:'l',c:'b',sz:'m'},
+      {x:9,y:9,d:'dr',c:'b'}, {x:3,y:2,d:'dr',c:'b'}, {x:5,y:0,d:'u',c:'b'}, {x:9,y:0,d:'ur',c:'g'},
+      {x:2,y:10,d:'d',c:'g',sz:'m'}, {x:8,y:8,d:'dr',c:'g',sz:'m'}, {x:5,y:8,d:'u',c:'p',sz:'l'}, {x:6,y:2,d:'u',c:'p',sz:'l'},
+      {x:7,y:9,d:'l',c:'r'}, {x:3,y:0,d:'l',c:'r'}, {x:8,y:0,d:'u',c:'r',sz:'l'}, {x:0,y:7,d:'l',c:'r',sz:'m'},
+      {x:0,y:6,d:'dl',c:'y',sz:'l'}, {x:1,y:6,d:'dl',c:'y',sz:'l'}, {x:0,y:2,d:'ul',c:'y',sz:'l'}, {x:2,y:3,d:'dl',c:'b',sz:'m'},
+      {x:7,y:4,d:'ul',c:'b'}, {x:3,y:5,d:'ul',c:'b',sz:'l'}, {x:9,y:10,d:'ur',c:'r',sz:'m'}, {x:7,y:7,d:'r',c:'r',sz:'m'},
+      {x:1,y:2,d:'u',c:'p',sz:'l'}, {x:7,y:0,d:'dl',c:'p'}, {x:8,y:9,d:'d',c:'p',sz:'m'}, {x:9,y:1,d:'r',c:'p',sz:'m'},
+      {x:9,y:3,d:'ul',c:'y',sz:'m'}, {x:4,y:5,d:'ul',c:'y',sz:'m'}
+    ],
+    tunnels:[{x:9,y:8,d:'r',stack:[{c:'p'},{c:'p',sz:'l'}]}],
+    queue:q('pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy') },
+  /* 日本 L6：70 架 / 1752 人 / 10x11 / 4 閘 */
+  { queueShape:'spiral', w:10, h:11, gates:4, stars:true, par:70, planes:[
+      {x:0,y:0,d:'l',c:'p',sz:'m'}, {x:2,y:10,d:'dr',c:'p',sz:'m'}, {x:1,y:1,d:'ul',c:'r'}, {x:9,y:4,d:'ur',c:'r'},
+      {x:6,y:8,d:'dl',c:'b',sz:'m'}, {x:4,y:0,d:'ur',c:'b',sz:'l'}, {x:0,y:5,d:'dl',c:'b',sz:'m'}, {x:8,y:3,d:'dr',c:'g'},
+      {x:5,y:10,d:'dl',c:'g',sz:'m'}, {x:8,y:9,d:'r',c:'g',sz:'m'}, {x:3,y:0,d:'ul',c:'p',sz:'l'}, {x:0,y:7,d:'l',c:'p'},
+      {x:7,y:7,d:'dl',c:'p'}, {x:7,y:0,d:'ul',c:'p',sz:'m'}, {x:0,y:1,d:'u',c:'r'}, {x:1,y:3,d:'l',c:'r'},
+      {x:0,y:2,d:'dl',c:'p',sz:'l'}, {x:9,y:1,d:'ur',c:'p',sz:'m'}, {x:2,y:9,d:'ul',c:'p',sz:'m'}, {x:9,y:8,d:'dr',c:'p',sz:'l'},
+      {x:9,y:0,d:'ur',c:'b'}, {x:1,y:2,d:'dl',c:'b'}, {x:6,y:5,d:'dr',c:'g'}, {x:9,y:7,d:'r',c:'g'},
+      {x:4,y:1,d:'u',c:'g'}, {x:3,y:10,d:'d',c:'g'}, {x:5,y:5,d:'dr',c:'y',sz:'l'}, {x:3,y:6,d:'d',c:'y',sz:'l'},
+      {x:4,y:6,d:'u',c:'y',sz:'l'}, {x:8,y:6,d:'dr',c:'y',sz:'l'}, {x:7,y:2,d:'ur',c:'r',sz:'l'}, {x:3,y:5,d:'d',c:'r',sz:'l'},
+      {x:8,y:10,d:'d',c:'r',sz:'l'}, {x:2,y:3,d:'ul',c:'r',sz:'m'}, {x:0,y:10,d:'dr',c:'p',sz:'m'}, {x:7,y:4,d:'ul',c:'p',sz:'m'},
+      {x:0,y:4,d:'u',c:'p'}, {x:5,y:4,d:'ur',c:'y',sz:'l'}, {x:9,y:10,d:'r',c:'y',sz:'m'}, {x:4,y:8,d:'u',c:'y',sz:'l'},
+      {x:8,y:2,d:'d',c:'y'}, {x:1,y:9,d:'dl',c:'r',sz:'l'}, {x:9,y:6,d:'dr',c:'r'}, {x:7,y:1,d:'r',c:'p'},
+      {x:1,y:7,d:'dr',c:'p'}, {x:0,y:9,d:'ul',c:'y'}, {x:2,y:4,d:'r',c:'y',sz:'m'}, {x:9,y:5,d:'dr',c:'y'},
+      {x:3,y:1,d:'l',c:'y',sz:'m'}, {x:6,y:0,d:'r',c:'b',sz:'m'}, {x:1,y:6,d:'l',c:'b',sz:'m'}, {x:1,y:0,d:'ur',c:'y',sz:'l'},
+      {x:2,y:7,d:'ur',c:'y',sz:'m'}, {x:6,y:7,d:'ul',c:'b',sz:'l'}, {x:6,y:10,d:'dl',c:'b',sz:'m'}, {x:7,y:10,d:'r',c:'b'},
+      {x:3,y:2,d:'ul',c:'b',sz:'l'}, {x:7,y:8,d:'d',c:'r',sz:'m'}, {x:2,y:0,d:'d',c:'r',sz:'m'}, {x:5,y:0,d:'dl',c:'r',sz:'m'},
+      {x:6,y:9,d:'dl',c:'b'}, {x:9,y:3,d:'ur',c:'b'}, {x:1,y:5,d:'u',c:'b',sz:'l'}, {x:9,y:2,d:'dl',c:'b',sz:'l'},
+      {x:0,y:8,d:'d',c:'r'}, {x:3,y:3,d:'dr',c:'r',sz:'l'}
+    ],
+    tunnels:[{x:1,y:10,d:'dr',stack:[{c:'g',sz:'m'},{c:'g',sz:'l'}]}, {x:0,y:6,d:'dl',stack:[{c:'g',sz:'l'},{c:'p',sz:'m'}]}],
+    queue:q('ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr') },
+  /* 日本 L7：72 架 / 1800 人 / 10x11 / 4 閘 */
+  { queueShape:'horseshoe', w:10, h:11, gates:4, stars:true, par:72, milestone:'解鎖：機庫！', planes:[
+      {x:9,y:4,d:'r',c:'r'}, {x:5,y:0,d:'u',c:'r'}, {x:2,y:0,d:'ul',c:'r',sz:'m'}, {x:5,y:10,d:'dl',c:'r'},
+      {x:1,y:1,d:'ur',c:'y'}, {x:8,y:1,d:'dr',c:'y',sz:'m'}, {x:6,y:9,d:'dr',c:'p',sz:'m'}, {x:2,y:2,d:'dl',c:'p',sz:'l'},
+      {x:8,y:5,d:'ur',c:'p',sz:'m'}, {x:0,y:3,d:'ul',c:'b',sz:'m'}, {x:3,y:3,d:'l',c:'b'}, {x:1,y:4,d:'l',c:'b',sz:'m'},
+      {x:9,y:1,d:'r',c:'r'}, {x:2,y:6,d:'ul',c:'r',sz:'m'}, {x:8,y:10,d:'d',c:'r',sz:'m'}, {x:8,y:6,d:'r',c:'y'},
+      {x:0,y:7,d:'ul',c:'y',sz:'m'}, {x:3,y:9,d:'d',c:'b'}, {x:7,y:7,d:'ur',c:'b',sz:'l'}, {x:3,y:1,d:'dl',c:'b'},
+      {x:8,y:4,d:'dr',c:'y',sz:'l'}, {x:1,y:6,d:'dl',c:'y',sz:'l'}, {x:6,y:2,d:'dr',c:'y'}, {x:0,y:0,d:'l',c:'y',sz:'m'},
+      {x:0,y:1,d:'u',c:'g',sz:'m'}, {x:5,y:7,d:'dr',c:'g',sz:'m'}, {x:6,y:4,d:'ul',c:'g',sz:'m'}, {x:7,y:0,d:'u',c:'g',sz:'m'},
+      {x:8,y:8,d:'ul',c:'p',sz:'m'}, {x:3,y:7,d:'d',c:'p',sz:'l'}, {x:9,y:10,d:'ur',c:'p',sz:'l'}, {x:7,y:4,d:'r',c:'p',sz:'m'},
+      {x:2,y:1,d:'l',c:'b'}, {x:8,y:0,d:'ul',c:'b'}, {x:9,y:0,d:'u',c:'b'}, {x:6,y:0,d:'u',c:'y'},
+      {x:7,y:8,d:'dr',c:'y'}, {x:4,y:1,d:'ur',c:'p',sz:'l'}, {x:0,y:9,d:'dr',c:'p'}, {x:8,y:7,d:'ur',c:'y',sz:'l'},
+      {x:9,y:8,d:'dr',c:'y',sz:'m'}, {x:5,y:8,d:'d',c:'r'}, {x:9,y:7,d:'dr',c:'r',sz:'l'}, {x:1,y:2,d:'u',c:'r',sz:'l'},
+      {x:1,y:7,d:'l',c:'b',sz:'l'}, {x:1,y:8,d:'ul',c:'b',sz:'m'}, {x:6,y:1,d:'ul',c:'p',sz:'m'}, {x:0,y:6,d:'l',c:'p'},
+      {x:7,y:1,d:'u',c:'p',sz:'m'}, {x:4,y:3,d:'dl',c:'g',sz:'m'}, {x:9,y:3,d:'dr',c:'g',sz:'l'}, {x:7,y:2,d:'dl',c:'g'},
+      {x:5,y:2,d:'ur',c:'b'}, {x:2,y:8,d:'u',c:'b',sz:'l'}, {x:4,y:10,d:'ur',c:'b',sz:'m'}, {x:7,y:6,d:'ur',c:'p',sz:'m'},
+      {x:4,y:9,d:'d',c:'p',sz:'m'}, {x:0,y:10,d:'d',c:'p'}, {x:5,y:1,d:'dr',c:'p',sz:'m'}, {x:0,y:8,d:'ul',c:'b',sz:'l'},
+      {x:0,y:2,d:'r',c:'b'}, {x:2,y:10,d:'l',c:'p',sz:'l'}, {x:6,y:10,d:'l',c:'p',sz:'l'}, {x:2,y:9,d:'u',c:'y',sz:'l'},
+      {x:9,y:9,d:'dr',c:'y',sz:'l'}, {x:4,y:7,d:'u',c:'y',sz:'l'}, {x:0,y:5,d:'dl',c:'y',sz:'l'}, {x:3,y:0,d:'r',c:'r'}
+    ],
+    tunnels:[{x:9,y:6,d:'ur',stack:[{c:'y',sz:'l'},{c:'y'}]}, {x:0,y:4,d:'ul',stack:[{c:'y',sz:'l'},{c:'y',sz:'m'}]}],
+    queue:q('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrr') },
+  /* 日本 L8：74 架 / 1852 人 / 11x11 / 4 閘 */
+  { queueShape:'squareSpiralTail', w:11, h:11, gates:4, stars:true, par:74, milestone:'控制塔擴建 Tier 2！', planes:[
+      {x:6,y:1,d:'ul',c:'y',sz:'l'}, {x:8,y:10,d:'dl',c:'y',sz:'m'}, {x:10,y:7,d:'dr',c:'y',sz:'l'}, {x:10,y:3,d:'dr',c:'y',sz:'l'},
+      {x:6,y:10,d:'dr',c:'g'}, {x:0,y:0,d:'u',c:'g'}, {x:4,y:8,d:'dr',c:'b'}, {x:9,y:9,d:'ur',c:'b'},
+      {x:0,y:7,d:'dl',c:'b'}, {x:8,y:8,d:'dl',c:'g',sz:'m'}, {x:10,y:0,d:'ul',c:'g',sz:'m'}, {x:1,y:0,d:'ur',c:'g'},
+      {x:3,y:0,d:'ur',c:'p',sz:'m'}, {x:9,y:8,d:'r',c:'p',sz:'l'}, {x:4,y:6,d:'ur',c:'p'}, {x:7,y:2,d:'ul',c:'p',sz:'l'},
+      {x:3,y:7,d:'dr',c:'y'}, {x:10,y:9,d:'r',c:'y',sz:'m'}, {x:4,y:10,d:'dl',c:'g',sz:'l'}, {x:4,y:0,d:'ul',c:'g',sz:'m'},
+      {x:9,y:0,d:'r',c:'g',sz:'m'}, {x:6,y:8,d:'dl',c:'g',sz:'l'}, {x:8,y:0,d:'ur',c:'p'}, {x:10,y:5,d:'r',c:'p'},
+      {x:0,y:10,d:'ul',c:'p',sz:'l'}, {x:10,y:10,d:'r',c:'g',sz:'l'}, {x:5,y:4,d:'ur',c:'g',sz:'l'}, {x:7,y:10,d:'d',c:'g',sz:'m'},
+      {x:4,y:1,d:'ur',c:'y',sz:'m'}, {x:8,y:5,d:'ur',c:'y'}, {x:7,y:0,d:'ur',c:'y',sz:'l'}, {x:10,y:6,d:'dr',c:'y',sz:'l'},
+      {x:1,y:10,d:'dl',c:'g'}, {x:2,y:2,d:'l',c:'g',sz:'m'}, {x:1,y:3,d:'u',c:'g',sz:'m'}, {x:0,y:4,d:'dl',c:'y',sz:'l'},
+      {x:2,y:0,d:'u',c:'y',sz:'l'}, {x:3,y:5,d:'r',c:'y'}, {x:7,y:7,d:'dl',c:'y',sz:'m'}, {x:10,y:1,d:'dr',c:'r',sz:'l'},
+      {x:0,y:1,d:'ul',c:'r'}, {x:6,y:2,d:'dr',c:'r'}, {x:8,y:6,d:'dr',c:'r',sz:'m'}, {x:10,y:2,d:'u',c:'b'},
+      {x:0,y:6,d:'ul',c:'b',sz:'m'}, {x:1,y:7,d:'dr',c:'g',sz:'m'}, {x:8,y:9,d:'dl',c:'g',sz:'m'}, {x:0,y:8,d:'ul',c:'r'},
+      {x:3,y:1,d:'dl',c:'r',sz:'l'}, {x:2,y:10,d:'dl',c:'r',sz:'l'}, {x:4,y:9,d:'r',c:'r',sz:'m'}, {x:10,y:4,d:'dl',c:'g',sz:'m'},
+      {x:3,y:4,d:'u',c:'g'}, {x:6,y:0,d:'r',c:'p',sz:'m'}, {x:5,y:10,d:'d',c:'p',sz:'l'}, {x:5,y:8,d:'l',c:'p'},
+      {x:5,y:7,d:'l',c:'b',sz:'m'}, {x:0,y:3,d:'dr',c:'b',sz:'m'}, {x:2,y:9,d:'dl',c:'b'}, {x:4,y:4,d:'l',c:'p',sz:'l'},
+      {x:7,y:8,d:'l',c:'p',sz:'m'}, {x:4,y:3,d:'ur',c:'r',sz:'m'}, {x:4,y:2,d:'ul',c:'r'}, {x:2,y:6,d:'ul',c:'r'},
+      {x:1,y:9,d:'r',c:'r',sz:'m'}, {x:9,y:6,d:'r',c:'p',sz:'l'}, {x:7,y:1,d:'ur',c:'p',sz:'l'}, {x:9,y:10,d:'dr',c:'p'},
+      {x:0,y:9,d:'ul',c:'r'}, {x:0,y:5,d:'r',c:'r',sz:'m'}
+    ],
+    tunnels:[{x:5,y:1,d:'u',stack:[{c:'b',sz:'l'},{c:'b',sz:'l'}]}, {x:0,y:2,d:'l',stack:[{c:'b'},{c:'b',sz:'m'}]}],
+    queue:q('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr') },
+  /* 日本 L9：76 架 / 1900 人 / 11x11 / 4 閘 */
+  { queueShape:'cloverPetals', w:11, h:11, gates:4, stars:true, par:76, planes:[
+      {x:0,y:2,d:'dl',c:'g',sz:'l'}, {x:8,y:10,d:'d',c:'g',sz:'m'}, {x:9,y:5,d:'ur',c:'p',sz:'l'}, {x:3,y:10,d:'d',c:'p',sz:'m'},
+      {x:5,y:9,d:'dr',c:'b',sz:'l'}, {x:0,y:9,d:'ul',c:'b'}, {x:2,y:0,d:'u',c:'g',sz:'m'}, {x:9,y:1,d:'ul',c:'g',sz:'l'},
+      {x:8,y:3,d:'u',c:'p',sz:'m'}, {x:1,y:6,d:'dl',c:'p',sz:'m'}, {x:1,y:8,d:'dl',c:'p',sz:'m'}, {x:10,y:5,d:'r',c:'b',sz:'m'},
+      {x:0,y:0,d:'ur',c:'b'}, {x:1,y:0,d:'l',c:'g',sz:'m'}, {x:4,y:3,d:'ul',c:'g',sz:'l'}, {x:10,y:10,d:'ur',c:'g'},
+      {x:7,y:0,d:'ur',c:'b',sz:'m'}, {x:9,y:3,d:'dr',c:'b',sz:'l'}, {x:3,y:1,d:'ul',c:'b'}, {x:7,y:1,d:'ur',c:'y'},
+      {x:0,y:6,d:'l',c:'y',sz:'l'}, {x:8,y:8,d:'dl',c:'b',sz:'l'}, {x:5,y:1,d:'ul',c:'b'}, {x:1,y:4,d:'dl',c:'g',sz:'m'},
+      {x:10,y:9,d:'dl',c:'g'}, {x:3,y:6,d:'l',c:'g',sz:'m'}, {x:10,y:0,d:'u',c:'g',sz:'l'}, {x:0,y:8,d:'dl',c:'y'},
+      {x:1,y:2,d:'l',c:'y',sz:'l'}, {x:8,y:7,d:'ur',c:'g',sz:'m'}, {x:6,y:2,d:'ul',c:'g'}, {x:0,y:4,d:'l',c:'g',sz:'l'},
+      {x:10,y:3,d:'r',c:'g',sz:'l'}, {x:8,y:6,d:'u',c:'y',sz:'l'}, {x:5,y:10,d:'ur',c:'y'}, {x:6,y:0,d:'u',c:'y'},
+      {x:7,y:3,d:'r',c:'b',sz:'l'}, {x:1,y:9,d:'l',c:'b',sz:'m'}, {x:6,y:8,d:'ur',c:'p',sz:'m'}, {x:3,y:0,d:'ul',c:'p'},
+      {x:10,y:7,d:'r',c:'p',sz:'m'}, {x:6,y:6,d:'d',c:'y',sz:'m'}, {x:7,y:6,d:'dr',c:'y',sz:'l'}, {x:2,y:10,d:'d',c:'p'},
+      {x:10,y:8,d:'dl',c:'p',sz:'m'}, {x:1,y:1,d:'ul',c:'p',sz:'l'}, {x:1,y:10,d:'dl',c:'g',sz:'m'}, {x:4,y:6,d:'dr',c:'g'},
+      {x:5,y:3,d:'ul',c:'b',sz:'l'}, {x:6,y:5,d:'dl',c:'b',sz:'l'}, {x:10,y:2,d:'ur',c:'b',sz:'m'}, {x:2,y:3,d:'u',c:'y'},
+      {x:4,y:1,d:'u',c:'y',sz:'m'}, {x:0,y:10,d:'l',c:'y'}, {x:5,y:0,d:'ul',c:'b',sz:'m'}, {x:5,y:8,d:'r',c:'b'},
+      {x:2,y:7,d:'d',c:'p',sz:'m'}, {x:4,y:9,d:'dl',c:'p',sz:'m'}, {x:3,y:9,d:'dl',c:'p',sz:'l'}, {x:3,y:5,d:'ul',c:'p'},
+      {x:9,y:0,d:'ur',c:'r'}, {x:10,y:6,d:'ul',c:'r'}, {x:9,y:7,d:'u',c:'r',sz:'m'}, {x:4,y:4,d:'d',c:'r',sz:'l'},
+      {x:1,y:5,d:'ul',c:'g',sz:'m'}, {x:0,y:3,d:'ur',c:'g',sz:'m'}, {x:7,y:10,d:'dl',c:'g',sz:'l'}, {x:8,y:9,d:'r',c:'r',sz:'m'},
+      {x:3,y:4,d:'d',c:'r',sz:'l'}, {x:6,y:4,d:'d',c:'r'}, {x:0,y:1,d:'ul',c:'y',sz:'m'}, {x:7,y:2,d:'l',c:'y'}
+    ],
+    tunnels:[{x:4,y:10,d:'d',stack:[{c:'y',sz:'l'},{c:'y'}]}, {x:0,y:7,d:'ul',stack:[{c:'b'},{c:'b'}]}],
+    queue:q('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy') },
+  /* 日本 L10：78 架 / 1952 人 / 11x11 / 4 閘 */
+  { queueShape:'heart', w:11, h:11, gates:4, stars:true, par:78, milestone:'貴賓室擴建 Tier 2！形狀關：飛機輪廓', planes:[
+      {x:10,y:4,d:'dr',c:'r',sz:'m'}, {x:10,y:8,d:'ur',c:'p',sz:'m'}, {x:3,y:0,d:'u',c:'p'}, {x:10,y:5,d:'dr',c:'p',sz:'m'},
+      {x:1,y:0,d:'ur',c:'r',sz:'l'}, {x:9,y:0,d:'ul',c:'r',sz:'m'}, {x:0,y:10,d:'dl',c:'g',sz:'l'}, {x:0,y:1,d:'l',c:'g'},
+      {x:4,y:4,d:'l',c:'g',sz:'m'}, {x:10,y:0,d:'ur',c:'g',sz:'m'}, {x:0,y:2,d:'l',c:'p'}, {x:6,y:0,d:'ul',c:'p'},
+      {x:0,y:6,d:'l',c:'r',sz:'m'}, {x:2,y:0,d:'ur',c:'r'}, {x:0,y:3,d:'ul',c:'r',sz:'l'}, {x:10,y:2,d:'r',c:'y',sz:'l'},
+      {x:6,y:4,d:'l',c:'y',sz:'m'}, {x:10,y:7,d:'dr',c:'y',sz:'m'}, {x:4,y:10,d:'d',c:'y',sz:'l'}, {x:6,y:8,d:'ur',c:'r'},
+      {x:1,y:9,d:'dl',c:'r',sz:'l'}, {x:2,y:6,d:'l',c:'r',sz:'l'}, {x:1,y:10,d:'l',c:'b',sz:'l'}, {x:2,y:10,d:'dr',c:'b',sz:'m'},
+      {x:7,y:10,d:'dl',c:'b',sz:'m'}, {x:1,y:1,d:'ur',c:'b',sz:'m'}, {x:8,y:10,d:'dr',c:'g',sz:'l'}, {x:1,y:2,d:'u',c:'g'},
+      {x:7,y:0,d:'u',c:'g'}, {x:6,y:1,d:'u',c:'y'}, {x:5,y:0,d:'ul',c:'y'}, {x:2,y:1,d:'ur',c:'r',sz:'m'},
+      {x:7,y:4,d:'l',c:'r',sz:'m'}, {x:10,y:1,d:'ur',c:'r'}, {x:5,y:10,d:'dl',c:'r',sz:'l'}, {x:3,y:3,d:'dl',c:'p',sz:'l'},
+      {x:2,y:2,d:'u',c:'p',sz:'l'}, {x:7,y:2,d:'ul',c:'p',sz:'m'}, {x:9,y:4,d:'ul',c:'y',sz:'m'}, {x:10,y:6,d:'dr',c:'y',sz:'l'},
+      {x:0,y:9,d:'dl',c:'y',sz:'m'}, {x:3,y:10,d:'d',c:'b',sz:'m'}, {x:4,y:1,d:'ur',c:'b'}, {x:0,y:8,d:'dr',c:'b',sz:'m'},
+      {x:1,y:3,d:'u',c:'y'}, {x:2,y:8,d:'dl',c:'y'}, {x:8,y:0,d:'r',c:'y'}, {x:9,y:7,d:'dr',c:'y',sz:'l'},
+      {x:10,y:9,d:'dl',c:'g'}, {x:5,y:7,d:'d',c:'g',sz:'l'}, {x:9,y:9,d:'r',c:'g'}, {x:8,y:9,d:'r',c:'p',sz:'l'},
+      {x:4,y:6,d:'dl',c:'p',sz:'l'}, {x:5,y:1,d:'l',c:'b'}, {x:9,y:3,d:'ur',c:'b',sz:'m'}, {x:3,y:5,d:'dl',c:'b',sz:'l'},
+      {x:5,y:2,d:'ur',c:'b',sz:'l'}, {x:4,y:0,d:'ur',c:'r',sz:'m'}, {x:0,y:5,d:'dl',c:'r'}, {x:8,y:5,d:'dr',c:'b',sz:'m'},
+      {x:8,y:4,d:'ur',c:'b',sz:'m'}, {x:7,y:1,d:'ul',c:'b',sz:'m'}, {x:2,y:9,d:'l',c:'y'}, {x:6,y:7,d:'dl',c:'y',sz:'l'},
+      {x:9,y:2,d:'dl',c:'y',sz:'m'}, {x:7,y:9,d:'u',c:'g',sz:'m'}, {x:6,y:9,d:'r',c:'g',sz:'m'}, {x:6,y:10,d:'d',c:'g'},
+      {x:0,y:7,d:'ul',c:'g'}, {x:10,y:3,d:'l',c:'b',sz:'l'}, {x:0,y:0,d:'r',c:'b'}, {x:9,y:1,d:'u',c:'g',sz:'l'},
+      {x:1,y:8,d:'ur',c:'g'}, {x:4,y:8,d:'ur',c:'g',sz:'l'}
+    ],
+    tunnels:[{x:0,y:4,d:'l',stack:[{c:'g'},{c:'g',sz:'m'}]}, {x:1,y:4,d:'l',stack:[{c:'r'},{c:'r',sz:'l'}]}],
+    queue:q('ggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggpppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbgggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg') },
+  /* 日本 L11：80 架 / 2000 人 / 11x11 / 5 閘 */
+  { queueShape:'hexRing', w:11, h:11, gates:5, stars:true, par:80, planes:[
+      {x:1,y:2,d:'dl',c:'b',sz:'l'}, {x:10,y:5,d:'dr',c:'b'}, {x:10,y:8,d:'ur',c:'b',sz:'l'}, {x:10,y:1,d:'dr',c:'r'},
+      {x:5,y:10,d:'d',c:'r',sz:'m'}, {x:0,y:8,d:'dl',c:'p'}, {x:7,y:7,d:'dl',c:'p',sz:'l'}, {x:4,y:1,d:'ul',c:'p',sz:'l'},
+      {x:0,y:10,d:'d',c:'y',sz:'m'}, {x:0,y:0,d:'ul',c:'y'}, {x:6,y:3,d:'ul',c:'y',sz:'l'}, {x:1,y:10,d:'d',c:'r'},
+      {x:9,y:1,d:'r',c:'r',sz:'l'}, {x:0,y:6,d:'dl',c:'r',sz:'m'}, {x:8,y:2,d:'r',c:'r',sz:'m'}, {x:9,y:6,d:'ur',c:'y',sz:'m'},
+      {x:0,y:9,d:'l',c:'y',sz:'l'}, {x:9,y:8,d:'r',c:'y',sz:'l'}, {x:4,y:0,d:'ur',c:'y',sz:'m'}, {x:1,y:4,d:'ul',c:'b'},
+      {x:7,y:4,d:'ul',c:'b',sz:'l'}, {x:2,y:1,d:'dl',c:'b',sz:'l'}, {x:1,y:7,d:'ul',c:'y',sz:'l'}, {x:9,y:5,d:'r',c:'y',sz:'l'},
+      {x:10,y:10,d:'d',c:'y',sz:'m'}, {x:3,y:10,d:'dl',c:'y'}, {x:7,y:1,d:'u',c:'p',sz:'l'}, {x:1,y:9,d:'l',c:'p'},
+      {x:1,y:3,d:'l',c:'p',sz:'l'}, {x:0,y:4,d:'l',c:'b'}, {x:5,y:5,d:'d',c:'b',sz:'l'}, {x:7,y:6,d:'u',c:'y',sz:'m'},
+      {x:1,y:0,d:'ur',c:'y',sz:'m'}, {x:2,y:9,d:'dl',c:'y',sz:'l'}, {x:10,y:0,d:'dr',c:'y',sz:'m'}, {x:0,y:2,d:'l',c:'g',sz:'m'},
+      {x:4,y:9,d:'d',c:'g',sz:'l'}, {x:10,y:7,d:'ul',c:'g'}, {x:6,y:1,d:'ur',c:'y'}, {x:8,y:3,d:'ur',c:'y',sz:'m'},
+      {x:0,y:1,d:'l',c:'y'}, {x:1,y:8,d:'l',c:'b'}, {x:10,y:6,d:'ur',c:'b',sz:'l'}, {x:9,y:0,d:'r',c:'b'},
+      {x:6,y:10,d:'dl',c:'b',sz:'m'}, {x:2,y:0,d:'l',c:'y'}, {x:5,y:1,d:'d',c:'y'}, {x:3,y:1,d:'u',c:'p',sz:'m'},
+      {x:10,y:9,d:'r',c:'p',sz:'m'}, {x:1,y:6,d:'l',c:'p',sz:'m'}, {x:10,y:3,d:'r',c:'b'}, {x:1,y:5,d:'r',c:'b',sz:'l'},
+      {x:6,y:2,d:'ur',c:'b',sz:'m'}, {x:1,y:1,d:'ur',c:'b',sz:'l'}, {x:2,y:2,d:'r',c:'p',sz:'m'}, {x:9,y:10,d:'dr',c:'p'},
+      {x:3,y:4,d:'ul',c:'b'}, {x:10,y:4,d:'dr',c:'b',sz:'l'}, {x:0,y:5,d:'l',c:'b'}, {x:8,y:9,d:'dl',c:'b',sz:'m'},
+      {x:9,y:7,d:'d',c:'g'}, {x:8,y:10,d:'dr',c:'g',sz:'m'}, {x:8,y:1,d:'dr',c:'y',sz:'l'}, {x:5,y:0,d:'u',c:'y',sz:'m'},
+      {x:4,y:4,d:'ur',c:'g'}, {x:6,y:9,d:'dr',c:'g'}, {x:7,y:9,d:'ul',c:'g'}, {x:7,y:8,d:'d',c:'b',sz:'l'},
+      {x:4,y:7,d:'d',c:'b'}, {x:0,y:7,d:'dr',c:'b',sz:'m'}, {x:3,y:7,d:'d',c:'p'}, {x:8,y:8,d:'ur',c:'p',sz:'l'},
+      {x:2,y:8,d:'r',c:'y',sz:'m'}, {x:6,y:6,d:'ul',c:'y'}, {x:9,y:4,d:'l',c:'r'}, {x:2,y:10,d:'dr',c:'r',sz:'l'}
+    ],
+    tunnels:[{x:9,y:3,d:'ur',stack:[{c:'g',sz:'l'},{c:'g'}]}, {x:6,y:8,d:'dl',stack:[{c:'g',sz:'m'},{c:'g',sz:'m'}]}],
+    queue:q('ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr') },
+  /* 日本 L12：82 架 / 2052 人 / 11x11 / 5 閘 */
+  { queueShape:'sWave', w:11, h:11, gates:5, stars:true, par:82, planes:[
+      {x:9,y:5,d:'ur',c:'y',sz:'m'}, {x:8,y:10,d:'dr',c:'y',sz:'l'}, {x:2,y:10,d:'dr',c:'b',sz:'l'}, {x:5,y:0,d:'ur',c:'b',sz:'l'},
+      {x:10,y:1,d:'r',c:'b',sz:'l'}, {x:6,y:10,d:'dl',c:'g',sz:'m'}, {x:10,y:7,d:'ur',c:'g',sz:'m'}, {x:8,y:9,d:'d',c:'r'},
+      {x:5,y:2,d:'u',c:'r',sz:'m'}, {x:10,y:8,d:'dr',c:'r',sz:'l'}, {x:3,y:10,d:'d',c:'r',sz:'m'}, {x:0,y:4,d:'ul',c:'b',sz:'l'},
+      {x:8,y:5,d:'dr',c:'b',sz:'m'}, {x:1,y:1,d:'l',c:'b',sz:'l'}, {x:10,y:5,d:'r',c:'b',sz:'m'}, {x:10,y:6,d:'dr',c:'g'},
+      {x:1,y:0,d:'ur',c:'g',sz:'m'}, {x:7,y:9,d:'dr',c:'g',sz:'l'}, {x:9,y:10,d:'d',c:'g',sz:'l'}, {x:9,y:0,d:'dr',c:'y',sz:'m'},
+      {x:3,y:0,d:'u',c:'y',sz:'m'}, {x:6,y:9,d:'ur',c:'y',sz:'m'}, {x:1,y:4,d:'dl',c:'r'}, {x:4,y:0,d:'ul',c:'r',sz:'m'},
+      {x:2,y:1,d:'dl',c:'r',sz:'m'}, {x:1,y:6,d:'ul',c:'r',sz:'l'}, {x:0,y:9,d:'dl',c:'b',sz:'l'}, {x:1,y:5,d:'l',c:'b'},
+      {x:5,y:5,d:'u',c:'r',sz:'m'}, {x:7,y:3,d:'dr',c:'r'}, {x:5,y:9,d:'dr',c:'r',sz:'m'}, {x:8,y:3,d:'ur',c:'r',sz:'m'},
+      {x:7,y:0,d:'u',c:'g',sz:'m'}, {x:7,y:1,d:'u',c:'g',sz:'l'}, {x:2,y:3,d:'dl',c:'g'}, {x:9,y:7,d:'ur',c:'g',sz:'l'},
+      {x:8,y:6,d:'r',c:'b',sz:'l'}, {x:8,y:1,d:'ur',c:'b',sz:'l'}, {x:8,y:0,d:'ul',c:'g'}, {x:3,y:1,d:'u',c:'g',sz:'m'},
+      {x:4,y:1,d:'dl',c:'p'}, {x:6,y:0,d:'ul',c:'p'}, {x:0,y:0,d:'dl',c:'p',sz:'m'}, {x:4,y:3,d:'u',c:'y'},
+      {x:7,y:10,d:'dl',c:'y',sz:'m'}, {x:1,y:10,d:'dl',c:'y',sz:'l'}, {x:6,y:1,d:'ul',c:'r'}, {x:10,y:10,d:'dr',c:'r'},
+      {x:6,y:6,d:'r',c:'r'}, {x:10,y:3,d:'ur',c:'g'}, {x:2,y:7,d:'dl',c:'g',sz:'l'}, {x:2,y:5,d:'ur',c:'p'},
+      {x:10,y:0,d:'r',c:'p',sz:'m'}, {x:0,y:8,d:'l',c:'p'}, {x:3,y:9,d:'dl',c:'b',sz:'m'}, {x:4,y:10,d:'dr',c:'b',sz:'l'},
+      {x:7,y:2,d:'ur',c:'b',sz:'l'}, {x:10,y:2,d:'ur',c:'y',sz:'l'}, {x:9,y:4,d:'dr',c:'y',sz:'m'}, {x:3,y:8,d:'ul',c:'b'},
+      {x:8,y:8,d:'dl',c:'b',sz:'m'}, {x:9,y:9,d:'ur',c:'b',sz:'m'}, {x:5,y:10,d:'r',c:'b',sz:'m'}, {x:0,y:6,d:'ul',c:'p',sz:'m'},
+      {x:4,y:4,d:'ul',c:'p'}, {x:0,y:2,d:'l',c:'y',sz:'l'}, {x:2,y:4,d:'l',c:'y'}, {x:7,y:7,d:'d',c:'b',sz:'l'},
+      {x:4,y:8,d:'u',c:'b'}, {x:1,y:3,d:'dl',c:'p'}, {x:2,y:0,d:'r',c:'p'}, {x:0,y:10,d:'ul',c:'y',sz:'l'},
+      {x:6,y:3,d:'ul',c:'y'}, {x:9,y:1,d:'l',c:'y'}, {x:0,y:7,d:'ur',c:'y'}, {x:10,y:9,d:'dr',c:'r',sz:'m'},
+      {x:3,y:5,d:'ul',c:'r',sz:'l'}, {x:5,y:6,d:'ur',c:'r',sz:'l'}
+    ],
+    tunnels:[{x:0,y:3,d:'ul',stack:[{c:'r'},{c:'r'}]}, {x:0,y:5,d:'ul',stack:[{c:'y',sz:'m'},{c:'y',sz:'m'}]}],
+    queue:q('rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr') },
+  /* 日本 L13：84 架 / 2100 人 / 11x11 / 5 閘 */
+  { queueShape:'figure8', w:11, h:11, gates:5, stars:true, par:84, milestone:'航廈終極擴建 Tier 3！形狀關：鳥居', planes:[
+      {x:10,y:1,d:'ur',c:'p',sz:'l'}, {x:1,y:0,d:'ul',c:'r',sz:'l'}, {x:3,y:0,d:'u',c:'r'}, {x:10,y:9,d:'ur',c:'g',sz:'l'},
+      {x:10,y:5,d:'r',c:'g'}, {x:0,y:4,d:'dl',c:'g'}, {x:0,y:2,d:'l',c:'b',sz:'m'}, {x:6,y:10,d:'dl',c:'b',sz:'l'},
+      {x:2,y:2,d:'ur',c:'p'}, {x:10,y:8,d:'r',c:'p',sz:'l'}, {x:10,y:4,d:'ur',c:'r',sz:'m'}, {x:0,y:6,d:'dl',c:'r'},
+      {x:5,y:1,d:'u',c:'p'}, {x:10,y:0,d:'dr',c:'p',sz:'l'}, {x:3,y:10,d:'d',c:'p'}, {x:0,y:0,d:'u',c:'p'},
+      {x:2,y:9,d:'dr',c:'r'}, {x:2,y:8,d:'d',c:'r',sz:'m'}, {x:5,y:5,d:'r',c:'g'}, {x:9,y:2,d:'ur',c:'g',sz:'m'},
+      {x:10,y:7,d:'ur',c:'b',sz:'m'}, {x:10,y:3,d:'dr',c:'b',sz:'l'}, {x:3,y:9,d:'d',c:'b',sz:'m'}, {x:8,y:0,d:'u',c:'g',sz:'m'},
+      {x:2,y:4,d:'d',c:'g',sz:'l'}, {x:1,y:10,d:'d',c:'y',sz:'l'}, {x:1,y:8,d:'dl',c:'y',sz:'l'}, {x:4,y:9,d:'dl',c:'y',sz:'l'},
+      {x:7,y:7,d:'r',c:'y'}, {x:9,y:6,d:'ur',c:'r',sz:'m'}, {x:7,y:9,d:'dl',c:'r'}, {x:5,y:7,d:'r',c:'r',sz:'l'},
+      {x:9,y:8,d:'r',c:'p'}, {x:6,y:0,d:'ul',c:'p'}, {x:0,y:8,d:'dl',c:'p',sz:'l'}, {x:6,y:1,d:'ul',c:'g',sz:'m'},
+      {x:0,y:10,d:'dr',c:'g',sz:'l'}, {x:4,y:1,d:'ur',c:'g',sz:'m'}, {x:10,y:10,d:'ur',c:'g'}, {x:1,y:3,d:'dl',c:'r',sz:'m'},
+      {x:7,y:1,d:'ur',c:'r',sz:'l'}, {x:4,y:5,d:'r',c:'r'}, {x:8,y:6,d:'ur',c:'r',sz:'l'}, {x:2,y:0,d:'ul',c:'y',sz:'l'},
+      {x:7,y:3,d:'dl',c:'y'}, {x:8,y:2,d:'dl',c:'p'}, {x:7,y:6,d:'dr',c:'p'}, {x:10,y:2,d:'u',c:'y',sz:'l'},
+      {x:9,y:4,d:'dr',c:'y'}, {x:7,y:10,d:'d',c:'y',sz:'m'}, {x:10,y:6,d:'d',c:'y',sz:'m'}, {x:6,y:2,d:'r',c:'r',sz:'l'},
+      {x:6,y:9,d:'ur',c:'r',sz:'m'}, {x:3,y:5,d:'ul',c:'r',sz:'m'}, {x:2,y:1,d:'ul',c:'y'}, {x:1,y:1,d:'dl',c:'y',sz:'l'},
+      {x:6,y:8,d:'dr',c:'y'}, {x:0,y:5,d:'ul',c:'b',sz:'m'}, {x:1,y:7,d:'r',c:'b',sz:'m'}, {x:8,y:8,d:'ul',c:'b',sz:'l'},
+      {x:5,y:10,d:'d',c:'b'}, {x:4,y:10,d:'r',c:'g',sz:'l'}, {x:8,y:3,d:'dl',c:'g',sz:'m'}, {x:0,y:3,d:'ur',c:'g',sz:'l'},
+      {x:9,y:9,d:'ul',c:'g',sz:'m'}, {x:1,y:6,d:'ul',c:'p',sz:'m'}, {x:3,y:4,d:'u',c:'p',sz:'m'}, {x:7,y:0,d:'ur',c:'p'},
+      {x:8,y:9,d:'dr',c:'y'}, {x:4,y:8,d:'dl',c:'y',sz:'m'}, {x:9,y:1,d:'ur',c:'g',sz:'l'}, {x:5,y:8,d:'d',c:'g'},
+      {x:5,y:2,d:'dr',c:'g',sz:'l'}, {x:0,y:1,d:'ur',c:'b',sz:'m'}, {x:8,y:1,d:'u',c:'b'}, {x:4,y:2,d:'dl',c:'b',sz:'m'},
+      {x:9,y:0,d:'u',c:'r',sz:'m'}, {x:9,y:3,d:'dl',c:'r'}
+    ],
+    tunnels:[{x:8,y:10,d:'dl',stack:[{c:'g'},{c:'g',sz:'l'},{c:'g',sz:'l'}]}, {x:4,y:0,d:'ur',stack:[{c:'r',sz:'m'},{c:'r',sz:'m'},{c:'p'}]}],
+    queue:q('ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrpppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbpppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr') },
+  /* 日本 L14：86 架 / 2152 人 / 11x11 / 5 閘 / 冰封 3 */
+  { queueShape:'spiral', w:11, h:11, gates:5, stars:true, par:86, milestone:'機庫擴建 Tier 2！新機制：冰封格登場', planes:[
+      {x:4,y:0,d:'ur',c:'p',sz:'l'}, {x:0,y:9,d:'l',c:'p'}, {x:6,y:10,d:'dl',c:'p'}, {x:0,y:5,d:'dl',c:'b',sz:'m'},
+      {x:8,y:0,d:'ul',c:'b'}, {x:9,y:5,d:'ur',c:'y',sz:'m'}, {x:0,y:0,d:'ur',c:'y'}, {x:3,y:10,d:'dr',c:'y',sz:'l'},
+      {x:1,y:5,d:'l',c:'y',sz:'m'}, {x:5,y:10,d:'dl',c:'r',sz:'m'}, {x:7,y:10,d:'dl',c:'r'}, {x:6,y:0,d:'u',c:'r'},
+      {x:8,y:1,d:'u',c:'y',sz:'m'}, {x:8,y:4,d:'r',c:'y',sz:'l'}, {x:9,y:0,d:'u',c:'y',sz:'l'}, {x:1,y:10,d:'dl',c:'g',sz:'m'},
+      {x:10,y:7,d:'dr',c:'g',sz:'m'}, {x:5,y:9,d:'d',c:'g'}, {x:1,y:1,d:'ul',c:'g',sz:'l'}, {x:3,y:9,d:'dr',c:'p',sz:'l'},
+      {x:9,y:10,d:'d',c:'p',sz:'m'}, {x:1,y:4,d:'dl',c:'b',sz:'l'}, {x:5,y:1,d:'ur',c:'b'}, {x:10,y:5,d:'ur',c:'y',sz:'m'},
+      {x:10,y:3,d:'ur',c:'y'}, {x:1,y:0,d:'ur',c:'b',sz:'l'}, {x:10,y:10,d:'r',c:'b',sz:'m'}, {x:7,y:1,d:'ur',c:'r'},
+      {x:4,y:9,d:'d',c:'r',sz:'l'}, {x:2,y:1,d:'ul',c:'p'}, {x:10,y:9,d:'ur',c:'p'}, {x:8,y:6,d:'dr',c:'p',sz:'l'},
+      {x:5,y:5,d:'d',c:'b'}, {x:8,y:10,d:'dl',c:'b'}, {x:3,y:0,d:'ul',c:'b',sz:'m'}, {x:9,y:2,d:'dr',c:'p'},
+      {x:7,y:9,d:'dr',c:'p',sz:'l'}, {x:3,y:3,d:'u',c:'y',sz:'m'}, {x:2,y:0,d:'l',c:'y'}, {x:6,y:5,d:'ul',c:'r',sz:'m'},
+      {x:2,y:8,d:'dr',c:'r',sz:'l'}, {x:1,y:9,d:'l',c:'r',sz:'m',ice:24}, {x:9,y:3,d:'r',c:'p'}, {x:2,y:7,d:'u',c:'p'},
+      {x:9,y:1,d:'u',c:'p'}, {x:0,y:4,d:'l',c:'b',sz:'m'}, {x:7,y:6,d:'l',c:'b',sz:'m'}, {x:9,y:9,d:'r',c:'b'},
+      {x:5,y:0,d:'l',c:'b',sz:'l'}, {x:4,y:1,d:'r',c:'g'}, {x:0,y:7,d:'dl',c:'g'}, {x:0,y:10,d:'l',c:'p',sz:'l'},
+      {x:9,y:6,d:'l',c:'p',sz:'l'}, {x:6,y:4,d:'ul',c:'r',sz:'m'}, {x:8,y:3,d:'r',c:'r'}, {x:7,y:0,d:'u',c:'b',sz:'m'},
+      {x:0,y:3,d:'dl',c:'b',sz:'l'}, {x:8,y:8,d:'dl',c:'g',sz:'l',ice:36}, {x:10,y:2,d:'ur',c:'g',sz:'m'}, {x:2,y:9,d:'dl',c:'g',ice:36},
+      {x:1,y:7,d:'ul',c:'p'}, {x:10,y:6,d:'r',c:'p'}, {x:3,y:4,d:'l',c:'p'}, {x:8,y:9,d:'dl',c:'r'},
+      {x:7,y:7,d:'dr',c:'r',sz:'l'}, {x:3,y:5,d:'u',c:'g',sz:'l'}, {x:10,y:0,d:'d',c:'g',sz:'m'}, {x:6,y:9,d:'dl',c:'r',sz:'m'},
+      {x:4,y:8,d:'ul',c:'r',sz:'l'}, {x:0,y:1,d:'u',c:'r'}, {x:2,y:10,d:'d',c:'y',sz:'l'}, {x:6,y:2,d:'dr',c:'y'},
+      {x:1,y:8,d:'d',c:'b',sz:'m'}, {x:8,y:2,d:'ur',c:'b'}, {x:9,y:8,d:'ul',c:'r',sz:'l'}, {x:8,y:5,d:'dr',c:'r',sz:'m'},
+      {x:0,y:2,d:'ur',c:'r',sz:'l'}, {x:3,y:8,d:'ur',c:'r',sz:'m'}, {x:1,y:3,d:'u',c:'p',sz:'l'}, {x:0,y:8,d:'ur',c:'p',sz:'m'}
+    ],
+    tunnels:[{x:10,y:1,d:'dr',stack:[{c:'b',sz:'l'},{c:'b',sz:'l'},{c:'b',sz:'m'}]}, {x:10,y:4,d:'dr',stack:[{c:'b',sz:'l'},{c:'y',sz:'l'},{c:'y',sz:'m'}]}],
+    queue:q('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggpppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp') },
+  /* 日本 L15：79 架 / 2200 人 / 11x11 / 5 閘 / 冰封 4 / 特大 6 */
+  { queueShape:'horseshoe', w:11, h:11, gates:5, stars:true, par:79, milestone:'控制塔終極擴建 Tier 3！新機制：特大型客機登場', planes:[
+      {x:0,y:8,d:'l',c:'y'}, {x:8,y:1,d:'ur',c:'y',sz:'l'}, {x:9,y:6,d:'ur',c:'b',sz:'xl'}, {x:9,y:2,d:'r',c:'b'},
+      {x:2,y:0,d:'u',c:'b',sz:'m'}, {x:0,y:0,d:'u',c:'y',sz:'m'}, {x:0,y:3,d:'l',c:'y',sz:'l'}, {x:3,y:0,d:'ul',c:'y'},
+      {x:1,y:1,d:'ul',c:'g',sz:'m'}, {x:9,y:10,d:'dl',c:'g',sz:'m'}, {x:0,y:5,d:'dl',c:'p',sz:'xl'}, {x:10,y:8,d:'r',c:'p'},
+      {x:0,y:1,d:'l',c:'y'}, {x:9,y:1,d:'r',c:'y'}, {x:9,y:7,d:'dr',c:'y',sz:'m'}, {x:10,y:0,d:'ul',c:'y',sz:'l'},
+      {x:4,y:10,d:'dr',c:'p',sz:'l'}, {x:2,y:8,d:'dr',c:'p'}, {x:2,y:10,d:'dr',c:'y',sz:'m'}, {x:8,y:2,d:'dr',c:'y',sz:'m'},
+      {x:2,y:1,d:'u',c:'r'}, {x:8,y:10,d:'d',c:'r',sz:'m'}, {x:3,y:10,d:'dr',c:'r',sz:'xl'}, {x:6,y:0,d:'ul',c:'p',sz:'l'},
+      {x:4,y:6,d:'ur',c:'p'}, {x:7,y:0,d:'ul',c:'p'}, {x:6,y:10,d:'d',c:'p',sz:'l'}, {x:10,y:6,d:'r',c:'r',sz:'m'},
+      {x:10,y:9,d:'dr',c:'r'}, {x:7,y:7,d:'ur',c:'r',sz:'l'}, {x:1,y:0,d:'ul',c:'g'}, {x:2,y:6,d:'dl',c:'g',sz:'m'},
+      {x:5,y:0,d:'ur',c:'g',sz:'m'}, {x:7,y:10,d:'dr',c:'g',sz:'m'}, {x:3,y:5,d:'dl',c:'r'}, {x:5,y:2,d:'ul',c:'r',sz:'m',ice:24},
+      {x:4,y:0,d:'l',c:'r',sz:'xl'}, {x:4,y:2,d:'u',c:'r',sz:'m'}, {x:7,y:1,d:'r',c:'y',sz:'xl'}, {x:10,y:3,d:'ur',c:'y'},
+      {x:5,y:10,d:'dl',c:'y',sz:'l'}, {x:1,y:9,d:'dr',c:'y',sz:'m'}, {x:3,y:8,d:'d',c:'p',sz:'m',ice:28}, {x:4,y:4,d:'dl',c:'p'},
+      {x:9,y:4,d:'r',c:'b',sz:'l',ice:28}, {x:4,y:8,d:'dr',c:'b',sz:'l'}, {x:1,y:10,d:'r',c:'b',sz:'l'}, {x:8,y:4,d:'dr',c:'p',sz:'l'},
+      {x:3,y:1,d:'u',c:'p'}, {x:2,y:3,d:'ul',c:'p'}, {x:5,y:6,d:'r',c:'y'}, {x:7,y:8,d:'ul',c:'y',sz:'l'},
+      {x:8,y:5,d:'ul',c:'y',sz:'l'}, {x:3,y:6,d:'dr',c:'y',sz:'l'}, {x:10,y:7,d:'dr',c:'r'}, {x:2,y:2,d:'dr',c:'r',sz:'m'},
+      {x:0,y:2,d:'dl',c:'r',sz:'l',ice:36}, {x:4,y:9,d:'dr',c:'r',sz:'l'}, {x:8,y:7,d:'ur',c:'g',sz:'m'}, {x:0,y:9,d:'dr',c:'g',sz:'m'},
+      {x:9,y:8,d:'d',c:'r',sz:'m'}, {x:0,y:7,d:'l',c:'r'}, {x:0,y:6,d:'dr',c:'r',sz:'l'}, {x:8,y:3,d:'l',c:'r',sz:'l'},
+      {x:5,y:7,d:'dr',c:'p',sz:'l'}, {x:0,y:10,d:'u',c:'p',sz:'l'}, {x:6,y:5,d:'l',c:'y',sz:'l'}, {x:5,y:1,d:'u',c:'y',sz:'l'},
+      {x:3,y:2,d:'u',c:'b'}, {x:7,y:5,d:'ul',c:'b',sz:'l'}, {x:8,y:0,d:'r',c:'b',sz:'l'}, {x:7,y:2,d:'l',c:'b',sz:'l'},
+      {x:1,y:4,d:'ul',c:'y',sz:'m'}
+    ],
+    tunnels:[{x:0,y:4,d:'dl',stack:[{c:'r',sz:'l'},{c:'r',sz:'l'},{c:'r'}]}, {x:10,y:5,d:'ur',stack:[{c:'r',sz:'m'},{c:'y',sz:'m'},{c:'y',sz:'xl'}]}],
+    queue:q('rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyy') },
+  /* 日本 L16：75 架 / 2252 人 / 11x11 / 5 閘 / 冰封 4 / 特大 8 */
+  { queueShape:'cloverPetals', w:11, h:11, gates:5, stars:true, par:75, milestone:'形狀關：富士山', planes:[
+      {x:0,y:6,d:'l',c:'g'}, {x:10,y:2,d:'dr',c:'b',sz:'l'}, {x:4,y:9,d:'d',c:'b',sz:'m'}, {x:9,y:0,d:'u',c:'b',sz:'l'},
+      {x:0,y:1,d:'l',c:'r',sz:'l'}, {x:8,y:0,d:'ul',c:'r'}, {x:3,y:10,d:'dr',c:'r',sz:'xl'}, {x:3,y:0,d:'ur',c:'p',sz:'m'},
+      {x:8,y:1,d:'ur',c:'p',sz:'m'}, {x:5,y:1,d:'u',c:'p',sz:'l'}, {x:7,y:10,d:'dl',c:'b'}, {x:0,y:10,d:'ul',c:'b',sz:'m'},
+      {x:4,y:0,d:'ul',c:'g',sz:'m'}, {x:10,y:8,d:'ur',c:'g'}, {x:0,y:0,d:'ur',c:'g',sz:'xl'}, {x:7,y:0,d:'u',c:'g',sz:'l'},
+      {x:1,y:8,d:'dr',c:'p',sz:'m'}, {x:10,y:3,d:'r',c:'p',sz:'l'}, {x:5,y:2,d:'u',c:'p',sz:'l'}, {x:8,y:10,d:'d',c:'p',sz:'l'},
+      {x:6,y:0,d:'ul',c:'y',sz:'m'}, {x:3,y:1,d:'ul',c:'y',sz:'xl'}, {x:4,y:1,d:'u',c:'b',sz:'m'}, {x:8,y:5,d:'d',c:'b',sz:'m'},
+      {x:10,y:5,d:'dr',c:'b',sz:'l'}, {x:10,y:6,d:'ur',c:'b',sz:'m'}, {x:10,y:9,d:'r',c:'g',sz:'m'}, {x:0,y:2,d:'ul',c:'g',sz:'l'},
+      {x:5,y:10,d:'dl',c:'g'}, {x:9,y:3,d:'ur',c:'b',sz:'l'}, {x:1,y:3,d:'l',c:'b',sz:'xl'}, {x:8,y:2,d:'ul',c:'r',sz:'l'},
+      {x:10,y:0,d:'ul',c:'r',sz:'m'}, {x:0,y:4,d:'ur',c:'r',sz:'l'}, {x:10,y:4,d:'dr',c:'r',sz:'m'}, {x:6,y:4,d:'r',c:'b',sz:'xl'},
+      {x:5,y:3,d:'u',c:'b',sz:'m'}, {x:1,y:6,d:'l',c:'b',sz:'l'}, {x:0,y:5,d:'dl',c:'b',sz:'l'}, {x:3,y:9,d:'ur',c:'y'},
+      {x:9,y:9,d:'r',c:'y',sz:'l'}, {x:6,y:5,d:'r',c:'b',sz:'xl'}, {x:6,y:1,d:'u',c:'b',sz:'l'}, {x:2,y:1,d:'dl',c:'b'},
+      {x:0,y:9,d:'l',c:'g',sz:'l'}, {x:1,y:9,d:'l',c:'g',sz:'l'}, {x:1,y:5,d:'dl',c:'g',sz:'xl',ice:28}, {x:6,y:8,d:'dr',c:'b'},
+      {x:5,y:5,d:'d',c:'b',sz:'m'}, {x:1,y:4,d:'l',c:'b',sz:'l'}, {x:0,y:7,d:'l',c:'y',sz:'m'}, {x:1,y:7,d:'ul',c:'y',sz:'m'},
+      {x:7,y:6,d:'ur',c:'y'}, {x:10,y:1,d:'ul',c:'p',sz:'m'}, {x:9,y:7,d:'dr',c:'p',sz:'l'}, {x:4,y:6,d:'r',c:'p'},
+      {x:2,y:7,d:'l',c:'b',sz:'m'}, {x:6,y:2,d:'dr',c:'b',sz:'l'}, {x:10,y:7,d:'ul',c:'b',sz:'l',ice:36}, {x:3,y:3,d:'r',c:'b',sz:'l'},
+      {x:6,y:7,d:'ur',c:'r',sz:'l'}, {x:9,y:8,d:'ur',c:'r',sz:'m'}, {x:3,y:8,d:'ul',c:'r',sz:'xl'}, {x:1,y:0,d:'d',c:'r',sz:'l',ice:36},
+      {x:10,y:10,d:'r',c:'b',sz:'l'}, {x:9,y:1,d:'d',c:'b',sz:'m'}, {x:4,y:2,d:'ul',c:'y'}, {x:6,y:10,d:'d',c:'y',sz:'l'},
+      {x:2,y:10,d:'dl',c:'b',sz:'l',ice:40}
+    ],
+    tunnels:[{x:1,y:1,d:'ur',stack:[{c:'p',sz:'m'},{c:'p'},{c:'p',sz:'l'}]}, {x:2,y:9,d:'dl',stack:[{c:'p'},{c:'g',sz:'l'},{c:'g'}]}],
+    queue:q('ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') },
+  /* 日本 L17：72 架 / 2300 人 / 11x11 / 5 閘 / 冰封 5 / 特大 8 */
+  { queueShape:'squareSpiralTail', w:11, h:11, gates:5, stars:true, par:72, planes:[
+      {x:2,y:10,d:'d',c:'g',sz:'xl'}, {x:5,y:10,d:'dr',c:'g',sz:'l'}, {x:6,y:0,d:'ul',c:'y',sz:'xl'}, {x:10,y:7,d:'ur',c:'y',sz:'l'},
+      {x:8,y:8,d:'dr',c:'y'}, {x:5,y:9,d:'d',c:'y',sz:'m'}, {x:3,y:0,d:'ul',c:'r',sz:'m'}, {x:4,y:5,d:'u',c:'r'},
+      {x:8,y:1,d:'ur',c:'r',sz:'l'}, {x:2,y:9,d:'l',c:'b',sz:'xl'}, {x:9,y:5,d:'r',c:'b',sz:'l'}, {x:0,y:0,d:'ul',c:'b'},
+      {x:5,y:0,d:'ur',c:'b'}, {x:9,y:8,d:'dr',c:'g',sz:'m'}, {x:10,y:4,d:'ur',c:'g',sz:'l'}, {x:10,y:0,d:'ur',c:'g',sz:'m'},
+      {x:8,y:0,d:'u',c:'g',sz:'l'}, {x:5,y:4,d:'r',c:'p',sz:'l'}, {x:10,y:8,d:'dr',c:'p',sz:'l'}, {x:9,y:10,d:'dl',c:'p',sz:'l'},
+      {x:3,y:6,d:'ur',c:'r',sz:'l'}, {x:6,y:9,d:'dl',c:'r',sz:'l'}, {x:7,y:10,d:'dl',c:'r',sz:'l'}, {x:8,y:5,d:'ur',c:'g',sz:'m'},
+      {x:6,y:10,d:'r',c:'g',sz:'l'}, {x:0,y:1,d:'dl',c:'r',sz:'l'}, {x:0,y:2,d:'dl',c:'r',sz:'l'}, {x:2,y:2,d:'l',c:'r'},
+      {x:1,y:5,d:'dr',c:'r',sz:'l'}, {x:1,y:10,d:'ul',c:'b',sz:'xl'}, {x:3,y:1,d:'dr',c:'b',sz:'l',ice:20}, {x:4,y:7,d:'dl',c:'b',sz:'m'},
+      {x:7,y:8,d:'r',c:'b',sz:'m'}, {x:8,y:9,d:'ur',c:'g',sz:'xl'}, {x:0,y:10,d:'dl',c:'g',sz:'m'}, {x:1,y:6,d:'ul',c:'g',sz:'m'},
+      {x:2,y:8,d:'dl',c:'g',sz:'l',ice:24}, {x:1,y:1,d:'u',c:'r',sz:'xl'}, {x:7,y:3,d:'dl',c:'r'}, {x:1,y:4,d:'dl',c:'r',sz:'l'},
+      {x:0,y:7,d:'l',c:'r',sz:'m'}, {x:0,y:3,d:'dr',c:'y',sz:'l'}, {x:5,y:1,d:'ul',c:'y',sz:'l'}, {x:0,y:8,d:'dr',c:'y'},
+      {x:7,y:1,d:'u',c:'y',sz:'l',ice:28}, {x:8,y:2,d:'ul',c:'r',sz:'xl'}, {x:9,y:6,d:'ur',c:'r',sz:'l',ice:28}, {x:2,y:3,d:'l',c:'r',sz:'m'},
+      {x:5,y:7,d:'u',c:'y',sz:'l'}, {x:2,y:0,d:'l',c:'y',sz:'m'}, {x:1,y:8,d:'ur',c:'y',sz:'l'}, {x:10,y:6,d:'ul',c:'y',sz:'m'},
+      {x:3,y:9,d:'l',c:'r',sz:'l'}, {x:4,y:10,d:'dl',c:'r',sz:'l'}, {x:6,y:1,d:'ul',c:'r',sz:'l'}, {x:3,y:4,d:'u',c:'r',sz:'l'},
+      {x:0,y:6,d:'dl',c:'b',sz:'l',ice:36}, {x:7,y:9,d:'l',c:'b',sz:'l'}, {x:0,y:4,d:'l',c:'b',sz:'l'}, {x:2,y:1,d:'dl',c:'y',sz:'m'},
+      {x:10,y:2,d:'dr',c:'y',sz:'l'}, {x:6,y:8,d:'dl',c:'g',sz:'l'}, {x:6,y:6,d:'dr',c:'g',sz:'m'}, {x:6,y:7,d:'ul',c:'g',sz:'l'},
+      {x:9,y:2,d:'l',c:'g',sz:'xl'}, {x:6,y:5,d:'u',c:'b',sz:'l'}
+    ],
+    tunnels:[{x:9,y:0,d:'ul',stack:[{c:'p',sz:'l'},{c:'p'},{c:'p',sz:'m'}]}, {x:0,y:5,d:'l',stack:[{c:'y',sz:'m'},{c:'y',sz:'m'},{c:'g',sz:'m'}]}],
+    queue:q('ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') },
+  /* 日本 L18：69 架 / 2352 人 / 11x11 / 5 閘 / 冰封 5 / 特大 10 */
+  { queueShape:'heart', w:11, h:11, gates:5, stars:true, par:69, milestone:'貴賓室終極擴建 Tier 3！', planes:[
+      {x:7,y:0,d:'ur',c:'p',sz:'l'}, {x:0,y:7,d:'l',c:'g',sz:'l'}, {x:10,y:5,d:'dr',c:'g',sz:'m'}, {x:5,y:9,d:'d',c:'r',sz:'xl'},
+      {x:4,y:6,d:'d',c:'r',sz:'l'}, {x:10,y:10,d:'ur',c:'r',sz:'l'}, {x:9,y:6,d:'ur',c:'b',sz:'l'}, {x:10,y:4,d:'ur',c:'b',sz:'xl'},
+      {x:9,y:1,d:'r',c:'b',sz:'m'}, {x:0,y:1,d:'dl',c:'p',sz:'l'}, {x:9,y:2,d:'ur',c:'p',sz:'l'}, {x:8,y:1,d:'ul',c:'y',sz:'m'},
+      {x:8,y:2,d:'dr',c:'y'}, {x:10,y:2,d:'ur',c:'b',sz:'l'}, {x:10,y:3,d:'ul',c:'b',sz:'l'}, {x:10,y:6,d:'ur',c:'p',sz:'xl'},
+      {x:2,y:4,d:'l',c:'p',sz:'m'}, {x:10,y:7,d:'ur',c:'g',sz:'l'}, {x:9,y:0,d:'u',c:'g',sz:'l'}, {x:0,y:9,d:'ul',c:'g',sz:'xl'},
+      {x:1,y:10,d:'dl',c:'b',sz:'l'}, {x:0,y:0,d:'dl',c:'b',sz:'l'}, {x:4,y:0,d:'u',c:'p',sz:'l'}, {x:2,y:10,d:'dr',c:'p',sz:'l'},
+      {x:4,y:1,d:'u',c:'g',sz:'l'}, {x:5,y:7,d:'dl',c:'g',sz:'l'}, {x:7,y:1,d:'ur',c:'g',sz:'l'}, {x:2,y:9,d:'dl',c:'g',sz:'m'},
+      {x:6,y:3,d:'ur',c:'y',sz:'m'}, {x:0,y:2,d:'u',c:'y',sz:'m'}, {x:0,y:6,d:'u',c:'y',sz:'l',ice:20}, {x:3,y:0,d:'ur',c:'g',sz:'l'},
+      {x:9,y:10,d:'r',c:'g',sz:'m'}, {x:10,y:0,d:'ul',c:'g',sz:'l'}, {x:1,y:1,d:'l',c:'p',sz:'xl'}, {x:5,y:8,d:'ur',c:'p',sz:'l'},
+      {x:6,y:10,d:'d',c:'p',sz:'l'}, {x:8,y:10,d:'r',c:'g',sz:'l'}, {x:10,y:9,d:'u',c:'g',sz:'l'}, {x:3,y:2,d:'ur',c:'g',sz:'l'},
+      {x:6,y:8,d:'dl',c:'y',sz:'l'}, {x:8,y:4,d:'ul',c:'y',sz:'l',ice:24}, {x:6,y:1,d:'dr',c:'y',sz:'xl'}, {x:2,y:2,d:'ur',c:'p',sz:'l'},
+      {x:1,y:6,d:'l',c:'p',sz:'l'}, {x:1,y:3,d:'dl',c:'p',sz:'m'}, {x:7,y:8,d:'dl',c:'r',sz:'xl'}, {x:1,y:0,d:'ul',c:'r',sz:'m'},
+      {x:2,y:7,d:'dr',c:'r',sz:'l'}, {x:3,y:10,d:'ul',c:'p',sz:'m'}, {x:3,y:6,d:'d',c:'p'}, {x:2,y:5,d:'l',c:'g',sz:'l',ice:32},
+      {x:4,y:3,d:'ur',c:'g',sz:'xl'}, {x:0,y:8,d:'dl',c:'g',sz:'l',ice:32}, {x:9,y:5,d:'dl',c:'r',sz:'m',ice:32}, {x:8,y:7,d:'dl',c:'r',sz:'xl'},
+      {x:2,y:1,d:'dl',c:'r',sz:'l'}, {x:7,y:5,d:'dr',c:'y',sz:'l'}, {x:8,y:9,d:'dl',c:'y',sz:'m'}, {x:2,y:3,d:'dl',c:'y',sz:'xl'},
+      {x:3,y:4,d:'u',c:'g',sz:'m'}, {x:0,y:10,d:'l',c:'g',sz:'m'}, {x:4,y:2,d:'u',c:'g'}
+    ],
+    tunnels:[{x:9,y:8,d:'r',stack:[{c:'r',sz:'l'},{c:'r',sz:'m'},{c:'r',sz:'l'}]}, {x:7,y:10,d:'d',stack:[{c:'p',sz:'l'},{c:'p',sz:'l'},{c:'p',sz:'l'}]}],
+    queue:q('rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyypppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyygggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg') },
+  /* 日本 L19：67 架 / 2400 人 / 11x11 / 5 閘 / 冰封 6 / 特大 10 */
+  { queueShape:'hexRing', w:11, h:11, gates:5, stars:true, par:67, planes:[
+      {x:0,y:9,d:'dl',c:'p',sz:'m'}, {x:0,y:10,d:'l',c:'p',sz:'l'}, {x:10,y:8,d:'dr',c:'p',sz:'l'}, {x:1,y:9,d:'ul',c:'b',sz:'m'},
+      {x:8,y:1,d:'r',c:'b',sz:'xl'}, {x:6,y:0,d:'ur',c:'b',sz:'l'}, {x:0,y:2,d:'dl',c:'b',sz:'l'}, {x:3,y:10,d:'d',c:'g',sz:'l'},
+      {x:3,y:1,d:'ur',c:'g',sz:'l'}, {x:3,y:7,d:'dl',c:'g',sz:'xl'}, {x:10,y:9,d:'ur',c:'r',sz:'xl'}, {x:2,y:1,d:'ul',c:'r',sz:'l'},
+      {x:0,y:5,d:'dl',c:'r',sz:'xl'}, {x:7,y:1,d:'u',c:'r',sz:'l'}, {x:8,y:2,d:'r',c:'b',sz:'l'}, {x:0,y:6,d:'dl',c:'b',sz:'l'},
+      {x:8,y:8,d:'r',c:'b',sz:'l'}, {x:0,y:3,d:'ul',c:'g',sz:'m'}, {x:2,y:6,d:'l',c:'g',sz:'m'}, {x:1,y:1,d:'l',c:'r',sz:'xl'},
+      {x:7,y:10,d:'d',c:'r',sz:'xl'}, {x:4,y:3,d:'dr',c:'r',sz:'l'}, {x:8,y:0,d:'ur',c:'g',sz:'l'}, {x:9,y:9,d:'r',c:'g',sz:'l'},
+      {x:10,y:4,d:'ur',c:'g',sz:'xl'}, {x:5,y:9,d:'dr',c:'b',sz:'l'}, {x:3,y:9,d:'ul',c:'b',sz:'l'}, {x:9,y:0,d:'dr',c:'g',sz:'l'},
+      {x:4,y:8,d:'dr',c:'g',sz:'l'}, {x:0,y:4,d:'u',c:'y',sz:'l'}, {x:1,y:10,d:'dl',c:'y',sz:'l'}, {x:8,y:9,d:'r',c:'g',sz:'l'},
+      {x:10,y:6,d:'dl',c:'g',sz:'l'}, {x:6,y:3,d:'l',c:'g',sz:'l',ice:20}, {x:10,y:7,d:'ur',c:'y',sz:'l',ice:24}, {x:4,y:10,d:'ul',c:'y',sz:'l',ice:24},
+      {x:5,y:10,d:'dl',c:'y',sz:'m'}, {x:5,y:1,d:'ul',c:'g',sz:'m'}, {x:8,y:10,d:'d',c:'g',sz:'l'}, {x:10,y:0,d:'dr',c:'g',sz:'xl'},
+      {x:9,y:6,d:'d',c:'g',sz:'m'}, {x:2,y:0,d:'r',c:'b',sz:'l'}, {x:10,y:10,d:'d',c:'b',sz:'l'}, {x:2,y:2,d:'dl',c:'b',sz:'l'},
+      {x:6,y:8,d:'dl',c:'p',sz:'m'}, {x:3,y:5,d:'dl',c:'p',sz:'m'}, {x:6,y:1,d:'l',c:'y',sz:'l',ice:28}, {x:8,y:5,d:'dr',c:'y',sz:'xl'},
+      {x:10,y:3,d:'d',c:'b',sz:'l'}, {x:9,y:3,d:'u',c:'b',sz:'l'}, {x:2,y:9,d:'d',c:'b',sz:'m'}, {x:1,y:2,d:'l',c:'b',sz:'l',ice:32},
+      {x:6,y:9,d:'d',c:'g',sz:'l'}, {x:0,y:7,d:'d',c:'g',sz:'l'}, {x:9,y:5,d:'l',c:'g',sz:'xl'}, {x:3,y:2,d:'dr',c:'r',sz:'l'},
+      {x:6,y:2,d:'dl',c:'r',sz:'l'}, {x:7,y:4,d:'d',c:'b',sz:'l',ice:36}, {x:2,y:7,d:'ur',c:'b',sz:'l'}, {x:6,y:4,d:'ur',c:'r',sz:'m'},
+      {x:8,y:3,d:'l',c:'r',sz:'l'}
+    ],
+    tunnels:[{x:0,y:1,d:'u',stack:[{c:'r',sz:'l'},{c:'r',sz:'l'},{c:'b',sz:'l'}]}, {x:2,y:10,d:'d',stack:[{c:'b',sz:'l'},{c:'b',sz:'l'},{c:'p',sz:'l'}]}],
+    queue:q('rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr') },
+  /* 日本 L20：65 架 / 2452 人 / 11x11 / 5 閘 / 冰封 6 / 特大 12 */
+  { queueShape:'spiral', w:11, h:11, gates:5, stars:true, par:65, milestone:'機庫終極擴建 Tier 3！形狀關：五重塔．第二章完成！', planes:[
+      {x:3,y:0,d:'ul',c:'b',sz:'l'}, {x:2,y:0,d:'u',c:'b',sz:'l'}, {x:9,y:8,d:'r',c:'b',sz:'l'}, {x:9,y:10,d:'d',c:'b',sz:'l'},
+      {x:8,y:5,d:'dr',c:'y',sz:'l'}, {x:10,y:10,d:'d',c:'y',sz:'l'}, {x:1,y:7,d:'ul',c:'y',sz:'l'}, {x:4,y:2,d:'dl',c:'y',sz:'l'},
+      {x:5,y:7,d:'d',c:'r',sz:'l'}, {x:9,y:7,d:'dr',c:'r',sz:'m'}, {x:1,y:10,d:'ul',c:'r',sz:'l'}, {x:10,y:5,d:'ur',c:'g',sz:'l'},
+      {x:9,y:3,d:'r',c:'g',sz:'l'}, {x:2,y:1,d:'ul',c:'g',sz:'l'}, {x:0,y:0,d:'ul',c:'r',sz:'l'}, {x:2,y:7,d:'dr',c:'r',sz:'l'},
+      {x:3,y:10,d:'dl',c:'r',sz:'l'}, {x:4,y:3,d:'ul',c:'y',sz:'xl'}, {x:6,y:4,d:'dr',c:'y',sz:'l'}, {x:3,y:7,d:'l',c:'g',sz:'xl'},
+      {x:9,y:4,d:'u',c:'g',sz:'xl'}, {x:4,y:7,d:'l',c:'g',sz:'l'}, {x:2,y:2,d:'u',c:'p',sz:'l'}, {x:5,y:0,d:'ur',c:'p',sz:'l'},
+      {x:7,y:8,d:'r',c:'p',sz:'l'}, {x:0,y:4,d:'dl',c:'p',sz:'l'}, {x:9,y:5,d:'dl',c:'y',sz:'l'}, {x:8,y:10,d:'d',c:'y',sz:'l'},
+      {x:8,y:7,d:'l',c:'b',sz:'l'}, {x:0,y:3,d:'l',c:'b',sz:'l'}, {x:9,y:9,d:'ul',c:'p',sz:'l'}, {x:3,y:1,d:'ur',c:'p',sz:'xl'},
+      {x:6,y:9,d:'ur',c:'p',sz:'xl',ice:20}, {x:6,y:0,d:'ur',c:'r',sz:'l',ice:20}, {x:1,y:9,d:'dl',c:'r',sz:'xl',ice:24}, {x:10,y:2,d:'r',c:'r',sz:'xl',ice:24},
+      {x:3,y:9,d:'d',c:'r',sz:'xl'}, {x:7,y:0,d:'ur',c:'g',sz:'l',ice:24}, {x:6,y:3,d:'ul',c:'g',sz:'xl'}, {x:2,y:10,d:'d',c:'g',sz:'l'},
+      {x:3,y:5,d:'d',c:'b',sz:'l'}, {x:0,y:5,d:'d',c:'b',sz:'l',ice:24}, {x:10,y:9,d:'ul',c:'p'}, {x:4,y:5,d:'u',c:'p',sz:'l'},
+      {x:1,y:3,d:'u',c:'p',sz:'l'}, {x:2,y:3,d:'r',c:'p',sz:'l'}, {x:8,y:4,d:'ur',c:'g',sz:'l'}, {x:10,y:6,d:'u',c:'g',sz:'l'},
+      {x:5,y:6,d:'u',c:'g',sz:'l'}, {x:1,y:8,d:'r',c:'g',sz:'l'}, {x:2,y:9,d:'dl',c:'r',sz:'l'}, {x:7,y:4,d:'r',c:'r',sz:'l'},
+      {x:0,y:1,d:'l',c:'r',sz:'l'}, {x:8,y:9,d:'d',c:'r',sz:'l'}, {x:8,y:1,d:'dl',c:'g',sz:'l'}, {x:6,y:2,d:'d',c:'g',sz:'l'},
+      {x:0,y:2,d:'u',c:'g',sz:'l'}, {x:7,y:9,d:'dl',c:'g',sz:'l'}, {x:3,y:4,d:'u',c:'y',sz:'xl'}
+    ],
+    tunnels:[{x:6,y:10,d:'dl',stack:[{c:'y',sz:'l'},{c:'y',sz:'xl'},{c:'g',sz:'l'}]}, {x:0,y:10,d:'ul',stack:[{c:'g',sz:'l'},{c:'g',sz:'l'},{c:'g',sz:'xl'}]}],
+    queue:q('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy') },
+];
+
+/* ---------- 章節（國家）：doc 第 11 節「多國機場並存」 ----------
+   每個國家 20 關做一章，各自有自己嘅解鎖進度／星級／機場建築；材料
+   （progress.mats）係全域共用資源。LEVELS 係「當前章節」嘅 alias，
+   其餘 code 照用 LEVELS／levelIdx 就得，唔使逐處改。 */
+const CHAPTERS = [
+  { id:'hk', name:'香港', levels:LEVELS_HK, island:'island',    bsuffix:''    },
+  { id:'jp', name:'日本', levels:LEVELS_JP, island:'island_jp', bsuffix:'_jp' },
+];
+let chapterId = 'hk';
+let LEVELS = LEVELS_HK;
+function chapter(){ return CHAPTERS.find(c=>c.id===chapterId) || CHAPTERS[0]; }
+/* 建築素材 key：香港用 b_<id>，日本用 b_<id>_jp（Tier 2／3 日本版未出圖，
+   會自動跌返 Tier 1 日本版，再唔得就用香港版）。 */
+function bKey(id, tier){
+  const sfx = chapter().bsuffix;
+  return tier<=1 ? 'b_'+id+sfx : 'b_'+id+sfx+'_'+tier;
+}
+function bSprite(id, tier){
+  return sprite(bKey(id,tier)) || sprite(bKey(id,1))
+      || sprite(tier<=1 ? 'b_'+id : 'b_'+id+'_'+tier) || sprite('b_'+id);
+}
+
 const COLORS = {
   red:   {main:'#ff6b6b', dark:'#c74848', lite:'#ffa3a3'},
   blue:  {main:'#4da3ff', dark:'#2f79cc', lite:'#93c8ff'},
@@ -973,9 +1453,12 @@ function sprite(k){
    16/24/36（同 gen-levels.js 一致）。 */
 /* 2026-09-03 再改：用戶試玩過 15/25/35 + 一排 5 個，覺得太易玩，改返
    一排 4 個（QUEUE_ROWS=4），載客量返返 4 嘅倍數 16/24/36。 */
-const SIZE_CAP = {s:16, m:24, l:36};
+const SIZE_CAP = {s:16, m:24, l:36, xl:48};
+/* 特大型客機（doc _33 日本 L15 首次登場）：doc 寫 50 座，但載客量一定要係
+   一排人數（QUEUE_ROWS=4）嘅倍數，所以落實做 48。⚠️ 未有獨立美術，暫時
+   借用大型飛船 sprite，靠閘位上面嘅「已上機/總數」數字牌分辨。 */
 function planeSpriteKey(p){
-  return 'plane_'+p.c+(p.sz==='m'?'_m':p.sz==='l'?'_l':'');
+  return 'plane_'+p.c+(p.sz==='m'?'_m':(p.sz==='l'||p.sz==='xl')?'_l':'');
 }
 /* 材料 icon（取代 🧱）：DOM 用 <img> 標籤，插入文字用 matsImg() */
 function matsImg(){
@@ -1069,23 +1552,60 @@ const DIRV = {
 };
 
 /* ---------- 本地進度 (offline, webview-safe) ---------- */
-const SAVE_KEY = 'airportsolver.progress.v3';
+const SAVE_KEY = 'airportsolver.progress.v4';
+const SAVE_KEY_V3 = 'airportsolver.progress.v3';
 function loadProgress(){
-  let p = {unlocked:1, stars:{}, done:{}};
-  try{ const s = localStorage.getItem(SAVE_KEY); if(s) p = JSON.parse(s); }catch(e){}
+  let p = {};
+  try{
+    const s = localStorage.getItem(SAVE_KEY) || localStorage.getItem(SAVE_KEY_V3);
+    if(s) p = JSON.parse(s);
+  }catch(e){}
   /* 建造 meta 欄位（doc 第 11 節）。結構上用 airports[站點] 包住，
      為 Growth「多國機場並存」預留（doc 第 8 節⚠️：多站點存檔） */
   p.mats ??= 0;                                        // 單一資源：建造材料
   p.claimed ??= {};                                    // 每關已領材料總額（星級差額制）
   for(const k of Object.keys(p.claimed))               // 舊版 bool 存檔遷移
     if(p.claimed[k]===true) p.claimed[k] = 15;
-  p.airports ??= {main:{built:{terminal:1,tower:0,vip:0,hangar:0}}};
+  /* v3（單章節＝香港）遷移做 v4（多章節）。每章各有解鎖／星級／已領材料，
+     材料本身全域共用。機場建築由 airports.main 搬去 airports.hk。 */
+  const blank = ()=>({unlocked:1, stars:{}, done:{}, claimed:{}});
+  p.ch ??= {};
+  p.ch.hk ??= { unlocked: p.unlocked ?? 1, stars: p.stars || {},
+                done: p.done || {}, claimed: p.claimed || {} };
+  p.ch.jp ??= blank();
+  for(const k of ['unlocked','stars','done','claimed']) delete p[k];
+  p.airports ??= {};
+  if(p.airports.main){ p.airports.hk ??= p.airports.main; delete p.airports.main; }
+  const blankAirport = ()=>({built:{terminal:1,tower:0,vip:0,hangar:0}});
+  p.airports.hk ??= blankAirport();
+  p.airports.jp ??= blankAirport();
+  p.cur ??= 'hk';
   return p;
+}
+/* 當前章節嘅進度（解鎖到第幾關、星級、已領材料） */
+function chapterProg(){ return progress.ch[chapterId] || progress.ch.hk; }
+/* 一個章節係咪已經全部關卡打完（用嚟解鎖下一個國家） */
+function chapterDone(id){
+  const ch = CHAPTERS.find(c=>c.id===id);
+  const pr = progress.ch[id];
+  if(!ch||!pr) return false;
+  return ch.levels.every((_,i)=>pr.done[String(i)]);
+}
+function setChapter(id){
+  if(!CHAPTERS.some(c=>c.id===id)) return;
+  chapterId = id;
+  LEVELS = chapter().levels;
+  progress.cur = id;
+  saveProgress(progress);
+  updateMatsChips();
 }
 function saveProgress(p){
   try{ localStorage.setItem(SAVE_KEY, JSON.stringify(p)); }catch(e){}
 }
 let progress = loadProgress();
+/* 開機回到上次玩緊嗰個章節（CHAPTERS／LEVELS 喺上面已經定義好） */
+chapterId = progress.cur && progress.ch[progress.cur] ? progress.cur : 'hk';
+LEVELS = chapter().levels;
 
 /* ---------- canvas / layout ---------- */
 const frame = document.getElementById('frame');
@@ -1647,7 +2167,11 @@ function startLevel(i){
   planes = L.planes.map((p,id)=>{
     const sz = p.sz || 's';
     const base = {id, c:CKEY[p.c]||p.c, sz, cap: L.type==='radial' ? L.cap : SIZE_CAP[sz], boarded:0,
-      state:'idle', animStart:0, slotIdx:-1, shakeT:0};
+      state:'idle', animStart:0, slotIdx:-1, shakeT:0,
+      /* 冰封格（doc _33 第 2／11 節，日本 L14 起）：ice = 要全盤累計清走
+         幾多架飛機先解凍。解凍之前顏色／方向都睇得到（已知但延後可用），
+         同隧道格嘅「資訊不確定」係兩種唔同難度。 */
+      ice: p.ice||0};
     if(L.type==='radial'){ base.a = p.a; base.r = p.r ?? 1; }
     else { base.x=p.x; base.y=p.y; base.d=p.d; }
     return base;
@@ -1695,6 +2219,7 @@ function startLevel(i){
     queue = [];   // 舊 array 唔再用（passengersLeft 直接數迴旋處＋尾巴）
   }
   slotPlanes = Array(nSlots).fill(null);
+  departedCount = 0;             // 冰封格解凍條件：全盤累計清走幾多架
   moves = 0; score = 0; combo = 0; comboTimer = 0;
   boardings = [];
   particles = []; floats = []; shakeT = 0;
@@ -1720,6 +2245,11 @@ function show(id){ document.getElementById(id).hidden = false; }
 function hide(id){ document.getElementById(id).hidden = true; }
 
 /* ---------- Grid-Based Puzzle：固定方向阻擋判定 ---------- */
+/* 全關累計清走（起飛）咗幾多架，冰封格靠呢個數解凍 */
+let departedCount = 0;
+function frozen(p){ return !!(p.ice && departedCount < p.ice); }
+function iceLeft(p){ return Math.max(0, (p.ice||0) - departedCount); }
+
 function occupied(cx, cy, except){
   for(const p of planes){
     /* 隧道格頭一架（state='covered'）都算實際企喺個格度，同 idle 飛機
@@ -1814,6 +2344,15 @@ cv.addEventListener('pointerdown', e=>{
   if(!hit) return;
   moves++; updateHud();                 // 步數＝撳飛機次數（含撳唔郁；冇失敗冇上限）
   hintOn = false;
+  /* 冰封格未解凍：撳極都唔郁（連指揮棒都救唔到——佢救嘅係「被圍死」，
+     唔係「未夠鐘」），話返玩家仲差幾多架先解凍。 */
+  if(frozen(hit)){
+    hit.shakeT = 0.32;
+    const ci = planeCenter(hit);
+    floats.push({x:ci.x, y:ci.y-cs*0.6, txt:'仲差 '+iceLeft(hit)+' 架解凍', life:1, big:false, start:performance.now()});
+    ping(140,0.12,'square',0.08);
+    return;
+  }
   /* 指揮棒已上膛：呢一撳直接送架機入閘，**跳過 pathClear**（成個道具
      嘅意義就係救返被圍死嗰啲機）。用完即解除上膛。 */
   if(wandArmed){
@@ -1961,6 +2500,7 @@ function takeoff(p){
   p.state='takeoff';
   p.animStart = performance.now();
   slotPlanes[p.slotIdx] = null;
+  departedCount++;                // 冰封格解凍進度
   combo = comboTimer>0 ? combo+1 : 1;
   comboTimer = COMBO_WINDOW;
   const pts = 100*combo;
@@ -1989,22 +2529,22 @@ function checkWin(){
     gameState='levelClear';
     updateAddGateBtn();
     const key = String(levelIdx);
-    progress.done[key] = true;
+    chapterProg().done[key] = true;
     let stars = 0;
     if(L.stars){
       stars = moves<=L.par ? 3 : moves<=L.par+3 ? 2 : 1;
-      progress.stars[key] = Math.max(progress.stars[key]||0, stars);
+      chapterProg().stars[key] = Math.max(chapterProg().stars[key]||0, stars);
     }
     /* 材料發放（doc 第 11 節 v1 價目）：星級制 1★=5/2★=10/3★=15，
        重玩只補「最佳星級提升」嘅差額（doc：重玩換更高星先追得切）。
        L1-6 未有星級評分 → 完成當足額 15。 */
-    const prev = progress.claimed[key] || 0;
-    const total = L.stars ? starReward(progress.stars[key]||0) : 15;
+    const prev = chapterProg().claimed[key] || 0;
+    const total = L.stars ? starReward(chapterProg().stars[key]||0) : 15;
     const matsGain = Math.max(0, total - prev);
-    progress.claimed[key] = Math.max(prev, total);
+    chapterProg().claimed[key] = Math.max(prev, total);
     progress.mats += matsGain;
     lastMatsGain = matsGain;
-    progress.unlocked = Math.max(progress.unlocked, Math.min(levelIdx+2, LEVELS.length));
+    chapterProg().unlocked = Math.max(chapterProg().unlocked, Math.min(levelIdx+2, LEVELS.length));
     saveProgress(progress);
     document.getElementById('winMats').innerHTML =
       matsGain>0 ? `${matsImg()} +${matsGain} 建造材料` : `${matsImg()} 已領取本關卡材料（獲得更高星級可補領差額）`;
@@ -2024,8 +2564,11 @@ function checkWin(){
       const ms = document.getElementById('winMilestone');
       if(L.milestone){ ms.hidden=false; ms.textContent = L.milestone; }
       else ms.hidden=true;
+      /* 打爆一章最後一關：如果下一個章節已經解鎖，粒掣直接帶你過去 */
+      const nextCh = chapterId==='hk' && chapterDone('hk') ? CHAPTERS.find(c=>c.id==='jp') : null;
       document.getElementById('btnNext').innerHTML =
-        levelIdx+1 < LEVELS.length ? `下一班航班 ${ctaImg()}` : '完成！';
+        levelIdx+1 < LEVELS.length ? `下一班航班 ${ctaImg()}`
+        : nextCh ? `前往${nextCh.name}．第二章 ${ctaImg()}` : '完成！';
       show('ovWin');
     }, 500);
   }
@@ -2049,7 +2592,7 @@ function checkStuck(){
   let hope = false;
   for(const c of present){
     if(slotPlanes.some(s=>s && s.boarded<s.cap && s.c===c)){ hope = true; break; }
-    if(hasEmptySlot && planes.some(p=>(p.state==='idle'||p.state==='covered') && p.c===c && pathClear(p))){ hope = true; break; }
+    if(hasEmptySlot && planes.some(p=>(p.state==='idle'||p.state==='covered') && p.c===c && !frozen(p) && pathClear(p))){ hope = true; break; }
   }
   if(!hope){
     gameState='stuck';
@@ -2296,6 +2839,7 @@ function drawIdlePlane(p, nowMs, dt){
   ctx.moveTo(ax-s, -s); ctx.lineTo(ax+s*0.6, 0); ctx.lineTo(ax-s, s);
   ctx.stroke();
   ctx.restore();
+  if(frozen(p)) drawIceCover(p, nowMs);
   /* L1 教學提示：脈動圈 + 手指 pointer sprite（doc 第 15 節資產） */
   if(hintOn && p.id===0){
     const pulse = 1 + Math.sin(nowMs*0.005)*0.12;
@@ -2319,6 +2863,42 @@ function drawIdlePlane(p, nowMs, dt){
     }
     ctx.restore();
   }
+}
+
+/* 冰封格（Ice Lock，doc _33 第 2／11 節）：半透明冰塊蓋喺飛機上面，
+   下面仍然睇得到顏色同方向，另加「仲差 N 架」嘅小數字牌。 */
+function drawIceCover(p, nowMs){
+  const c = planeCenter(p);
+  const w = psz*0.86, h = psz*0.86;
+  ctx.save();
+  ctx.translate(c.x, c.y);
+  /* 冰塊本體：淺藍半透明圓角方 + 高光斜紋 */
+  roundRect(-w/2, -h/2, w, h, w*0.22);
+  ctx.fillStyle = 'rgba(173,216,240,.55)';
+  ctx.fill();
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = 'rgba(255,255,255,.85)';
+  ctx.stroke();
+  ctx.save();
+  roundRect(-w/2, -h/2, w, h, w*0.22); ctx.clip();
+  ctx.globalAlpha = 0.5; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = w*0.10;
+  ctx.beginPath();
+  ctx.moveTo(-w*0.55, h*0.15); ctx.lineTo(w*0.05, -h*0.55);
+  ctx.moveTo(-w*0.10, h*0.55); ctx.lineTo(w*0.50, -h*0.15);
+  ctx.stroke();
+  ctx.restore();
+  /* 「仲差 N 架」數字牌 */
+  const n = iceLeft(p);
+  const r = psz*0.20;
+  const bx = w*0.34, by = -h*0.34;
+  ctx.beginPath(); ctx.arc(bx, by, r, 0, Math.PI*2);
+  ctx.fillStyle = '#1c5f8c'; ctx.fill();
+  ctx.lineWidth = 2; ctx.strokeStyle = '#eaf6ff'; ctx.stroke();
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `800 ${Math.max(10, Math.round(r*1.25))}px 'Baloo 2',sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(String(n), bx, by+0.5);
+  ctx.restore();
 }
 
 /* 隧道格（Tunnel Tile，doc _29 第 2 節）：頭一架 state='covered' 嘅出口
@@ -2618,7 +3198,7 @@ const BUILD_MS = 2600;    // 即時建造嘅視覺動畫長度（doc：10-60 秒
 
 function drawHub(now){
   /* 直向 9:16 島圖 cover 鋪滿全屏 — 就係成個 Hub 世界 */
-  const isl = sprite('island');
+  const isl = sprite(chapter().island) || sprite('island');
   let ix=0, iy=0, iw=VW, ih=VH;
   if(isl){
     const s = Math.max(VW/isl.naturalWidth, VH/isl.naturalHeight);
@@ -2733,14 +3313,14 @@ function drawBuilding(b, tier, x, y, baseW, now){
   if(tier===0 && !anim){
     const t1 = b.tiers[0];
     const can = passedLv() >= t1.lv;
-    const key = 'b_'+b.id;
-    const im1 = sprite(key);
+    const key = bKey(b.id, 1);
+    const im1 = bSprite(b.id, 1);
     const w = baseW*0.8;
     const h = im1 ? w*im1.naturalHeight/im1.naturalWidth : w*0.9;
     ctx.save();
     ctx.globalAlpha = can ? 0.55 + 0.15*Math.sin(now*0.005) : 0.42;
     if(im1){
-      const g = can ? im1 : ghostSprite(key);
+      const g = can ? im1 : (ghostSprite(key) || ghostSprite('b_'+b.id) || im1);
       ctx.drawImage(g, x-w/2, y-h*0.62, w, h);
     }else{
       drawBuildingArt(b.id, 1, x, y, w/90, now);
@@ -2777,7 +3357,7 @@ function drawBuilding(b, tier, x, y, baseW, now){
   /* 建築 sprite：每級用返真實 Tier 圖（Tier1 冇後綴，Tier2/3 有 _2/_3），
      tier 越高越大，Tier 3 加閃爍。冇對應 sprite 就用返 procedural fallback。 */
   const activeTier = Math.max(1,tier);
-  const im = sprite(activeTier===1 ? 'b_'+b.id : `b_${b.id}_${activeTier}`);
+  const im = bSprite(b.id, activeTier);
   const tScale = [0.8, 0.95, 1.12][activeTier-1];
   const w = baseW*tScale;
   const h = im ? w*im.naturalHeight/im.naturalWidth : w*0.9;
@@ -3252,10 +3832,10 @@ document.getElementById('btnRevive').addEventListener('click',()=>{
 });
 
 /* ---------- 機場 Hub（Home，doc 第 4/5 節） ---------- */
-const airport = ()=>progress.airports.main;
+const airport = ()=>progress.airports[chapterId] || progress.airports.hk;
 function passedLv(){
   let m = 0;
-  for(const k of Object.keys(progress.done)) m = Math.max(m, +k+1);
+  for(const k of Object.keys(chapterProg().done)) m = Math.max(m, +k+1);
   return m;
 }
 let buildAnim = null;      // {id, start} 即時建造嘅短視覺動畫（冇等鐘）
@@ -3271,8 +3851,8 @@ function updateMatsChips(){
    （香港→日本→韓國→德國→荷蘭→歐洲地區），MVP 淨係香港可玩，
    其餘用「鎖住＋通關 N 解鎖」卡片顯示，冚埋框架、冇實際內容。 */
 const COUNTRIES = [
-  {id:'hk', name:'香港',     unlocked:true,  sub:'MVP 可玩機場'},
-  {id:'jp', name:'日本',     unlocked:false, sub:'完成香港 20 關解鎖'},
+  {id:'hk', name:'香港',     chapter:true,   sub:'第一章．20 關'},
+  {id:'jp', name:'日本',     chapter:true,   sub:'第二章．20 關（冰封格／特大型客機）'},
   {id:'kr', name:'韓國',     unlocked:false, sub:'完成日本解鎖'},
   {id:'de', name:'德國',     unlocked:false, sub:'完成韓國解鎖'},
   {id:'nl', name:'荷蘭',     unlocked:false, sub:'完成德國解鎖'},
@@ -3283,9 +3863,13 @@ function renderWorldMap(){
   const list = document.getElementById('wmList');
   list.innerHTML='';
   COUNTRIES.forEach((c,i)=>{
+    /* 章節國家：香港永遠開；日本要打完香港 20 關先開。其餘仲未有內容。 */
+    c.unlocked = c.id==='hk' ? true : c.id==='jp' ? chapterDone('hk') : false;
+    if(c.id==='jp' && !c.unlocked) c.sub = '完成香港 20 關解鎖';
     const node = document.createElement('div');
     node.className = 'wm-node '+(i%2===0?'left':'right');
-    const thumb = c.unlocked && AS.island ? `<img src="${AS.island}" alt="${c.name}">` : '';
+    const thumbSrc = AS['island_'+c.id] || AS.island;
+    const thumb = c.unlocked && thumbSrc ? `<img src="${thumbSrc}" alt="${c.name}">` : '';
     const planeHtml = i>0 ? `<img class="wm-plane-marker" src="${AS.ui_ctaplane||''}" alt="">` : '';
     /* 2026-09-02 世界地圖島嶼主題化（doc _29 第 4 節）：有該國「主題島」素材
        （island_<id>_map，透明底大島）就直接畫大島，冇就跌返用圓形卡片縮圖 */
@@ -3301,6 +3885,7 @@ function renderWorldMap(){
       </div>
     </div>`;
     if(c.unlocked) node.addEventListener('click',()=>{
+      setChapter(c.id);
       buildMenu(); hide('ovWorldMap'); show('ovLevels');
     });
     list.appendChild(node);
@@ -3319,12 +3904,13 @@ function switchTab(tab){
 }
 
 function buildMenu(){
+  document.getElementById('levelsTitle').textContent = chapter().name + '．關卡選擇';
   const grid = document.getElementById('levelGrid');
   grid.innerHTML='';
   LEVELS.forEach((Lv,i)=>{
-    const locked = i+1 > progress.unlocked;
-    const done = progress.done[String(i)];
-    const st = progress.stars[String(i)]||0;
+    const locked = i+1 > chapterProg().unlocked;
+    const done = chapterProg().done[String(i)];
+    const st = chapterProg().stars[String(i)]||0;
     const el = document.createElement('div');
     el.className = 'lv'+(locked?' locked':'');
     const sub = locked ? '' : Lv.stars ? (st>0 ? Array(st).fill(0).map(()=>starImg(true)).join('') : '—') : (done?'✓':'—');
@@ -3354,7 +3940,8 @@ function renderBuildList(){
         act = `<button class="btn-up" data-b="${b.id}">升級 ${matsImg()}${t.cost}</button>`;
       else act = `<span class="bneed">還差 ${t.cost-progress.mats} 材料<br>回去多玩幾關吧！</span>`;
     }
-    const iconSrc = (window.ASSET_SRC||{})['b_'+b.id];
+    const AS0 = window.ASSET_SRC||{};
+    const iconSrc = AS0[bKey(b.id,1)] || AS0['b_'+b.id];
     const iconHtml = iconSrc
       ? `<img src="${iconSrc}" alt="${b.name}">`
       : b.icon;   // fallback（正常唔會用到，asset 已內嵌）
@@ -3394,7 +3981,7 @@ function toHub(){
 }
 
 document.getElementById('btnPlay').addEventListener('click',()=>{
-  startLevel(Math.min(progress.unlocked, LEVELS.length)-1);
+  startLevel(Math.min(chapterProg().unlocked, LEVELS.length)-1);
 });
 document.querySelectorAll('.tab-btn').forEach(b=>{
   b.addEventListener('click',()=>switchTab(b.dataset.tab));
@@ -3422,6 +4009,14 @@ document.getElementById('btnDoneMenu').addEventListener('click',toHub);
 document.getElementById('btnNext').addEventListener('click',()=>{
   Ads.maybeInterstitial(()=>{
     if(levelIdx+1 < LEVELS.length) startLevel(levelIdx+1);
+    else if(chapterId==='hk' && chapterDone('hk')){
+      /* 香港章節完結 → 轉去日本第二章嘅關卡選擇 */
+      setChapter('jp');
+      hide('ovWin'); hide('hud');
+      gameState='menu';
+      buildMenu(); show('ovLevels');
+      document.getElementById('tabBar').hidden = false;
+    }
     else { gameState='allClear'; hide('ovWin'); show('ovDone'); }
   });
 });
