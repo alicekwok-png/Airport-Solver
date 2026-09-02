@@ -422,6 +422,21 @@
     background:#3a4767;border:2px solid #12233f;color:var(--ink-dim);
   }
   .langbtn.on{background:var(--green);border-color:#14663a;color:#06301b}
+  /* 參考圖：語言兩粒掣係大粒膠囊，唔係細標籤 */
+  .langbtn{min-width:86px;padding:9px 12px;font-size:15px;border-radius:12px}
+  /* 每行左邊嘅線條 icon */
+  .seticon{
+    width:30px;height:30px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink);
+  }
+  .seticon svg{width:100%;height:100%}
+  .setrow .lbl{flex:1;text-align:left;margin-left:10px}
+  /* 「重新開始這一關」／「返回機場」並排嘅 icon 掣 */
+  .setactions{display:flex;gap:12px;width:100%;margin-top:4px}
+  .setactions[hidden]{display:none}
+  .seticonbtn{flex:1;padding:10px 0;display:flex;align-items:center;justify-content:center}
+  .seticonbtn img{width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.45))}
   #hubDock{
     display:flex;align-items:center;justify-content:center;
   }
@@ -735,16 +750,18 @@
     <div class="panel">
       <div class="ribbon">設定</div>
       <button class="xbtn" id="btnSettingsClose">✕</button>
-      <div class="setrow"><span class="lbl">音效</span><button class="toggle" id="tgSfx"></button></div>
-      <div class="setrow"><span class="lbl">震動</span><button class="toggle" id="tgVibe"></button></div>
-      <div class="setrow"><span class="lbl">語言</span>
+      <div class="setrow"><span class="seticon" id="icSfx"></span><span class="lbl">音效</span><button class="toggle" id="tgSfx"></button></div>
+      <div class="setrow"><span class="seticon" id="icVibe"></span><span class="lbl">震動</span><button class="toggle" id="tgVibe"></button></div>
+      <div class="setrow"><span class="seticon" id="icLang"></span><span class="lbl">語言</span>
         <span class="langpick">
           <button class="langbtn" data-lang="zh">中文</button>
           <button class="langbtn" data-lang="en">English</button>
         </span>
       </div>
-      <button class="btn-sec" id="btnSettingsRestart" hidden>重新開始這一關</button>
-      <button class="btn-sec" id="btnSettingsHome" hidden>返回機場</button>
+      <div class="setactions" id="setActions" hidden>
+        <button class="btn-sec seticonbtn" id="btnSettingsRestart"><img id="icRestart" alt=""></button>
+        <button class="btn-sec seticonbtn" id="btnSettingsHome"><img id="icHome" alt=""></button>
+      </div>
       <button class="btn-main" id="btnSettingsResume">繼續遊戲</button>
     </div>
   </div>
@@ -4446,11 +4463,36 @@ for(const b of document.querySelectorAll('.langbtn')){
   });
 }
 applyLang();          // 開機跟返上次揀嘅語言
-/* inGame=true → 多兩個動作掣（重新開始呢一關／返回機場） */
+/* 設定行嘅線條 icon（inline SVG，唔使多開素材） */
+const SET_ICONS = {
+  icSfx: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">'
+       + '<path d="M6 12h5l6-5v18l-6-5H6z" fill="currentColor" stroke="none"/>'
+       + '<path d="M22 12.5a5 5 0 0 1 0 7"/><path d="M25.5 9a9.5 9.5 0 0 1 0 14"/></svg>',
+  icVibe: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">'
+        + '<rect x="11" y="5" width="10" height="22" rx="3" fill="currentColor" stroke="none"/>'
+        + '<path d="M6 12v8"/><path d="M26 12v8"/></svg>',
+  icLang: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">'
+        + '<circle cx="16" cy="16" r="11"/><path d="M5 16h22"/><path d="M16 5v22"/>'
+        + '<path d="M16 5c4 4 4 18 0 22"/><path d="M16 5c-4 4-4 18 0 22"/></svg>',
+};
+{
+  for(const id in SET_ICONS) document.getElementById(id).innerHTML = SET_ICONS[id];
+  const AS = window.ASSET_SRC||{};
+  document.getElementById('icRestart').src = AS.ui_restart || '';
+  document.getElementById('icHome').src = AS.ui_world || '';
+}
+/* inGame=true → 多兩粒動作掣（重新開始呢一關／返回機場） */
 function openSettings(inGame){
   syncSettingsUI();
-  document.getElementById('btnSettingsRestart').hidden = !inGame;
-  document.getElementById('btnSettingsHome').hidden = !inGame;
+  document.getElementById('setActions').hidden = !inGame;
+  /* icon 掣冇文字，所以要留返文字說明畀輔助工具／長按提示 */
+  const lbl = (id, zh) => {
+    const el = document.getElementById(id);
+    el.setAttribute('aria-label', T(zh));
+    el.setAttribute('title', T(zh));
+  };
+  lbl('btnSettingsRestart', '重新開始這一關');
+  lbl('btnSettingsHome', '返回機場');
   show('ovSettings');
 }
 document.getElementById('btnWinMenu').addEventListener('click',()=>Ads.maybeInterstitial(toHub));
