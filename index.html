@@ -226,8 +226,8 @@
      全部癡埋一齊，冇晒分隔——改做企定喺畫面最右邊、HUD 下面一行，
      同上面嗰堆分開返，唔會再迭埋。 */
   .aidbar{
-    /* 2026-09-02：搬去左上角——右上角而家係迴旋處右邊入口尾巴出畫面嘅位置，會撞埋 */
-    position:absolute; left:10px; top:82px;
+    /* 2026-09-02 用戶：放喺棋盤右下角，唔會遮住嘢（左上／右上都會撞到迴旋處兩條入口尾巴） */
+    position:absolute; right:10px; bottom:14px;
     display:flex; flex-direction:column; gap:8px; align-items:center;
     pointer-events:none;
     z-index:3;
