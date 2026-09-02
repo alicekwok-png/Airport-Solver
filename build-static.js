@@ -49,5 +49,12 @@ ${bodyNoTitle}
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
 fs.writeFileSync(OUT, html);
+
+/* wallet.html（Web3 錢包／NFT 卡，doc _32）本身已經係完整 HTML，照抄過去 */
+const WALLET = path.join(__dirname, 'wallet.html');
+if (fs.existsSync(WALLET)) {
+  fs.copyFileSync(WALLET, path.join(OUT_DIR, 'wallet.html'));
+  console.log('copied public/wallet.html');
+}
 const mb = (fs.statSync(OUT).size / 1048576).toFixed(2);
 console.log(`built public/index.html (${mb} MB) — title: ${title}`);

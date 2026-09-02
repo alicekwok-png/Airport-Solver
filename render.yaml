@@ -15,6 +15,13 @@ services:
         name: Cache-Control
         value: no-store, must-revalidate
     routes:
+      # Web3 錢包獨立頁（wallet.html）要先於下面個 catch-all，否則會被改寫去 index.html
+      - type: rewrite
+        source: /wallet.html
+        destination: /wallet.html
+      - type: rewrite
+        source: /wallet
+        destination: /wallet.html
       # 單頁：任何路徑都回 index.html
       - type: rewrite
         source: /*

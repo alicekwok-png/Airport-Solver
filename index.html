@@ -690,6 +690,10 @@
     <div class="panel">
       <div class="ribbon">商店</div>
       <div class="note big">即將推出，敬請期待！</div>
+      <!-- Web3 錢包／NFT 卡（doc _32，2026-09-02）：獨立 web app（wallet.html），
+           同一 origin 共用 $DST 結餘 -->
+      <div class="note">你的 $DST：<b id="shopDst">0</b>　·　NFT 卡：<b id="shopCards">0</b> 張</div>
+      <button class="btn-sec" id="btnWallet" type="button" style="margin-top:10px">Web3 錢包／NFT 卡（測試版）</button>
     </div>
   </div>
 
@@ -737,7 +741,7 @@
       <img style="width:62px;height:62px;object-fit:contain" id="adIcon" alt="">
       <div class="note big" id="adNote"></div>
       <button class="btn-main" id="btnAdClose" disabled>5</button>
-      <div class="note">測試廣告位 — 正式版由 AdMob 提供。<br>插頁廣告最多每 3 關一次（代碼層面強制執行）。</div>
+      <div class="note">測試廣告位 — 正式版由 AdMob 提供。<br>每完成一關會播放一次插頁廣告（代碼層面強制執行）。</div>
     </div>
   </div>
 
@@ -2920,8 +2924,10 @@ function tickInner(now){
    - 插頁：最多每 3 關一次，過關撳「下一班」先出
    - 獎勵廣告：全自願（卡關救援＋1 閘位／過關雙倍分數）
    - removed：預留一次性「移除廣告」IAP flag（RevenueCat） */
+/* 2026-09-02 用戶拍板：每玩完一關就要睇一次插頁廣告（由「每 3 關一次」改做
+   每關）。「下一班航班」同「返回機場」兩條出路都會經 maybeInterstitial。 */
 const Ads = {
-  INTERSTITIAL_EVERY: 3,
+  INTERSTITIAL_EVERY: 1,
   _since: 0,
   removed: false,
   maybeInterstitial(done){
@@ -2932,7 +2938,9 @@ const Ads = {
       this._show('interstitial', done);
     } else done();
   },
-  showRewarded(onReward){ this._show('rewarded', onReward); },
+  /* 獎勵廣告睇完，除咗原本嘅遊戲獎勵，仲會入 $DST（doc _32 第 7 節：持有
+     NFT 卡有加成）——結餘用 localStorage 同 wallet.html（同一 origin）共用 */
+  showRewarded(onReward){ this._show('rewarded', ()=>{ const g = Web3Bridge.creditAd(); showToast(`+${g} $DST`); onReward(); }); },
   _show(kind, cb){
     const btn = document.getElementById('btnAdClose');
     const note = document.getElementById('adNote');
@@ -2956,6 +2964,42 @@ const Ads = {
     };
   },
 };
+
+/* ---------- Web3 橋接（doc _32 第 7／8 節，2026-09-02）----------
+   $DST token MVP 階段係 off-chain：呢度同 wallet.html（獨立 web app，同一
+   origin）共用一個 localStorage 記錄。規則（暫定，doc 未落實）：每次獎勵
+   廣告基礎 10 $DST，每張 NFT 卡 +0.2 倍，多張疊加、封頂 +1.0 倍。 */
+const Web3Bridge = {
+  KEY: 'airportsolver.web3.v1',
+  BASE_AD_DST: 10,
+  load(){ try{ return JSON.parse(localStorage.getItem(this.KEY)) || {}; }catch(e){ return {}; } },
+  save(s){ try{ localStorage.setItem(this.KEY, JSON.stringify(s)); }catch(e){} },
+  multiplier(s){ const n = (s.cards||[]).length; return 1 + Math.min(1, 0.2*n); },
+  creditAd(){
+    const s = this.load();
+    const mult = this.multiplier(s);
+    const gain = Math.round(this.BASE_AD_DST*mult);
+    s.dst = (s.dst||0) + gain;
+    s.history = [{type:'ad', gain, mult, ts:Date.now(), from:'game'}].concat(s.history||[]).slice(0,50);
+    this.save(s);
+    return gain;
+  },
+};
+function showToast(msg){
+  let el = document.getElementById('toast');
+  if(!el){
+    el = document.createElement('div'); el.id='toast';
+    el.style.cssText='position:absolute;left:50%;top:14%;transform:translateX(-50%);background:rgba(14,21,38,.92);color:#ffe066;font:800 16px "Baloo 2",sans-serif;padding:8px 16px;border-radius:14px;border:2px solid #f5c84c;z-index:40;pointer-events:none;transition:opacity .3s';
+    frame.appendChild(el);
+  }
+  el.textContent = msg; el.style.opacity = '1';
+  clearTimeout(el._t); el._t = setTimeout(()=>{ el.style.opacity='0'; }, 1600);
+}
+function renderShop(){
+  const s = Web3Bridge.load();
+  const el = document.getElementById('shopDst'); if(el) el.textContent = s.dst||0;
+  const c = document.getElementById('shopCards'); if(c) c.textContent = (s.cards||[]).length;
+}
 
 let doubledThisLevel = false, lastMatsGain = 0;
 /* 閘位解鎖（doc 第 7 節 2026-08-29 新增）：每關基礎閘位（L.gates）之外，
@@ -3135,7 +3179,7 @@ function switchTab(tab){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
   if(tab==='home') show('ovHub');
   else if(tab==='map'){ renderWorldMap(); show('ovWorldMap'); }
-  else if(tab==='shop') show('ovShop');
+  else if(tab==='shop'){ renderShop(); show('ovShop'); }
   document.getElementById('tabBar').hidden = false;
 }
 
@@ -3235,7 +3279,9 @@ document.getElementById('btnSpeed').addEventListener('click',()=>{
 document.getElementById('btnRestart').addEventListener('click',()=>startLevel(levelIdx));
 document.getElementById('btnRetry').addEventListener('click',()=>startLevel(levelIdx));
 document.getElementById('btnMenu').addEventListener('click',toHub);
-document.getElementById('btnWinMenu').addEventListener('click',toHub);
+document.getElementById('btnWinMenu').addEventListener('click',()=>Ads.maybeInterstitial(toHub));
+document.getElementById('btnWallet').addEventListener('click',()=>{ window.open('wallet.html', '_blank'); });
+window.addEventListener('focus', renderShop);   // 由 wallet.html 返嚟即刻更新 $DST／卡數
 document.getElementById('btnStuckMenu').addEventListener('click',toHub);
 document.getElementById('btnDoneMenu').addEventListener('click',toHub);
 document.getElementById('btnNext').addEventListener('click',()=>{
