@@ -226,7 +226,8 @@
      全部癡埋一齊，冇晒分隔——改做企定喺畫面最右邊、HUD 下面一行，
      同上面嗰堆分開返，唔會再迭埋。 */
   .aidbar{
-    position:absolute; right:10px; top:82px;
+    /* 2026-09-02：搬去左上角——右上角而家係迴旋處右邊入口尾巴出畫面嘅位置，會撞埋 */
+    position:absolute; left:10px; top:82px;
     display:flex; flex-direction:column; gap:8px; align-items:center;
     pointer-events:none;
     z-index:3;
@@ -775,110 +776,109 @@ function q(s){ return [...s].map(ch=>CKEY[ch]); }
 const LEVELS = [
   /* L1 純互動教學：羅盤雙圈（內外各 8 位＝16 機），全部外向零阻礙。
      密度大幅提高（doc 第10節拍板），保留 hint 教學提示。 */
-  { queueShape:'oRing', type:'radial', cap:25, gates:4, hint:true, planes:[
+  { queueShape:'oRing', queueSplit:132, type:'radial', cap:24, gates:4, hint:true, planes:[
       {a:0,c:'g'}, {a:60,c:'b'}, {a:120,c:'b'}, {a:180,c:'r'}, {a:240,c:'g'}, {a:300,c:'r'}, {a:30,c:'r',r:0.56}, {a:120,c:'b',r:0.56}, {a:210,c:'y',r:0.56}, {a:300,c:'y',r:0.56} ],
-    queue:q('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggbbbbbbbbbbbbrrrrrrrrrrrrrrrrbbbbbgggggggggggggggggggggggggggggggggggggrrrrrrrryyyyyyyyyyyyyyyybbbbgbbbbbbbbbbbbbbbbbyyyyyyyyryyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr') },
+    queue:q('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbggggggggggggggggggggggggbbbbrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrr') },
 
   /* L2：5x5、16 機、4 色 */
-  { queueShape:'ellipseRing', w:5,h:5, gates:4, milestone:'解鎖：控制塔！', planes:[
+  { queueShape:'ellipseRing', queueSplit:220, w:5,h:5, gates:4, milestone:'解鎖：控制塔！', planes:[
       {x:2,y:1,d:'d',c:'y',sz:'m'}, {x:0,y:1,d:'d',c:'y',sz:'m'}, {x:4,y:0,d:'d',c:'r',sz:'m'}, {x:4,y:4,d:'l',c:'r',sz:'l'}, {x:1,y:0,d:'l',c:'g',sz:'m'}, {x:4,y:1,d:'r',c:'b',sz:'m'}, {x:0,y:3,d:'r',c:'y',sz:'m'}, {x:4,y:3,d:'r',c:'g'}, {x:3,y:1,d:'d',c:'r'}, {x:2,y:4,d:'l',c:'g',sz:'l'}, {x:3,y:2,d:'l',c:'r'}, {x:4,y:2,d:'r',c:'y'}, {x:3,y:3,d:'d',c:'g',sz:'l'}, {x:1,y:1,d:'d',c:'b',sz:'m'}, {x:0,y:2,d:'l',c:'b',sz:'m'}, {x:3,y:4,d:'d',c:'b',sz:'l'} ],
-    queue:q('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyybbbbbbbbbbbbrrrrrrrrbbbbbbbbbbbbbrrrrrrrgggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbggggrrrrrrrryyyyggggggggggggrrrrrrrgggggggggrrrryyyyyyyyyyyyrrrrrrrrrrrrrrrrbbbbrrrrryyyybbbbbbbbyyyyyyyyyyyyyyyybyyyyyyyyyyyyyyyyyyrrrrrrrryyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyy') },
+    queue:q('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrgggggggggggggggggggggggg') },
 
   /* L3：5x5、20 機、4 色 */
-  { queueShape:'horseshoe', w:5,h:5, gates:4, planes:[
-      {x:2,y:2,d:'l',c:'g',sz:'l'}, {x:0,y:2,d:'l',c:'y'}, {x:2,y:4,d:'r',c:'y',sz:'m'}, {x:4,y:4,d:'d',c:'b',sz:'l'}, {x:1,y:1,d:'l',c:'b',sz:'m'}, {x:0,y:1,d:'l',c:'y',sz:'m'}, {x:2,y:0,d:'l',c:'r',sz:'m'}, {x:0,y:3,d:'l',c:'r',sz:'m'}, {x:4,y:1,d:'r',c:'y',sz:'l'}, {x:4,y:2,d:'r',c:'r',sz:'m'}, {x:0,y:0,d:'u',c:'b'}, {x:4,y:0,d:'r',c:'g',sz:'l'}, {x:1,y:4,d:'l',c:'g',sz:'l'}, {x:2,y:3,d:'r',c:'y',sz:'m'}, {x:4,y:3,d:'r',c:'b'}, {x:3,y:3,d:'d',c:'b',sz:'l'}, {x:3,y:0,d:'u',c:'g',sz:'m'}, {x:3,y:4,d:'d',c:'r'}, {x:0,y:4,d:'d',c:'g'}, {x:1,y:0,d:'u',c:'r'} ],
-    queue:q('rrrrrrrrrrrrrrrrrrrrggggggggrrrrrrrrrrrrgggggggggggggggggyyyyyyyyyyyyrrrrryyyyyyyrrrrrrrryyyyyyyyrrrrrrrrrrrrrrrryyyyyyyyyyyyybbbbbbbbbbbbggggggggggggggggrrrrrrrrrrrggggbbbbbbbbbbbbbbbbgggggggggggggggbbbbggggyyyyrrrrrrrrrrrrrrrrrryyyyyyyygggggggggggyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbyyyyyyyyyyyybbbyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrbbbbbbbbbbbbyyyyrrrrrrrrrrrrrrrrrrrryyyyyyyyryggggbbbbbbbbbbbbbbbbbbbbbbbbbyggggggggggggggggggggggggbgggggggggggggggggggggg') },
+  { queueShape:'horseshoe', queueSplit:276, w:5,h:5, gates:4, planes:[
+      {x:1,y:0,d:'u',c:'b',sz:'m'}, {x:0,y:0,d:'u',c:'g'}, {x:4,y:3,d:'r',c:'y'}, {x:3,y:2,d:'d',c:'r',sz:'m'}, {x:0,y:1,d:'l',c:'y',sz:'l'}, {x:4,y:4,d:'l',c:'r',sz:'l'}, {x:2,y:1,d:'d',c:'r',sz:'m'}, {x:4,y:2,d:'r',c:'r'}, {x:1,y:2,d:'d',c:'b',sz:'m'}, {x:4,y:1,d:'u',c:'b'}, {x:0,y:2,d:'d',c:'y'}, {x:2,y:2,d:'d',c:'b'}, {x:3,y:3,d:'l',c:'g',sz:'l'}, {x:2,y:0,d:'u',c:'y',sz:'m'}, {x:1,y:3,d:'d',c:'y',sz:'m'}, {x:3,y:1,d:'u',c:'r',sz:'l'}, {x:0,y:3,d:'d',c:'g',sz:'l'}, {x:0,y:4,d:'d',c:'b',sz:'m'}, {x:2,y:4,d:'d',c:'g',sz:'l'}, {x:1,y:4,d:'d',c:'g',sz:'m'} ],
+    queue:q('ggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrggggggggbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyybbbbyyyyyyyyyyyyrrrrrrrrggggggggggggggggbbbbbbbbbbbbbbbbbbbbrrrrbbbbrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyrrrrrrrr') },
 
   /* L4：6x6、24 機、4 色 */
-  { queueShape:'sWave', w:6,h:6, gates:4, milestone:'解鎖：貴賓室！請在建造面板中興建！', planes:[
+  { queueShape:'sWave', queueSplit:332, w:6,h:6, gates:4, milestone:'解鎖：貴賓室！請在建造面板中興建！', planes:[
       {x:4,y:1,d:'d',c:'b',sz:'m'}, {x:5,y:4,d:'l',c:'b'}, {x:3,y:1,d:'d',c:'b',sz:'l'}, {x:4,y:4,d:'d',c:'y'}, {x:2,y:4,d:'l',c:'r',sz:'m'}, {x:5,y:1,d:'u',c:'r',sz:'l'}, {x:1,y:3,d:'r',c:'g',sz:'m'}, {x:0,y:0,d:'r',c:'b',sz:'m'}, {x:3,y:0,d:'u',c:'g'}, {x:3,y:3,d:'r',c:'y',sz:'l'}, {x:0,y:2,d:'r',c:'b'}, {x:5,y:3,d:'r',c:'y',sz:'l'}, {x:5,y:0,d:'r',c:'g',sz:'m'}, {x:2,y:5,d:'d',c:'r'}, {x:0,y:1,d:'l',c:'r'}, {x:0,y:5,d:'l',c:'r',sz:'m'}, {x:2,y:2,d:'u',c:'r'}, {x:1,y:5,d:'d',c:'g',sz:'m'}, {x:4,y:0,d:'u',c:'g',sz:'m'}, {x:5,y:2,d:'r',c:'y',sz:'l'}, {x:1,y:0,d:'u',c:'b',sz:'l'}, {x:0,y:4,d:'l',c:'g',sz:'l'}, {x:0,y:3,d:'l',c:'y',sz:'m'}, {x:4,y:5,d:'d',c:'y',sz:'m'} ],
-    queue:q('yyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyggggggggggggyyyyyyyyyyyyyyyygggggggggggggggggggggggbbbggggggggggggggggyyyyyyyyyyyyyyyyggggggggggggyyyyyyyggggggggggggggggrrrrgrrrrgggggrrrrrrrrrrrrrrrryyyyyyyyrrrrrrrrrrrrrrryrrrrrrrrrrrrggggggggggggggggrrrrryyyyyyyyyyyyyyyyyyyyyyyyrrrryyyyyyyyrrrrrrryyygggggggggyyyyyyyyyyyyrrrbbbbbbbbyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbggggggggggggbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrggggyyyyyyyyyyyrrrrrrrrrrrrggggggggggggrrrrrrrrrrrggggggggggggbbbbbbbbbbbbbbbyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrryyybbbbbbbbrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') },
+    queue:q('yyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyybbbbggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggbbbbbbbbbbbbbbbbrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') },
 
   /* L5：6x6、28 機、4 色 */
-  { queueShape:'hexRing', w:6,h:6, gates:4, milestone:'航廈擴建 Tier 2！', planes:[
+  { queueShape:'hexRing', queueSplit:388, w:6,h:6, gates:4, milestone:'航廈擴建 Tier 2！', planes:[
       {x:1,y:2,d:'u',c:'y'}, {x:5,y:2,d:'u',c:'y'}, {x:3,y:0,d:'u',c:'g',sz:'m'}, {x:3,y:5,d:'d',c:'b',sz:'m'}, {x:2,y:5,d:'l',c:'g',sz:'l'}, {x:5,y:5,d:'d',c:'g'}, {x:2,y:1,d:'r',c:'b'}, {x:4,y:0,d:'d',c:'r'}, {x:3,y:3,d:'r',c:'g',sz:'m'}, {x:0,y:3,d:'l',c:'r',sz:'m'}, {x:4,y:3,d:'r',c:'b'}, {x:4,y:5,d:'d',c:'g',sz:'m'}, {x:0,y:2,d:'u',c:'g',sz:'m'}, {x:2,y:0,d:'u',c:'y',sz:'l'}, {x:1,y:0,d:'u',c:'r',sz:'l'}, {x:5,y:0,d:'u',c:'r',sz:'m'}, {x:3,y:1,d:'r',c:'r',sz:'m'}, {x:5,y:3,d:'r',c:'b',sz:'m'}, {x:0,y:1,d:'u',c:'b',sz:'l'}, {x:1,y:4,d:'l',c:'y'}, {x:2,y:4,d:'r',c:'r'}, {x:4,y:4,d:'r',c:'y',sz:'l'}, {x:0,y:4,d:'d',c:'b',sz:'m'}, {x:0,y:0,d:'l',c:'b',sz:'l'}, {x:4,y:1,d:'r',c:'y',sz:'m'}, {x:5,y:4,d:'r',c:'y',sz:'l'}, {x:0,y:5,d:'d',c:'g',sz:'m'}, {x:1,y:5,d:'d',c:'r',sz:'l'} ],
-    queue:q('rrrryyyyyyyygggggggggggggggggggggggggrrrrrrrrrrrrbbbbbbbbbbbbbbbbyyyyyyyybbbbbbbbyyyyrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrbbbbyyyybbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbyyybbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrbbbbbbbbbbbbbbbbrrrrrrrrrrrrbbbbbbbbbbbbrbbbbbbbbrrrrrrrrbbbbbbbbbbbbbbbbbrrrryyyyyyyyyyyyggggggggyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrggggggggyyyyyyyyyyyyggggggggggggggggggggggggrrrrrrrrrrrrgyyyrrrrrrrrrrrgggggggggggggggggggggrrrrrrrrrrrrrrrrbbbbbbbbbbbbggggggggggggrrrrrrrrrrrrrbbbbbbbbbbbbbbbrrrrrrrrrrrgggggggggbbbbbbbbbbbbbbbbggggggggggggggggbbbbbbbbbbbbyyyyyyyygggyyyyyyyyggggggggggggyyyyyyyyyyyyyygggggggggggggggggggggggggggggggggggg') },
+    queue:q('rrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrryyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrggggggggggggggggggggyyyyyyyyyyyyyyyybbbbbbbbbbbbggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrggggggggggggrrrrggggbbbbbbbbbbbbbbbbggggggggggggggggbbbbbbbbggggggggggggggggggggggggyyyyyyyyyyyyyyyyggggggggggggggggyyyyyyyyyyyyyyyygggggggg') },
 
   /* L6：7x6、30 機、4 色、8方向 */
-  { queueShape:'squareSpiralTail', w:7,h:6, gates:4,
-    /* 隧道格首次登場（doc _29 第2節，HK L6 拍板）：將原本擺喺 (5,4)
-       同 (3,0) 呢兩架飛機（藍色中型 + 黃色細型）疊埋一格，逐架自動
-       揭曉，唔改總飛機數／乘客總需求。已用 pathClear 純物理模擬確認
-       （30 架全部順利清晒，冇死局）。 */
-    tunnels:[{x:5,y:4,d:'d',stack:[{c:'b',sz:'m'},{c:'y'}]}],
+  { queueShape:'squareSpiralTail', queueSplit:416, w:7,h:6, gates:4, 
+    /* 隧道格首次登場（doc _29 第2節，HK L6 拍板）：將最先放出嗰兩架（原本喺
+       (6,0) 同 (5,0)）疊埋一格，逐架自動揭曉，唔改總飛機數／乘客總需求。
+       sync-levels.js 每次同步都會重新合併，唔好手改。 */
+    tunnels:[{x:6,y:0,d:'ul',stack:[{c:'g'},{c:'y',sz:'m'}]}],
     planes:[
-      {x:4,y:2,d:'d',c:'r'}, {x:3,y:2,d:'ur',c:'r',sz:'l'}, {x:0,y:0,d:'dr',c:'y',sz:'l'}, {x:5,y:3,d:'ur',c:'g',sz:'m'}, {x:2,y:5,d:'dl',c:'g',sz:'m'}, {x:1,y:4,d:'u',c:'b'}, {x:4,y:1,d:'dr',c:'g'}, {x:6,y:1,d:'d',c:'r'}, {x:6,y:3,d:'r',c:'r',sz:'l'}, {x:3,y:4,d:'dr',c:'y',sz:'m'}, {x:0,y:3,d:'d',c:'g'}, {x:4,y:0,d:'ul',c:'r',sz:'m'}, {x:1,y:5,d:'l',c:'g',sz:'m'}, {x:2,y:0,d:'ul',c:'y',sz:'l'}, {x:2,y:4,d:'dr',c:'y',sz:'m'}, {x:0,y:4,d:'dl',c:'b',sz:'l'}, {x:6,y:0,d:'u',c:'b'}, {x:4,y:4,d:'d',c:'g'}, {x:2,y:1,d:'ul',c:'b',sz:'m'}, {x:1,y:3,d:'u',c:'y',sz:'m'}, {x:6,y:2,d:'r',c:'b',sz:'l'}, {x:5,y:5,d:'dr',c:'g',sz:'l'}, {x:2,y:3,d:'ul',c:'r',sz:'l'}, {x:0,y:2,d:'l',c:'r',sz:'m'}, {x:6,y:5,d:'r',c:'b',sz:'m'}, {x:3,y:5,d:'dl',c:'b',sz:'m'}, {x:1,y:2,d:'ul',c:'y'}, {x:0,y:1,d:'l',c:'r',sz:'l'} ],
-    queue:q('rrrrrrrrrrrrrrrrrrrrrrrrggggggggggggrrrrrrrrrrrrrrrrgggggggggggggggggggbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggbbbbbbbbbbbbgggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbgggggyyyyyyyyrrrrrrrrrrrrrrrryyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrgggggggggggggrrryyyrrrrrrrrrrrryyyyyyyyrrrbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyrrrrbbbbbbbbbbbbbbbbrrrrrrrrrrrryrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrbbbyyyyyyyyyyyyyyyyrrrryyyyyyyyyyyrrrrryyyyyyyyyyyybbbbbbbbbbbbyyyyyyyyyyyyyyyybbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrbbbbgggggggryyyyby') },
+      {x:1,y:1,d:'ur',c:'y'}, {x:0,y:3,d:'r',c:'r',sz:'l'}, {x:4,y:5,d:'ul',c:'y',sz:'m'}, {x:5,y:5,d:'r',c:'y',sz:'m'}, {x:4,y:4,d:'u',c:'b'}, {x:6,y:5,d:'dl',c:'b',sz:'l'}, {x:1,y:5,d:'d',c:'g',sz:'l'}, {x:2,y:5,d:'dl',c:'b',sz:'l'}, {x:0,y:1,d:'dl',c:'r'}, {x:0,y:4,d:'ul',c:'b',sz:'m'}, {x:3,y:1,d:'r',c:'g',sz:'l'}, {x:5,y:3,d:'ur',c:'g',sz:'m'}, {x:6,y:4,d:'r',c:'g',sz:'m'}, {x:5,y:2,d:'r',c:'r'}, {x:1,y:0,d:'u',c:'y',sz:'m'}, {x:6,y:1,d:'ul',c:'r',sz:'m'}, {x:3,y:2,d:'d',c:'g',sz:'m'}, {x:6,y:2,d:'ur',c:'b',sz:'l'}, {x:5,y:4,d:'ur',c:'y',sz:'l'}, {x:4,y:1,d:'ur',c:'r',sz:'l'}, {x:3,y:0,d:'u',c:'r'}, {x:0,y:2,d:'dr',c:'y',sz:'m'}, {x:6,y:3,d:'r',c:'g'}, {x:2,y:4,d:'u',c:'r',sz:'m'}, {x:2,y:0,d:'ur',c:'b',sz:'m'}, {x:0,y:0,d:'dl',c:'r',sz:'l'}, {x:4,y:0,d:'ul',c:'b'}, {x:4,y:2,d:'ur',c:'b'} ],
+    queue:q('ggggggggggggggggrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbrrrrrrrrrrrrrrrrggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyggggggggggggggggggggggggbbbbbbbbbbbbbbbbrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrgggggggggggg') },
 
   /* L7：6x6、26 機、5 色 */
-  { queueShape:'ellipseRing', w:6,h:6, gates:4, stars:true, par:26, milestone:'解鎖：機庫！', planes:[
+  { queueShape:'ellipseRing', queueSplit:360, w:6,h:6, gates:4, stars:true, par:26, milestone:'解鎖：機庫！', planes:[
       {x:5,y:3,d:'d',c:'p',sz:'l'}, {x:3,y:4,d:'d',c:'r'}, {x:2,y:1,d:'d',c:'y'}, {x:5,y:2,d:'r',c:'b',sz:'m'}, {x:4,y:0,d:'u',c:'y',sz:'m'}, {x:1,y:0,d:'l',c:'b',sz:'m'}, {x:3,y:2,d:'u',c:'p'}, {x:3,y:5,d:'d',c:'y',sz:'l'}, {x:1,y:3,d:'l',c:'r',sz:'l'}, {x:5,y:0,d:'r',c:'r'}, {x:3,y:0,d:'u',c:'g',sz:'m'}, {x:1,y:2,d:'l',c:'b',sz:'l'}, {x:5,y:5,d:'d',c:'p',sz:'m'}, {x:3,y:1,d:'r',c:'g',sz:'l'}, {x:0,y:0,d:'u',c:'p',sz:'m'}, {x:0,y:3,d:'l',c:'g'}, {x:2,y:0,d:'u',c:'g'}, {x:4,y:1,d:'r',c:'r',sz:'m'}, {x:4,y:2,d:'d',c:'r',sz:'l'}, {x:0,y:4,d:'l',c:'y',sz:'m'}, {x:2,y:2,d:'d',c:'b',sz:'m'}, {x:1,y:1,d:'l',c:'b',sz:'l'}, {x:4,y:4,d:'d',c:'p',sz:'m'}, {x:1,y:4,d:'d',c:'y',sz:'m'}, {x:0,y:1,d:'l',c:'r',sz:'m'}, {x:5,y:4,d:'r',c:'g'} ],
-    queue:q('ggggrrrrrrrrrrrrggggggggppppppppppppppppppppppprrrrrrrrrrrrrrrppppppppppppggggggggppppppppppppgggggppprrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrpppppppppppprrrggggppprrrrrrrrrrrrrrrrggggbbbbbbbbbbbbbbbbbbbbbbbbggggbrrrrrrrrrrrrrrrrrrrrbbbbggggggggggggggggggggrrrrgggggggggbbbbbbbbbbbrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyrrrbbbbbbbbbyyyyyyyyyyyyyyyyyyyyppppppppppppppppbbbbbbbbbbbbbbbbppppppppprrrrryyyyyyyyyyyybbbbbbbbbbbbggggggggggggbbbbbbbgggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppyyyyyyyyyppppppppppppppppp') },
+    queue:q('rrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbpppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppggggggggggggggggggggggggppppppppbbbbbbbbbbbbbbbbppppppppppppppppppppppppggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyypppppppprrrrrrrrrrrrrrrr') },
 
   /* L8：8x8、33 機、5 色、8方向 形狀關（mask 座標未經美術落實，見 doc 第10節⚠️，呢度用幾何佔位輪廓） */
-  { queueShape:'heart', w:8,h:8, gates:4, stars:true, par:33, milestone:'控制塔擴建 Tier 2！', planes:[
-      {x:6,y:2,d:'dr',c:'p'}, {x:4,y:2,d:'ur',c:'b',sz:'m'}, {x:1,y:1,d:'ur',c:'r'}, {x:4,y:3,d:'l',c:'p'}, {x:1,y:2,d:'l',c:'y',sz:'l'}, {x:2,y:7,d:'l',c:'b',sz:'m'}, {x:2,y:2,d:'ur',c:'b',sz:'m'}, {x:2,y:1,d:'u',c:'p',sz:'m'}, {x:5,y:2,d:'ul',c:'r',sz:'m'}, {x:5,y:0,d:'dl',c:'y',sz:'l'}, {x:5,y:1,d:'ur',c:'y',sz:'m'}, {x:4,y:6,d:'ur',c:'r',sz:'l'}, {x:5,y:5,d:'r',c:'r'}, {x:3,y:7,d:'dr',c:'g',sz:'m'}, {x:4,y:5,d:'ur',c:'y',sz:'m'}, {x:3,y:5,d:'u',c:'g'}, {x:2,y:3,d:'dl',c:'r',sz:'m'}, {x:1,y:0,d:'dl',c:'y',sz:'m'}, {x:4,y:7,d:'ul',c:'b',sz:'l'}, {x:4,y:0,d:'ur',c:'g',sz:'m'}, {x:2,y:6,d:'l',c:'g'}, {x:3,y:1,d:'u',c:'y',sz:'m'}, {x:2,y:4,d:'ul',c:'p',sz:'l'}, {x:3,y:6,d:'ul',c:'r',sz:'m'}, {x:6,y:0,d:'dr',c:'b',sz:'m'}, {x:3,y:4,d:'dl',c:'b',sz:'m'}, {x:6,y:1,d:'dr',c:'y',sz:'l'}, {x:5,y:6,d:'d',c:'r',sz:'l'}, {x:5,y:3,d:'r',c:'p'}, {x:5,y:4,d:'dr',c:'p',sz:'l'}, {x:3,y:0,d:'ul',c:'g'}, {x:2,y:0,d:'u',c:'g',sz:'l'}, {x:2,y:5,d:'ul',c:'b'} ],
-    queue:q('bbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppprrrbbbbbbbbbbbggggggggggggggggrrrrrrrrbbbbbbbbggggbbbbbbbbppppppppppppppppgggggbbbbbbbbpppprrrrrrrrrrrrrrrrrrrrrrrrrrrrbrrrrrrrrrrrrrrrrrrrrrrrpppppppppyyyyryyyyyyyyyyyypppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggyyyyyyyyyyyyggggggggggggyyyyyyyyybbbbbbbbbbbbbbbbbbbbyyyyyyyyyyybbbbgbbbbbbbbbbbbggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbggggyyyygggggggbbbbbbbbbbbbbbbbbbbbbbbbppppppppggggggggggggbgggrrrrrrrrpppppppggggggggggggppppppppppppyyyygggggggggggggyyyyyyyyyyyyyyyyyyypppppppppppppppprrrrrrrrrrrrrrrrpppppppggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrggggggggrrrrgrrrrrrrrrrrryyyyyyyyyyyyrrrbbbbbbbbbbbbrrrrbbbbbbbbrrrrrrrrrrrrrrrrrrrbbbbbrrrrrrrrrrrrrrrrpppppppprrrrrrrryrrrrrrrrrrrrrrrrppppppppppppppppppppppppppp') },
+  { queueShape:'heart', queueSplit:456, w:8,h:8, gates:4, stars:true, par:33, milestone:'控制塔擴建 Tier 2！', planes:[
+      {x:6,y:1,d:'ur',c:'g'}, {x:2,y:2,d:'d',c:'y',sz:'l'}, {x:3,y:2,d:'r',c:'b',sz:'m'}, {x:5,y:3,d:'ul',c:'y',sz:'m'}, {x:1,y:1,d:'dl',c:'r',sz:'l'}, {x:4,y:0,d:'d',c:'b',sz:'m'}, {x:2,y:1,d:'ur',c:'r',sz:'l'}, {x:4,y:1,d:'d',c:'p',sz:'m'}, {x:2,y:5,d:'dr',c:'y'}, {x:4,y:5,d:'d',c:'b',sz:'m'}, {x:4,y:2,d:'ul',c:'p'}, {x:6,y:0,d:'r',c:'r'}, {x:5,y:1,d:'dr',c:'y',sz:'l'}, {x:4,y:4,d:'r',c:'r',sz:'m'}, {x:1,y:0,d:'dl',c:'y',sz:'l'}, {x:3,y:5,d:'ul',c:'p',sz:'m'}, {x:5,y:6,d:'ur',c:'g',sz:'m'}, {x:4,y:7,d:'l',c:'r',sz:'m'}, {x:5,y:5,d:'r',c:'g',sz:'m'}, {x:3,y:4,d:'l',c:'g',sz:'m'}, {x:6,y:2,d:'r',c:'p',sz:'m'}, {x:5,y:7,d:'ur',c:'b'}, {x:3,y:6,d:'l',c:'b'}, {x:2,y:3,d:'ul',c:'r',sz:'l'}, {x:5,y:4,d:'ur',c:'p'}, {x:2,y:7,d:'l',c:'r',sz:'l'}, {x:3,y:3,d:'dl',c:'y',sz:'l'}, {x:3,y:1,d:'ul',c:'p'}, {x:4,y:6,d:'dl',c:'b',sz:'m'}, {x:3,y:7,d:'dr',c:'g',sz:'m'}, {x:3,y:0,d:'ul',c:'b',sz:'l'}, {x:5,y:0,d:'ul',c:'g'}, {x:1,y:2,d:'d',c:'y',sz:'m'} ],
+    queue:q('yyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyypppppppppppppppprrrrrrrrrrrrbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppggggggggggggggggggggggggggggggggggggpppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppyyyyyyyyyyyypppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyypppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggyyyyyyyybbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbyyyyyyyy') },
 
   /* L9：8x7、35 機、5 色、8方向 */
-  { queueShape:'sWave', w:8,h:7, gates:4, stars:true, par:35, planes:[
-      {x:0,y:5,d:'r',c:'y',sz:'m'}, {x:5,y:4,d:'dr',c:'g',sz:'m'}, {x:2,y:6,d:'r',c:'r'}, {x:0,y:0,d:'ur',c:'r',sz:'m'}, {x:1,y:3,d:'ur',c:'p',sz:'m'}, {x:4,y:2,d:'ul',c:'y',sz:'m'}, {x:2,y:0,d:'ul',c:'y',sz:'m'}, {x:2,y:4,d:'l',c:'y',sz:'l'}, {x:7,y:0,d:'r',c:'b'}, {x:2,y:1,d:'ul',c:'p',sz:'m'}, {x:5,y:6,d:'ul',c:'g'}, {x:4,y:3,d:'r',c:'b'}, {x:6,y:2,d:'r',c:'g',sz:'m'}, {x:4,y:5,d:'r',c:'b',sz:'l'}, {x:5,y:2,d:'dr',c:'r',sz:'l'}, {x:1,y:2,d:'dl',c:'b',sz:'m'}, {x:3,y:2,d:'ur',c:'r',sz:'m'}, {x:0,y:4,d:'ul',c:'g',sz:'m'}, {x:5,y:5,d:'dr',c:'p'}, {x:3,y:1,d:'u',c:'r'}, {x:2,y:5,d:'ul',c:'y',sz:'l'}, {x:7,y:1,d:'ur',c:'y',sz:'m'}, {x:5,y:0,d:'ul',c:'p'}, {x:0,y:1,d:'dl',c:'g',sz:'l'}, {x:4,y:0,d:'ur',c:'b',sz:'l'}, {x:7,y:3,d:'d',c:'b'}, {x:1,y:4,d:'d',c:'p',sz:'l'}, {x:7,y:6,d:'r',c:'r',sz:'l'}, {x:0,y:6,d:'d',c:'g',sz:'m'}, {x:3,y:0,d:'u',c:'b',sz:'l'}, {x:6,y:3,d:'ur',c:'g',sz:'m'}, {x:6,y:4,d:'d',c:'r'}, {x:6,y:1,d:'dr',c:'p'}, {x:3,y:4,d:'d',c:'y',sz:'m'}, {x:1,y:6,d:'dr',c:'p',sz:'l'} ],
-    queue:q('yyyyyyyyyyyyyyyyyyyyyyyyppppppppppppyrrrrrrrrrrrrrrrppppppppppppppppbbbbbbbbbbbbbbbbggggggggggggbbbbbbbbbbbbppppggggggggbbbbbbbgggggpppppppggggggggpppppppppppppppppppprrrrrrrrrrrrppppppppppppggggggggppppppppppppppbbbbbbbbgggggggggrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbggggggggppppppppppppggggpppbbbbbbbggggggggggggggggbbbbbbbbbbbbbbbbgggggggbbbbyyyybbbbbbbppppppppppppyyyyppprrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggrrrrrrrrrrrrrrrrrrrggggrrrrrrrrrrrrrrrrrrrrbbbbbbbbgggggrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbgggggggggggggggggggggggggggrrrrrrrrrrrrbbbrrrrrrryyyyyyyygggggggggggggyyyyppppppppppppppppppppppppbbbbbbbbbbbbyyyybbbyyyypppppppppyyyyyyyyyyyyppppppppppppppppyyyyyyyyyyyyyyyyypyyyyyyyyyyyrrrrrrrrrrrrrrryyyygggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrr') },
+  { queueShape:'sWave', queueSplit:484, w:8,h:7, gates:4, stars:true, par:35, planes:[
+      {x:1,y:3,d:'dr',c:'p',sz:'m'}, {x:3,y:0,d:'u',c:'g',sz:'l'}, {x:3,y:4,d:'dl',c:'b',sz:'m'}, {x:1,y:5,d:'dr',c:'r',sz:'m'}, {x:2,y:3,d:'ur',c:'r',sz:'m'}, {x:1,y:4,d:'dr',c:'r',sz:'m'}, {x:0,y:5,d:'l',c:'g',sz:'l'}, {x:6,y:3,d:'ur',c:'b',sz:'l'}, {x:5,y:1,d:'dr',c:'r',sz:'l'}, {x:3,y:2,d:'l',c:'p',sz:'m'}, {x:6,y:5,d:'dl',c:'b'}, {x:2,y:5,d:'dl',c:'y'}, {x:4,y:3,d:'u',c:'y',sz:'l'}, {x:1,y:1,d:'dl',c:'p'}, {x:6,y:1,d:'r',c:'r'}, {x:4,y:0,d:'r',c:'y',sz:'m'}, {x:1,y:2,d:'ul',c:'g'}, {x:4,y:2,d:'r',c:'p',sz:'m'}, {x:1,y:0,d:'dl',c:'y',sz:'l'}, {x:6,y:0,d:'ul',c:'p'}, {x:6,y:6,d:'dl',c:'b',sz:'m'}, {x:2,y:1,d:'u',c:'p',sz:'l'}, {x:4,y:6,d:'l',c:'g'}, {x:3,y:6,d:'l',c:'r',sz:'m'}, {x:7,y:2,d:'d',c:'g',sz:'l'}, {x:2,y:6,d:'dr',c:'y',sz:'m'}, {x:4,y:5,d:'dr',c:'p',sz:'m'}, {x:7,y:1,d:'ur',c:'r',sz:'l'}, {x:5,y:0,d:'ul',c:'g',sz:'m'}, {x:6,y:2,d:'dr',c:'b',sz:'l'}, {x:5,y:4,d:'d',c:'y',sz:'m'}, {x:6,y:4,d:'dr',c:'b'}, {x:0,y:6,d:'dl',c:'b',sz:'m'}, {x:0,y:0,d:'ur',c:'y'}, {x:5,y:6,d:'d',c:'g'} ],
+    queue:q('ggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggrrrrrrrrggggggggggggppppppppppppppppppppggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbppppppppppppppppbbbbbbbbbbbbbbbbbbbbpppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrpppppppppppppppppppppppprrrrbbbbbbbbbbbbbbbbbbbbbbbb') },
 
   /* L10：9x8、38 機、5 色、8方向 形狀關（mask 座標未經美術落實，見 doc 第10節⚠️，呢度用幾何佔位輪廓） */
-  { queueShape:'figure8', w:9,h:8, gates:4, stars:true, par:38, milestone:'貴賓室擴建 Tier 2！', planes:[
-      {x:8,y:5,d:'dl',c:'y',sz:'m'}, {x:0,y:5,d:'u',c:'r',sz:'m'}, {x:5,y:3,d:'l',c:'b'}, {x:2,y:1,d:'d',c:'g',sz:'l'}, {x:1,y:2,d:'u',c:'y',sz:'l'}, {x:6,y:6,d:'dr',c:'b',sz:'l'}, {x:5,y:6,d:'d',c:'b'}, {x:5,y:2,d:'dl',c:'p',sz:'l'}, {x:7,y:2,d:'d',c:'b',sz:'l'}, {x:7,y:3,d:'dl',c:'r'}, {x:4,y:5,d:'dl',c:'y',sz:'l'}, {x:1,y:5,d:'dl',c:'b',sz:'m'}, {x:2,y:5,d:'d',c:'r',sz:'m'}, {x:5,y:5,d:'dl',c:'p',sz:'l'}, {x:4,y:4,d:'r',c:'r',sz:'m'}, {x:6,y:2,d:'ur',c:'b'}, {x:6,y:1,d:'ur',c:'p',sz:'m'}, {x:4,y:3,d:'l',c:'g',sz:'l'}, {x:2,y:4,d:'dr',c:'g'}, {x:2,y:3,d:'l',c:'r',sz:'m'}, {x:3,y:7,d:'dr',c:'g',sz:'m'}, {x:4,y:0,d:'r',c:'r',sz:'l'}, {x:0,y:3,d:'dl',c:'r',sz:'m'}, {x:3,y:6,d:'u',c:'y',sz:'l'}, {x:4,y:7,d:'dl',c:'g',sz:'m'}, {x:4,y:1,d:'ul',c:'b',sz:'m'}, {x:5,y:4,d:'r',c:'y'}, {x:3,y:0,d:'u',c:'g'}, {x:0,y:2,d:'ur',c:'g',sz:'m'}, {x:4,y:2,d:'ul',c:'r',sz:'m'}, {x:8,y:3,d:'dr',c:'p'}, {x:3,y:3,d:'ul',c:'p'}, {x:7,y:1,d:'ur',c:'p'}, {x:6,y:4,d:'r',c:'y'}, {x:2,y:6,d:'dl',c:'p',sz:'m'}, {x:5,y:0,d:'r',c:'y',sz:'m'}, {x:1,y:4,d:'l',c:'y',sz:'l'}, {x:5,y:7,d:'dr',c:'b',sz:'m'} ],
-    queue:q('rrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrryyyyyyyppppppppppppppppbbbbbbbbbbbbpppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyybbbrrrrrrrrrrrrrrryyyggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrgggggggggggggggggggbbbbbbbbbbbbggggggggggggggggggggggggrgbbbbbbbbbbbbbbbbbbbbbbbbbpppppppppppppppppppppppprrrrrrrrrrrrrrrppppppppppppppppbbbbbbbbbbbbbbbbggggggggggggggggpppppppppppppppppppppppppppgggggggggggggggggggyyyybbbbbbbppppppppppppppppppyyyyyyyybbbbyyyyyyyyrrrrrrrryyyyyyyrrrrrrrrbbbbbbbbbbbbrrrrrrrrrppppppppppppbbbbyyybbbbbppppggggppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbppppppppppppppppppyyyybbbbyyyyyyyyggggbbbbyyyyyyyyyyyyygggggggbbbbggggggggggggggggrrrrbbbbbbbbbggggggggggggggggggggbbbbbbbrrrrrrrrgggggggggrrrrrrrrrrrrryyyybbbbbbbbrrrrrrrrrrrrgggggggggggggggrrrbbbbbbbbbbbbyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbppppppppppppppppggggggggggggpppppppppggggbbbbbbbbyyyyygggggggggbbbbbbb') },
+  { queueShape:'figure8', queueSplit:524, w:9,h:8, gates:4, stars:true, par:38, milestone:'貴賓室擴建 Tier 2！', planes:[
+      {x:5,y:0,d:'dr',c:'r',sz:'m'}, {x:2,y:2,d:'dl',c:'p'}, {x:7,y:2,d:'u',c:'g',sz:'m'}, {x:3,y:4,d:'ur',c:'y'}, {x:6,y:4,d:'u',c:'p',sz:'l'}, {x:1,y:1,d:'dl',c:'g',sz:'m'}, {x:2,y:6,d:'d',c:'r'}, {x:4,y:4,d:'ur',c:'p',sz:'m'}, {x:4,y:7,d:'r',c:'b'}, {x:5,y:5,d:'d',c:'y'}, {x:5,y:1,d:'dr',c:'y',sz:'m'}, {x:2,y:1,d:'ul',c:'b',sz:'l'}, {x:1,y:5,d:'dl',c:'y',sz:'m'}, {x:3,y:3,d:'u',c:'r',sz:'m'}, {x:1,y:4,d:'dl',c:'g'}, {x:5,y:3,d:'r',c:'r',sz:'l'}, {x:4,y:0,d:'l',c:'b',sz:'l'}, {x:8,y:3,d:'dr',c:'g'}, {x:5,y:6,d:'d',c:'r',sz:'l'}, {x:6,y:5,d:'r',c:'b',sz:'m'}, {x:4,y:3,d:'ur',c:'y'}, {x:6,y:1,d:'u',c:'g',sz:'l'}, {x:5,y:2,d:'ul',c:'p',sz:'l'}, {x:8,y:5,d:'dr',c:'y',sz:'l'}, {x:7,y:3,d:'ur',c:'r',sz:'m'}, {x:1,y:3,d:'dr',c:'y'}, {x:7,y:6,d:'r',c:'b',sz:'l'}, {x:4,y:1,d:'ul',c:'r',sz:'l'}, {x:2,y:4,d:'dr',c:'b',sz:'l'}, {x:0,y:5,d:'u',c:'g'}, {x:5,y:4,d:'dl',c:'p',sz:'m'}, {x:1,y:2,d:'dl',c:'b',sz:'m'}, {x:2,y:5,d:'dl',c:'y',sz:'m'}, {x:7,y:5,d:'ur',c:'b'}, {x:3,y:7,d:'dr',c:'r',sz:'m'}, {x:3,y:1,d:'u',c:'p',sz:'m'}, {x:0,y:4,d:'u',c:'p',sz:'m'}, {x:6,y:6,d:'d',c:'g',sz:'m'} ],
+    queue:q('pppppppppppprrrrrrrrrrrrrrrrrrrrrrrrppppppppppppbbbbbbbbbbbbbbbbggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbpppppppppppppppppppppppprrrrrrrrrrrrrrrrbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrbbbbbbbbggggggggggggggggggggggggggggggggggggrrrrbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyybbbbppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbpppppppppppppppppppppppprrrrrrrrrrrrrrrrggggggggggggggggggggbbbbyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyggggyyyyyyyyyyyyyyyypppprrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppgggggggggggggggggggggggg') },
 
   /* L11：9x8、40 機、5 色、8方向 */
-  { queueShape:'hexRing', w:9,h:8, gates:4, stars:true, par:40, planes:[
-      {x:8,y:0,d:'l',c:'g',sz:'m'}, {x:8,y:6,d:'l',c:'g',sz:'m'}, {x:8,y:1,d:'ul',c:'g',sz:'m'}, {x:5,y:0,d:'dl',c:'y'}, {x:4,y:1,d:'dl',c:'r',sz:'m'}, {x:5,y:6,d:'ur',c:'p'}, {x:2,y:2,d:'l',c:'p',sz:'m'}, {x:0,y:7,d:'r',c:'y',sz:'l'}, {x:7,y:7,d:'r',c:'r'}, {x:4,y:6,d:'ul',c:'b',sz:'m'}, {x:8,y:2,d:'ur',c:'p'}, {x:0,y:3,d:'ul',c:'y'}, {x:7,y:1,d:'ul',c:'p',sz:'l'}, {x:6,y:6,d:'dl',c:'y',sz:'l'}, {x:3,y:0,d:'ul',c:'y'}, {x:3,y:1,d:'d',c:'b',sz:'l'}, {x:6,y:7,d:'dl',c:'r',sz:'l'}, {x:3,y:7,d:'dl',c:'p',sz:'l'}, {x:3,y:5,d:'ul',c:'b'}, {x:8,y:3,d:'r',c:'p',sz:'l'}, {x:1,y:2,d:'u',c:'g',sz:'l'}, {x:6,y:0,d:'u',c:'b',sz:'l'}, {x:2,y:3,d:'dl',c:'p'}, {x:8,y:7,d:'ur',c:'b',sz:'m'}, {x:7,y:0,d:'ul',c:'g',sz:'l'}, {x:8,y:5,d:'r',c:'g',sz:'l'}, {x:6,y:2,d:'dr',c:'p',sz:'m'}, {x:4,y:7,d:'d',c:'r'}, {x:6,y:4,d:'l',c:'b',sz:'m'}, {x:0,y:5,d:'ul',c:'r',sz:'m'}, {x:3,y:4,d:'l',c:'g',sz:'m'}, {x:1,y:4,d:'d',c:'r'}, {x:0,y:1,d:'ul',c:'b',sz:'m'}, {x:1,y:7,d:'dr',c:'y',sz:'m'}, {x:6,y:3,d:'dl',c:'r'}, {x:7,y:4,d:'r',c:'y',sz:'m'}, {x:2,y:7,d:'dr',c:'b'}, {x:2,y:6,d:'ul',c:'r',sz:'m'}, {x:2,y:1,d:'ul',c:'y',sz:'l'}, {x:0,y:0,d:'ur',c:'g',sz:'m'} ],
-    queue:q('rrrryyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrggggbbbbbbbbbbbbyyyyyyyyyyyggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbgggggggggyyyyrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbrrrrrrrrrrrryyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrryyyyypppppppppppprrrrrrrrggggggggggggggggrrrrrrrpppppppppppppgggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggbbbbggggbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbgggggggggggggggggggggggbbbbbbbggggpppppppppppppppgggggggggggbbbbbbbbggggggggbbbbbbbpppppppppppprrrrrrrrrrrrrrrrppppppppgggbbbbbbbbpppppppppppprrrrrrrrppppppppppppbbbbbbbbppppppppppprrrrbbbbbbbbpppppppppppprrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbyyyyyyyyyyypppppppppppppppppppppppppppppppppppppppppppppppyyyyyyybbbbbbbbpppyyyyyyyyyyybbbbbbbbbbbbbbbbyyyyyyyyrrrrrrrrppprrrrrrrppppyyyyyyyyyyyyyyyyyyyyyyyyyyybpppppppppppppppppppppppppppggggggggggggrrrrrrrrrrrrrrrrrrrrggggggggrrrrryyyyyyyygggggggggggggyyyyyyyggggggggggggggggggggggggggggggggggggggggggppppppppp') },
+  { queueShape:'hexRing', queueSplit:556, w:9,h:8, gates:4, stars:true, par:40, planes:[
+      {x:3,y:3,d:'ul',c:'g',sz:'m'}, {x:8,y:1,d:'ur',c:'y',sz:'l'}, {x:4,y:4,d:'r',c:'g',sz:'m'}, {x:1,y:2,d:'dl',c:'r',sz:'m'}, {x:8,y:2,d:'dr',c:'p',sz:'m'}, {x:8,y:7,d:'r',c:'p'}, {x:3,y:2,d:'ul',c:'g',sz:'m'}, {x:4,y:2,d:'dr',c:'r'}, {x:2,y:3,d:'dl',c:'y'}, {x:3,y:0,d:'r',c:'b',sz:'m'}, {x:1,y:6,d:'ul',c:'r',sz:'m'}, {x:6,y:2,d:'dr',c:'b'}, {x:8,y:0,d:'dr',c:'r',sz:'m'}, {x:0,y:6,d:'u',c:'g',sz:'l'}, {x:7,y:4,d:'ur',c:'g'}, {x:1,y:3,d:'dr',c:'r',sz:'m'}, {x:4,y:6,d:'r',c:'y'}, {x:2,y:7,d:'dr',c:'b',sz:'l'}, {x:2,y:2,d:'ul',c:'p'}, {x:1,y:7,d:'l',c:'r',sz:'l'}, {x:4,y:5,d:'l',c:'p',sz:'l'}, {x:8,y:4,d:'dl',c:'y',sz:'m'}, {x:0,y:1,d:'dl',c:'y',sz:'m'}, {x:7,y:0,d:'ul',c:'b',sz:'m'}, {x:7,y:2,d:'dr',c:'b',sz:'l'}, {x:3,y:6,d:'dr',c:'g'}, {x:7,y:7,d:'dl',c:'p',sz:'l'}, {x:3,y:5,d:'l',c:'p',sz:'l'}, {x:5,y:6,d:'u',c:'y'}, {x:5,y:4,d:'u',c:'b',sz:'m'}, {x:3,y:7,d:'ul',c:'r'}, {x:1,y:1,d:'ul',c:'y',sz:'l'}, {x:1,y:5,d:'ul',c:'g',sz:'l'}, {x:7,y:5,d:'r',c:'g',sz:'m'}, {x:0,y:3,d:'ul',c:'p',sz:'m'}, {x:4,y:1,d:'ur',c:'r',sz:'l'}, {x:2,y:0,d:'ul',c:'b'}, {x:2,y:1,d:'ul',c:'p',sz:'l'}, {x:8,y:3,d:'ur',c:'b',sz:'m'}, {x:6,y:4,d:'d',c:'y'} ],
+    queue:q('yyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbrrrrrrrrrrrrppppppppppppppppppppppppppppppppbbbbggggggggggggggggggggggggpppppppppppppppppppppppppppprrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggppppppppppppppppppppppppbbbbbbbbbbbbppppppppppppbbbbyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyypppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyggggggggggggggggbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrpppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbpppppppppppppppprrrrrrrrrrrrrrrrppppppppppppppppppppppppggggggggggggyyyyyyyyyyyyyyyyrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy') },
 
   /* L12：9x9、42 機、5 色、8方向 */
-  { queueShape:'squareSpiralTail', w:9,h:9, gates:4, stars:true, par:42, planes:[
-      {x:1,y:1,d:'dl',c:'y'}, {x:6,y:5,d:'ul',c:'p',sz:'m'}, {x:1,y:8,d:'l',c:'p',sz:'m'}, {x:7,y:5,d:'u',c:'r'}, {x:8,y:6,d:'l',c:'p',sz:'m'}, {x:6,y:4,d:'dl',c:'r',sz:'l'}, {x:8,y:1,d:'ur',c:'b',sz:'m'}, {x:6,y:8,d:'d',c:'g',sz:'l'}, {x:5,y:0,d:'dr',c:'p'}, {x:7,y:1,d:'ul',c:'y',sz:'m'}, {x:1,y:4,d:'l',c:'g',sz:'m'}, {x:2,y:0,d:'l',c:'r',sz:'m'}, {x:0,y:7,d:'ul',c:'r',sz:'l'}, {x:6,y:1,d:'dr',c:'g',sz:'l'}, {x:5,y:7,d:'ul',c:'p'}, {x:4,y:2,d:'r',c:'b'}, {x:3,y:4,d:'ul',c:'b'}, {x:7,y:8,d:'r',c:'b',sz:'l'}, {x:3,y:6,d:'l',c:'p',sz:'m'}, {x:1,y:7,d:'dl',c:'b',sz:'m'}, {x:8,y:4,d:'dr',c:'y',sz:'m'}, {x:5,y:6,d:'dl',c:'b',sz:'l'}, {x:3,y:3,d:'l',c:'r'}, {x:5,y:4,d:'ul',c:'r'}, {x:4,y:4,d:'dr',c:'b',sz:'m'}, {x:0,y:6,d:'l',c:'g',sz:'m'}, {x:8,y:8,d:'ur',c:'r',sz:'l'}, {x:7,y:2,d:'r',c:'g'}, {x:1,y:3,d:'l',c:'y'}, {x:5,y:5,d:'l',c:'r'}, {x:0,y:4,d:'l',c:'g',sz:'m'}, {x:2,y:1,d:'d',c:'r',sz:'m'}, {x:4,y:7,d:'dl',c:'y',sz:'m'}, {x:0,y:5,d:'dr',c:'g',sz:'m'}, {x:4,y:8,d:'dl',c:'g',sz:'l'}, {x:6,y:3,d:'dr',c:'y',sz:'l'}, {x:3,y:8,d:'dl',c:'y',sz:'l'}, {x:0,y:3,d:'u',c:'y',sz:'l'}, {x:0,y:0,d:'ur',c:'p',sz:'l'}, {x:2,y:4,d:'d',c:'p',sz:'m'}, {x:7,y:0,d:'r',c:'b'}, {x:0,y:1,d:'l',c:'b',sz:'m'} ],
-    queue:q('bbbbbbbbbbbbbbbbppppppppbbbbbbbbppppppppbbbbbbbbbbbbbbbbpppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyypppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggyyyyyyyyggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyygggggggyyyyyyyyyyyggggyyyyyyyyyyyyyyyyggggggggggggggggggggyyyyyyyyygrrrrrrrrrrrryyyrrrryyyrrrrrrrrrrrrggggrggggyyyyyyyyrrrrggggggggggggrrrrrrrrrrrrrrrgggggggggggggggggggyyyyyyyrrrrrrrrrrrrggggbbbbrrrrrrrrggggggggggggrrrrrrrbbbbbbbbbbbbbbbbggggggggbbbbbrrrrrrrrggrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyypppppppppppppbbbggggggggggggpppppppppppppppyyyyggggggggggggggggggggbbbbbbbbbbbbbbbggggggggggggggggggggggggggggyyyyyrrrrrrrrrrrryyyyyyyyyyyyrrrrppppppppyyyyyyyyppppppprrrryyyyybbbbbbbbrrrrbbbbggggggggggggrrrrrrrrrrrrrrrrggggrrrrrrrrrrrrrrrrrrrrppppppppbbbbppppppppbbbbbbbbppppppppprrrrrrrrrrrrrrrrggggggggggggggggbpppprrrrrrrrrrrrrrrrrrrrrrrrppppppppppppgggpppprrrrrrrrrrppppyyyypppppppppppppyyyyyyyyyyyppppppppppppp') },
+  { queueShape:'squareSpiralTail', queueSplit:580, w:9,h:9, gates:4, stars:true, par:42, planes:[
+      {x:3,y:8,d:'dl',c:'p',sz:'l'}, {x:6,y:1,d:'u',c:'r',sz:'l'}, {x:6,y:0,d:'u',c:'g',sz:'m'}, {x:1,y:3,d:'d',c:'y',sz:'m'}, {x:0,y:0,d:'ur',c:'b',sz:'m'}, {x:8,y:6,d:'l',c:'g',sz:'l'}, {x:3,y:6,d:'ur',c:'p'}, {x:7,y:3,d:'dl',c:'b'}, {x:5,y:4,d:'u',c:'r',sz:'l'}, {x:6,y:5,d:'ur',c:'y',sz:'l'}, {x:5,y:2,d:'dl',c:'p',sz:'m'}, {x:5,y:0,d:'ur',c:'r'}, {x:4,y:6,d:'dr',c:'b',sz:'m'}, {x:8,y:0,d:'ul',c:'p'}, {x:2,y:6,d:'dr',c:'r'}, {x:1,y:8,d:'dr',c:'p',sz:'m'}, {x:0,y:8,d:'l',c:'g',sz:'m'}, {x:1,y:4,d:'ul',c:'b',sz:'m'}, {x:7,y:1,d:'u',c:'b',sz:'l'}, {x:1,y:2,d:'dl',c:'p',sz:'m'}, {x:6,y:7,d:'d',c:'y',sz:'m'}, {x:2,y:5,d:'l',c:'r'}, {x:3,y:2,d:'u',c:'g',sz:'m'}, {x:8,y:4,d:'dr',c:'b'}, {x:8,y:3,d:'r',c:'y',sz:'m'}, {x:7,y:5,d:'dl',c:'b',sz:'l'}, {x:6,y:3,d:'ur',c:'y',sz:'l'}, {x:3,y:3,d:'dl',c:'r',sz:'m'}, {x:4,y:2,d:'ul',c:'r',sz:'l'}, {x:2,y:3,d:'u',c:'r'}, {x:7,y:6,d:'ur',c:'y',sz:'l'}, {x:4,y:7,d:'l',c:'g',sz:'m'}, {x:2,y:8,d:'d',c:'y',sz:'l'}, {x:7,y:0,d:'u',c:'r',sz:'m'}, {x:4,y:8,d:'dr',c:'b',sz:'m'}, {x:5,y:8,d:'d',c:'g'}, {x:1,y:7,d:'ul',c:'b'}, {x:5,y:1,d:'l',c:'p'}, {x:0,y:7,d:'dl',c:'g',sz:'l'}, {x:6,y:8,d:'r',c:'g',sz:'m'}, {x:4,y:0,d:'ul',c:'y',sz:'m'}, {x:7,y:8,d:'dl',c:'p'} ],
+    queue:q('ppppppppppppyyyyyyyyyyyyyyyyggggggggggggggggggggggggyyyyyyyyppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggpppprrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbggggggggggggggggggggrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyggggggggggggggggggggyyyyyyyyyyyyggggrrrrbbbbbbbbbbbbggggggggggggggggggggggggbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppbbbbbbbbrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppggggggggggggggggggggggggppppbbbbbbbbbbbbbbbbbbbbpppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbppppppppppppppppppppppppyyyyyyyybbbbbbbbbbbbbbbbppppppppppppggggggggggggggggggggggggrrrrrrrrrrrrbbbbbbbbbbbbbbbbggggggggggggppppyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggpppppppppppppppppppppppppppppppppppp') },
 
   /* L13：9x9、44 機、5 色、8方向 形狀關（mask 座標未經美術落實，見 doc 第10節⚠️，呢度用幾何佔位輪廓） */
-  { queueShape:'cloverPetals', w:9,h:9, gates:4, stars:true, par:44, milestone:'航廈終極擴建 Tier 3！', planes:[
+  { queueShape:'cloverPetals', queueSplit:608, w:9,h:9, gates:4, stars:true, par:44, milestone:'航廈終極擴建 Tier 3！', planes:[
       {x:5,y:4,d:'d',c:'y'}, {x:3,y:2,d:'dl',c:'b',sz:'l'}, {x:7,y:6,d:'r',c:'g'}, {x:3,y:6,d:'ul',c:'p'}, {x:5,y:5,d:'ur',c:'r'}, {x:7,y:7,d:'d',c:'p'}, {x:7,y:4,d:'ur',c:'y',sz:'m'}, {x:5,y:2,d:'r',c:'g'}, {x:3,y:4,d:'l',c:'b',sz:'m'}, {x:2,y:7,d:'dr',c:'y'}, {x:2,y:3,d:'l',c:'p',sz:'m'}, {x:3,y:5,d:'l',c:'g',sz:'l'}, {x:3,y:7,d:'d',c:'r',sz:'l'}, {x:1,y:7,d:'d',c:'r',sz:'m'}, {x:7,y:2,d:'u',c:'r',sz:'m'}, {x:4,y:1,d:'r',c:'r',sz:'m'}, {x:0,y:4,d:'ul',c:'b',sz:'l'}, {x:5,y:6,d:'d',c:'y',sz:'l'}, {x:5,y:7,d:'dl',c:'g'}, {x:6,y:7,d:'dl',c:'r',sz:'l'}, {x:2,y:2,d:'l',c:'p',sz:'l'}, {x:1,y:4,d:'dl',c:'y',sz:'m'}, {x:0,y:5,d:'l',c:'g',sz:'m'}, {x:5,y:3,d:'r',c:'r',sz:'m'}, {x:4,y:5,d:'d',c:'p',sz:'m'}, {x:1,y:3,d:'u',c:'b'}, {x:2,y:8,d:'d',c:'p',sz:'l'}, {x:2,y:4,d:'ur',c:'p',sz:'l'}, {x:3,y:8,d:'dl',c:'g',sz:'l'}, {x:6,y:6,d:'ur',c:'y',sz:'m'}, {x:4,y:0,d:'ul',c:'p'}, {x:8,y:3,d:'dr',c:'b'}, {x:4,y:7,d:'d',c:'b',sz:'m'}, {x:1,y:5,d:'dl',c:'r',sz:'m'}, {x:6,y:4,d:'ur',c:'g',sz:'m'}, {x:3,y:3,d:'ur',c:'y'}, {x:4,y:2,d:'ur',c:'y',sz:'m'}, {x:6,y:2,d:'u',c:'r',sz:'l'}, {x:5,y:0,d:'ur',c:'g',sz:'m'}, {x:1,y:6,d:'dl',c:'b',sz:'m'}, {x:6,y:1,d:'r',c:'b'}, {x:0,y:3,d:'u',c:'b',sz:'l'}, {x:7,y:3,d:'dr',c:'g',sz:'l'}, {x:6,y:8,d:'dl',c:'y',sz:'m'} ],
-    queue:q('ggggbbbbbbbbbbbbbbbbyyyyggggggggbbbbbbbbbbbbbbbbbbbbbbbbyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggbrrrrgggyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggrrrrrrrrrrrrgggggggggyyyyyyyyyyyyyggggyyyyggggggggggggggggggggyyyyyrrrrrrrrrrrrgrrrrrrrbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyppppppppppppbbbbrrrrbbbpppyyyyyyyybbbbbbbbbbbbggggggggbbbbbbbbbggggggggggggggggggggggggyyyyyyyyyyyyrppppppppppppppppgggyyyyyppppppppppppbbbbbbbbbbbbbbbpppppppppppppppppppppppppppppppppppppggggggggggggggggpppprrrrrrrrrrrrrrrrgggggggggrrrrrrrrrppppppppyyyyyyyyyyyyyyyyyyyyppppppppppprrrrrrrrrrrryyyyygggggggggggggggpppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrpppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrppppppprrrryyyyyyyggggggggggggrrrrrrrrrpppppppppppppppppppppppprrrrprrrrrrrrrrrryyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrggggbbbbbbbbrrrggggggggyyyyyyyyyyybbbbgggggggggggggggggggbbbbbbbbbbbbyyyyyyyygggggggyyyyyyyyybggggggggggggpppppppppppppppbbbbbbbbbbbbppppppppppppbbbbgggppprrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbyyyybbbyyyyyyyyyyy') },
+    queue:q('ggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyggggggggggggggggggggbbbbbbbbbbbbbbbbyyyyyyyyyyyybbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggppppppppppppggggggggggggppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggggggppppbbbbbbbbbbbbggggggggbbbbpppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggppppyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrryyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppyyyyyyyyyyyyrrrrbbbbbbbbbbbbbbbbbbbbbbbbyyyyppppppppppppppppggggggggggggggggppppppppyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbggggggggbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrr') },
 
   /* L14：10x9、46 機、5 色、8方向 */
-  { queueShape:'horseshoe', w:10,h:9, gates:4, stars:true, par:46, milestone:'機庫擴建 Tier 2！', planes:[
-      {x:0,y:6,d:'l',c:'g',sz:'m'}, {x:0,y:0,d:'r',c:'b'}, {x:3,y:8,d:'r',c:'y'}, {x:5,y:6,d:'r',c:'r',sz:'l'}, {x:1,y:0,d:'ur',c:'g',sz:'m'}, {x:3,y:5,d:'dr',c:'g',sz:'m'}, {x:4,y:2,d:'ul',c:'p'}, {x:9,y:0,d:'ur',c:'p',sz:'l'}, {x:1,y:8,d:'dl',c:'b',sz:'m'}, {x:5,y:2,d:'ur',c:'g',sz:'m'}, {x:8,y:4,d:'d',c:'b',sz:'m'}, {x:1,y:1,d:'dr',c:'p',sz:'l'}, {x:7,y:5,d:'u',c:'g',sz:'l'}, {x:8,y:5,d:'dl',c:'r'}, {x:4,y:6,d:'d',c:'p',sz:'m'}, {x:8,y:7,d:'ur',c:'r'}, {x:5,y:4,d:'l',c:'y',sz:'m'}, {x:7,y:6,d:'d',c:'r',sz:'l'}, {x:9,y:3,d:'dr',c:'r'}, {x:9,y:1,d:'dr',c:'b',sz:'m'}, {x:7,y:0,d:'dr',c:'g'}, {x:2,y:1,d:'dl',c:'y',sz:'m'}, {x:6,y:0,d:'ur',c:'b',sz:'m'}, {x:3,y:3,d:'l',c:'y',sz:'m'}, {x:4,y:8,d:'dr',c:'b',sz:'l'}, {x:4,y:3,d:'dl',c:'b',sz:'l'}, {x:7,y:2,d:'ul',c:'r',sz:'m'}, {x:8,y:3,d:'ur',c:'y',sz:'m'}, {x:6,y:8,d:'ur',c:'b',sz:'m'}, {x:7,y:7,d:'dr',c:'b',sz:'m'}, {x:6,y:2,d:'ur',c:'r'}, {x:4,y:1,d:'ul',c:'r'}, {x:2,y:0,d:'ul',c:'g',sz:'l'}, {x:2,y:3,d:'ul',c:'p'}, {x:2,y:4,d:'ul',c:'y',sz:'l'}, {x:1,y:3,d:'l',c:'y'}, {x:2,y:8,d:'d',c:'g'}, {x:6,y:1,d:'ul',c:'p',sz:'l'}, {x:9,y:6,d:'r',c:'y',sz:'l'}, {x:9,y:8,d:'r',c:'g',sz:'l'}, {x:6,y:7,d:'dl',c:'p',sz:'m'}, {x:0,y:1,d:'dl',c:'r',sz:'m'}, {x:5,y:8,d:'d',c:'y'}, {x:8,y:8,d:'dl',c:'p',sz:'m'}, {x:2,y:6,d:'dl',c:'r',sz:'l'}, {x:8,y:6,d:'ur',c:'p',sz:'m'} ],
-    queue:q('yyyyyyyyyyyyyyyyyyyyyyyyggggggggggggbbbbbbbbbbbbbbbbbbbbyyyyrrrrbbbbyyyyyyybbbbbbbbbbbggggrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyygggyyyyrrrrrrrrrrrrrgggggrrrryyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyrrrrrrrrrrrrrrrryyyyrrrrrrrrrggggggggrrrrrrryyyygggggggrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyggggggggggggggggggggyyyyyyyrrrrrrrryyyyyyyrrrrrrrrrrrrrrrrrrrgggggggggggggggggggrrrrrrrrggggggggggggggggggggggggrggggggggggggggggggggggggggyyyyyyyyyyyyyyyyggggggggggggyyyyyyyyyyyyggggggggggggggggyyyyyyyyybbbbbbbbbbbbbbbbppppppppppppppppyyyyyyyyyyyyybbbbbbbbgggrrrrrrrrrrrrrrrrbbbbbbbbbbbpppppppppppppppppppppppppbbbbrrrrrrrrrrrrrpppppppppppppppppbbbbggggggggggggggggrrrrrrrrrrrrppppppppppppbbbbbbbbbbbbbbbbbggggggggrrrrrrrrrgpppppbbbbbbbbbbbbppppppppggggggggggggbbbgggggggggggggbbbbbbbbbbbbyyyyppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrbbbbbbbyyyyyyyyyyyypppppppppppppppprrrryyyyyyyybbbbbbbbbbbpppppppprrrrrrrrrrrryyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppyyyyyyyyyyyyyypppppppppppppppppppppppppppp') },
+  { queueShape:'horseshoe', queueSplit:636, w:10,h:9, gates:4, stars:true, par:46, milestone:'機庫擴建 Tier 2！', planes:[
+      {x:7,y:5,d:'ul',c:'b',sz:'m'}, {x:1,y:1,d:'r',c:'b',sz:'m'}, {x:5,y:5,d:'d',c:'r',sz:'l'}, {x:3,y:5,d:'dl',c:'r',sz:'l'}, {x:2,y:0,d:'r',c:'g',sz:'l'}, {x:7,y:8,d:'ul',c:'g',sz:'l'}, {x:2,y:4,d:'ul',c:'p',sz:'m'}, {x:6,y:7,d:'r',c:'y',sz:'l'}, {x:6,y:3,d:'dr',c:'r',sz:'m'}, {x:8,y:8,d:'r',c:'g',sz:'l'}, {x:7,y:1,d:'ul',c:'r'}, {x:1,y:5,d:'dr',c:'y',sz:'m'}, {x:2,y:3,d:'ul',c:'y'}, {x:2,y:7,d:'ul',c:'r',sz:'m'}, {x:3,y:6,d:'l',c:'y',sz:'l'}, {x:2,y:8,d:'dr',c:'y',sz:'l'}, {x:5,y:2,d:'dl',c:'b',sz:'m'}, {x:8,y:0,d:'r',c:'p',sz:'m'}, {x:5,y:1,d:'ul',c:'g',sz:'m'}, {x:4,y:5,d:'d',c:'p',sz:'l'}, {x:9,y:7,d:'dr',c:'p'}, {x:5,y:4,d:'ul',c:'r',sz:'l'}, {x:4,y:4,d:'u',c:'b',sz:'m'}, {x:6,y:6,d:'r',c:'r'}, {x:0,y:8,d:'dr',c:'b',sz:'m'}, {x:3,y:3,d:'u',c:'r'}, {x:0,y:0,d:'ul',c:'p',sz:'m'}, {x:1,y:2,d:'ur',c:'p',sz:'l'}, {x:6,y:0,d:'ur',c:'p',sz:'m'}, {x:7,y:7,d:'dl',c:'g',sz:'m'}, {x:4,y:6,d:'dr',c:'g'}, {x:3,y:8,d:'dr',c:'r'}, {x:8,y:4,d:'dr',c:'y',sz:'m'}, {x:8,y:3,d:'ul',c:'b',sz:'m'}, {x:0,y:4,d:'ul',c:'r',sz:'m'}, {x:2,y:5,d:'dl',c:'y',sz:'m'}, {x:5,y:6,d:'d',c:'g'}, {x:0,y:5,d:'ul',c:'p',sz:'l'}, {x:9,y:2,d:'dr',c:'b'}, {x:9,y:1,d:'r',c:'y'}, {x:8,y:6,d:'r',c:'b'}, {x:1,y:8,d:'dr',c:'b',sz:'m'}, {x:6,y:1,d:'ul',c:'g',sz:'m'}, {x:7,y:0,d:'ul',c:'y',sz:'l'}, {x:2,y:6,d:'dr',c:'g'}, {x:4,y:0,d:'ur',c:'p'} ],
+    queue:q('ppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggppppbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppggggggggggggggggbbbbyyyyyyyyyyyyyyyyppppppppppppyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppggggggggggggggggggggggggggggggggggggppppppppggggpppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbpppprrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbggggggggggggggggggggggggbbbbbbbbbbbbyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrryyyyyyyyrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyypppppppppppprrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggpppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbgggggggggggg') },
 
   /* L15：10x9、48 機、5 色、8方向 */
-  { queueShape:'spiral', w:10,h:9, gates:4, stars:true, par:48, milestone:'控制塔終極擴建 Tier 3！', planes:[
-      {x:0,y:4,d:'ul',c:'y'}, {x:3,y:5,d:'ur',c:'p'}, {x:7,y:5,d:'r',c:'b'}, {x:2,y:0,d:'dl',c:'r',sz:'m'}, {x:8,y:0,d:'dr',c:'r',sz:'m'}, {x:5,y:4,d:'u',c:'r',sz:'m'}, {x:4,y:4,d:'dr',c:'p',sz:'m'}, {x:9,y:2,d:'dl',c:'p',sz:'m'}, {x:3,y:7,d:'dl',c:'r'}, {x:0,y:0,d:'l',c:'g'}, {x:7,y:2,d:'u',c:'y',sz:'m'}, {x:0,y:1,d:'ul',c:'g',sz:'m'}, {x:8,y:4,d:'d',c:'y'}, {x:8,y:2,d:'ul',c:'y',sz:'l'}, {x:2,y:8,d:'dr',c:'r',sz:'m'}, {x:1,y:2,d:'dr',c:'p'}, {x:1,y:4,d:'ul',c:'p',sz:'m'}, {x:5,y:0,d:'u',c:'b'}, {x:8,y:3,d:'dl',c:'g',sz:'m'}, {x:9,y:3,d:'d',c:'y',sz:'l'}, {x:5,y:5,d:'dr',c:'b',sz:'l'}, {x:0,y:7,d:'ur',c:'y',sz:'l'}, {x:8,y:7,d:'dr',c:'g',sz:'m'}, {x:1,y:0,d:'u',c:'b',sz:'l'}, {x:1,y:6,d:'ur',c:'y'}, {x:7,y:7,d:'dr',c:'g',sz:'m'}, {x:8,y:5,d:'dl',c:'r'}, {x:3,y:1,d:'u',c:'b',sz:'m'}, {x:7,y:1,d:'ul',c:'g'}, {x:9,y:4,d:'d',c:'r',sz:'l'}, {x:9,y:0,d:'r',c:'r',sz:'l'}, {x:3,y:4,d:'ur',c:'y',sz:'l'}, {x:0,y:5,d:'ul',c:'b',sz:'l'}, {x:8,y:1,d:'r',c:'g'}, {x:2,y:3,d:'l',c:'b',sz:'l'}, {x:0,y:3,d:'dl',c:'b',sz:'m'}, {x:0,y:2,d:'l',c:'y',sz:'l'}, {x:5,y:1,d:'dl',c:'p',sz:'m'}, {x:1,y:8,d:'dr',c:'b',sz:'m'}, {x:0,y:8,d:'l',c:'g'}, {x:6,y:8,d:'dr',c:'p',sz:'m'}, {x:6,y:7,d:'dl',c:'r',sz:'m'}, {x:5,y:8,d:'d',c:'g',sz:'l'}, {x:6,y:3,d:'u',c:'p',sz:'m'}, {x:6,y:6,d:'dl',c:'b',sz:'l'}, {x:3,y:8,d:'dr',c:'y',sz:'l'}, {x:3,y:3,d:'dl',c:'p'}, {x:1,y:7,d:'ul',c:'r',sz:'m'} ],
-    queue:q('rrrrrrrrrrrryyyyyyyyyyyybbbbbbbbyyyybbbbbbbbrrrrpppppppppppppppyyyyyyyyyyyyyyyyrrrrrrrrrbbbbbbbbbbbbbbbbpppppppppppppppppppppppppbbbyyyggggggggggggggggrrrrgggggggggggggggggggbbbbbbbbbbbbbbbbrrrrrrrrpppprrrrrrrrrrrrbbbbbbbbbryyyyppppppppyyyyyyyyyyyyyyyyppppppppggggggggyyyyppppppppgggggggpppppppppppppppppbbbbbbbbbbbbbbbbyyyybbbbbbbbbbbbbbbbbbbbpppppbbbbbyyyyyyybbbbbbbbgggggggggggggggbbbbbbbbbbbbyyyyyyyyyyyyrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrbbbrrrrrrrrbbbbbbbbbbbrrrrgggggggggggggggbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrryyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrryyyyrrryyyyyyyggggbbbbbggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrryyyyyyyyggggggggggggyyyyyyybbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyygggggggggggggggggbbbbgggggyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggbbbbbbbbbbbbgbbbyyyyyyyyyyyyyyyyppppppppppppbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrpppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyygggggggggyyyyyyyggggggggggggrrrrrrrrrrrrppppyyyyyyyygggppppppppppppppppppppprrryrrrrrrrrrrrrrrrrrrrrrrrrpppprrrrrrrrrppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbrrrrrrrrrpppppppppppppppyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrppppppppppppppppp') },
+  { queueShape:'spiral', queueSplit:664, w:10,h:9, gates:4, stars:true, par:48, milestone:'控制塔終極擴建 Tier 3！', planes:[
+      {x:2,y:3,d:'r',c:'r'}, {x:2,y:7,d:'l',c:'g',sz:'m'}, {x:6,y:1,d:'r',c:'y',sz:'l'}, {x:2,y:5,d:'r',c:'r'}, {x:3,y:8,d:'d',c:'g',sz:'m'}, {x:1,y:8,d:'ul',c:'p',sz:'m'}, {x:9,y:4,d:'dr',c:'p'}, {x:3,y:4,d:'u',c:'y',sz:'m'}, {x:9,y:0,d:'ul',c:'g',sz:'m'}, {x:6,y:0,d:'dl',c:'b',sz:'m'}, {x:7,y:4,d:'dr',c:'y'}, {x:9,y:3,d:'r',c:'b'}, {x:9,y:5,d:'dr',c:'b',sz:'l'}, {x:2,y:4,d:'ul',c:'y',sz:'l'}, {x:6,y:8,d:'dl',c:'y',sz:'m'}, {x:4,y:1,d:'d',c:'r',sz:'l'}, {x:5,y:2,d:'u',c:'y',sz:'m'}, {x:2,y:1,d:'u',c:'g',sz:'m'}, {x:0,y:4,d:'l',c:'r',sz:'m'}, {x:1,y:3,d:'u',c:'p',sz:'m'}, {x:7,y:6,d:'dr',c:'b',sz:'m'}, {x:3,y:3,d:'ul',c:'g',sz:'m'}, {x:2,y:8,d:'dl',c:'p',sz:'l'}, {x:8,y:1,d:'ul',c:'p',sz:'m'}, {x:4,y:3,d:'d',c:'b'}, {x:5,y:7,d:'d',c:'p',sz:'m'}, {x:8,y:0,d:'u',c:'b',sz:'l'}, {x:0,y:7,d:'l',c:'g'}, {x:4,y:8,d:'dl',c:'b',sz:'l'}, {x:5,y:0,d:'l',c:'y'}, {x:8,y:8,d:'d',c:'y'}, {x:3,y:6,d:'l',c:'y',sz:'m'}, {x:1,y:7,d:'dl',c:'b',sz:'l'}, {x:4,y:2,d:'l',c:'b',sz:'m'}, {x:3,y:1,d:'ul',c:'p',sz:'l'}, {x:8,y:2,d:'ur',c:'g',sz:'m'}, {x:9,y:7,d:'dr',c:'b'}, {x:8,y:4,d:'ul',c:'g',sz:'l'}, {x:8,y:3,d:'ur',c:'r',sz:'l'}, {x:8,y:6,d:'r',c:'r'}, {x:3,y:0,d:'u',c:'g'}, {x:2,y:6,d:'l',c:'p',sz:'m'}, {x:6,y:2,d:'ul',c:'p'}, {x:2,y:0,d:'u',c:'r',sz:'l'}, {x:6,y:7,d:'dr',c:'r',sz:'l'}, {x:1,y:4,d:'dl',c:'r',sz:'l'}, {x:9,y:1,d:'dr',c:'y',sz:'m'}, {x:9,y:8,d:'ur',c:'r'} ],
+    queue:q('rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggpppppppppppppppppppppppppppprrrrrrrrrrrrrrrrpppppppppppprrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrggggggggggggggggggggggggbbbbpppppppppppppppprrrrrrrrbbbbbbbbbbbbppppppppppppppppppppyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbggggyyyyyyyyyyyyyyyybbbbbbbbbbbbyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggppppppppppppppppppppppppbbbbbbbbbbbbbbbbppppppppppppppppppppppppbbbbyyyyyyyyggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbggggggggggggggggggggggggyyyybbbbbbbbbbbbbbbbppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrpppppppppppppppprrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggyyyyyyyyyyyygggggggggggg') },
 
   /* L16：10x9、50 機、5 色、8方向 */
-  { queueShape:'sWave', w:10,h:9, gates:4, stars:true, par:50, planes:[
-      {x:9,y:8,d:'dl',c:'b'}, {x:5,y:7,d:'dr',c:'b',sz:'l'}, {x:3,y:8,d:'dr',c:'b'}, {x:0,y:3,d:'r',c:'g',sz:'m'}, {x:6,y:2,d:'l',c:'r',sz:'m'}, {x:3,y:2,d:'ul',c:'r',sz:'l'}, {x:8,y:8,d:'dr',c:'b',sz:'l'}, {x:5,y:4,d:'ur',c:'b',sz:'m'}, {x:2,y:6,d:'dr',c:'p'}, {x:9,y:1,d:'dr',c:'g'}, {x:9,y:5,d:'dl',c:'y'}, {x:4,y:4,d:'ul',c:'y',sz:'m'}, {x:7,y:5,d:'dr',c:'y',sz:'l'}, {x:0,y:1,d:'u',c:'p',sz:'m'}, {x:4,y:7,d:'d',c:'p'}, {x:4,y:1,d:'u',c:'y',sz:'m'}, {x:7,y:2,d:'ur',c:'g',sz:'l'}, {x:2,y:0,d:'l',c:'b',sz:'m'}, {x:5,y:3,d:'u',c:'g',sz:'l'}, {x:9,y:2,d:'r',c:'g',sz:'m'}, {x:6,y:0,d:'u',c:'p',sz:'m'}, {x:2,y:4,d:'l',c:'p',sz:'l'}, {x:0,y:4,d:'dl',c:'r',sz:'m'}, {x:7,y:6,d:'r',c:'p'}, {x:4,y:5,d:'dl',c:'r'}, {x:3,y:0,d:'ul',c:'g',sz:'m'}, {x:6,y:6,d:'d',c:'g',sz:'m'}, {x:4,y:0,d:'ur',c:'r',sz:'m'}, {x:9,y:0,d:'dr',c:'y'}, {x:0,y:0,d:'u',c:'p',sz:'l'}, {x:7,y:7,d:'dl',c:'p',sz:'m'}, {x:7,y:4,d:'r',c:'b',sz:'l'}, {x:8,y:0,d:'u',c:'p'}, {x:1,y:2,d:'d',c:'g',sz:'m'}, {x:6,y:7,d:'dr',c:'y'}, {x:3,y:6,d:'dl',c:'g',sz:'l'}, {x:8,y:4,d:'ur',c:'r',sz:'m'}, {x:9,y:4,d:'r',c:'r'}, {x:3,y:7,d:'l',c:'b',sz:'m'}, {x:5,y:8,d:'d',c:'b'}, {x:7,y:3,d:'r',c:'g'}, {x:8,y:2,d:'dr',c:'b',sz:'l'}, {x:1,y:5,d:'d',c:'r',sz:'m'}, {x:8,y:1,d:'ul',c:'y'}, {x:3,y:4,d:'ur',c:'p',sz:'l'}, {x:5,y:0,d:'ul',c:'r',sz:'m'}, {x:1,y:4,d:'dl',c:'r',sz:'l'}, {x:0,y:8,d:'dl',c:'y',sz:'m'}, {x:7,y:1,d:'u',c:'y',sz:'l'}, {x:8,y:6,d:'dr',c:'y',sz:'l'} ],
-    queue:q('ggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrppppppppbbbbrrrrrrrrrbbbbbbbbbbbyyyyggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyggggggggggggyyyyyyyyyyyggggggggyyyyyggggggggggggyyyyyyyyyyyygggggggggggggyyyyyyyyyyyyyyyygyyyyyyyygggggggyyyyyyyyyyyyyyyygggggggggggggggrrrryyyyppppyyypppppppppppppppppppprrrrrrrrrrrrrrrrrrrryyyyyyyyrrrrrrrrrrrrrrrpppppppppppppppppppggggggggggggyyyyyyyyyyyyyrrrrrrrrpppprrrrrrrrrrrrrrrrrrrrrrrrrrrrgggggggggggggggggggggggggggbbbbbbbbbbbbbbbbpppyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbgyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbrrrrrrrrppppbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppprrrbbbbbbbbbbbbbbbbggggbbbbbbbbbbbbppppbbbbbbbbbbbggggggggbbbbpppppppgggpppppppprrrrrrrrbbbbrrrrrrrpppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyybbbbbbbbbppppppppppppppppbbbbppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbppppppppppppbbbbbbbbbbbbbbbbbbyrrrrrrrrrrrrrrrrrrrrppppppppppppgggggggggggggggrrrrrrrrrrryyyyyyyyppppyyyyyyyyyyyyyyyyyyyyyyyyyyyppppyyyyyyyyyyyypppyyyyyyyyyyyyyyyyyyyyyyy') },
+  { queueShape:'sWave', queueSplit:692, w:10,h:9, gates:4, stars:true, par:50, planes:[
+      {x:1,y:3,d:'u',c:'r'}, {x:9,y:4,d:'dl',c:'p',sz:'m'}, {x:1,y:1,d:'ul',c:'y',sz:'m'}, {x:0,y:5,d:'ur',c:'y'}, {x:6,y:4,d:'l',c:'b',sz:'m'}, {x:8,y:8,d:'ur',c:'y'}, {x:6,y:3,d:'dr',c:'r',sz:'m'}, {x:5,y:8,d:'dl',c:'p',sz:'m'}, {x:0,y:0,d:'r',c:'r',sz:'m'}, {x:8,y:5,d:'u',c:'g',sz:'l'}, {x:7,y:8,d:'ur',c:'p'}, {x:8,y:1,d:'r',c:'g'}, {x:1,y:6,d:'r',c:'p',sz:'m'}, {x:6,y:6,d:'ur',c:'g',sz:'l'}, {x:3,y:4,d:'ur',c:'b',sz:'l'}, {x:6,y:2,d:'u',c:'b',sz:'l'}, {x:9,y:5,d:'d',c:'r'}, {x:7,y:4,d:'ur',c:'b'}, {x:5,y:5,d:'u',c:'g',sz:'m'}, {x:3,y:3,d:'dl',c:'b',sz:'m'}, {x:9,y:7,d:'d',c:'p',sz:'m'}, {x:0,y:2,d:'ul',c:'g',sz:'m'}, {x:7,y:6,d:'ul',c:'r',sz:'l'}, {x:9,y:6,d:'ur',c:'p',sz:'l'}, {x:8,y:4,d:'ur',c:'g',sz:'l'}, {x:8,y:2,d:'ur',c:'y',sz:'m'}, {x:6,y:0,d:'ur',c:'y',sz:'m'}, {x:4,y:4,d:'u',c:'p'}, {x:0,y:1,d:'l',c:'b'}, {x:3,y:0,d:'u',c:'p',sz:'l'}, {x:4,y:1,d:'ur',c:'y',sz:'m'}, {x:4,y:8,d:'dl',c:'r',sz:'l'}, {x:3,y:8,d:'dl',c:'b',sz:'l'}, {x:3,y:5,d:'dl',c:'g',sz:'m'}, {x:5,y:3,d:'ul',c:'g'}, {x:2,y:4,d:'dl',c:'p',sz:'m'}, {x:9,y:3,d:'r',c:'y'}, {x:9,y:1,d:'ur',c:'p',sz:'l'}, {x:7,y:3,d:'u',c:'r',sz:'m'}, {x:6,y:5,d:'ul',c:'b',sz:'m'}, {x:4,y:6,d:'dr',c:'y'}, {x:2,y:3,d:'u',c:'y'}, {x:8,y:7,d:'l',c:'r',sz:'l'}, {x:5,y:2,d:'ur',c:'g',sz:'l'}, {x:0,y:3,d:'ul',c:'y',sz:'l'}, {x:4,y:0,d:'u',c:'b'}, {x:1,y:7,d:'d',c:'r',sz:'l'}, {x:2,y:6,d:'ul',c:'r',sz:'m'}, {x:8,y:0,d:'r',c:'g'}, {x:2,y:8,d:'l',c:'b',sz:'m'} ],
+    queue:q('bbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggggggggggbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrpppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyggggggggggggggggrrrrppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggppppppppppppppppppppppppppppppppggggbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggggggppppppppppppggggggggppppyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggggggggggggggppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggbbbbbbbbpppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrggggggggggggggggpppppppppppppppppppppppprrrrrrrrrrrryyyyyyyyyyyyyyyyggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrpppppppppppppppppppppppprrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrr') },
 
   /* L17：10x10、52 機、5 色、8方向 */
-  { queueShape:'hexRing', w:10,h:10, gates:4, stars:true, par:52, planes:[
-      {x:7,y:0,d:'r',c:'p',sz:'m'}, {x:4,y:6,d:'dl',c:'y'}, {x:9,y:1,d:'d',c:'y',sz:'m'}, {x:1,y:9,d:'dr',c:'y'}, {x:5,y:7,d:'l',c:'p',sz:'m'}, {x:2,y:4,d:'dl',c:'b',sz:'l'}, {x:1,y:5,d:'l',c:'b'}, {x:7,y:5,d:'ul',c:'y'}, {x:3,y:4,d:'dr',c:'p',sz:'m'}, {x:8,y:2,d:'ul',c:'g',sz:'m'}, {x:5,y:4,d:'dl',c:'b',sz:'m'}, {x:3,y:3,d:'ur',c:'g',sz:'l'}, {x:6,y:0,d:'ul',c:'g'}, {x:0,y:7,d:'d',c:'y',sz:'l'}, {x:9,y:6,d:'dl',c:'p'}, {x:5,y:3,d:'ul',c:'b'}, {x:4,y:9,d:'dl',c:'b',sz:'m'}, {x:8,y:8,d:'r',c:'y',sz:'m'}, {x:0,y:4,d:'u',c:'b',sz:'m'}, {x:0,y:3,d:'ul',c:'b',sz:'l'}, {x:3,y:8,d:'d',c:'p',sz:'m'}, {x:3,y:2,d:'u',c:'g',sz:'m'}, {x:1,y:3,d:'ul',c:'p'}, {x:7,y:8,d:'dr',c:'r',sz:'l'}, {x:3,y:7,d:'dr',c:'r'}, {x:3,y:9,d:'d',c:'r',sz:'l'}, {x:8,y:1,d:'ur',c:'y',sz:'l'}, {x:9,y:5,d:'r',c:'r',sz:'m'}, {x:4,y:2,d:'u',c:'p'}, {x:0,y:9,d:'d',c:'r',sz:'m'}, {x:4,y:4,d:'dl',c:'y',sz:'l'}, {x:7,y:6,d:'ur',c:'g',sz:'l'}, {x:2,y:3,d:'u',c:'y',sz:'m'}, {x:5,y:8,d:'d',c:'r',sz:'m'}, {x:9,y:9,d:'r',c:'r',sz:'l'}, {x:8,y:5,d:'ul',c:'r'}, {x:7,y:1,d:'ur',c:'p',sz:'m'}, {x:6,y:6,d:'d',c:'g',sz:'l'}, {x:3,y:6,d:'l',c:'b',sz:'m'}, {x:1,y:2,d:'l',c:'r',sz:'m'}, {x:5,y:6,d:'ur',c:'g'}, {x:3,y:5,d:'dl',c:'r',sz:'l'}, {x:0,y:1,d:'ul',c:'p',sz:'l'}, {x:8,y:3,d:'r',c:'p',sz:'m'}, {x:9,y:8,d:'dl',c:'y',sz:'m'}, {x:4,y:8,d:'dr',c:'g'}, {x:6,y:8,d:'dr',c:'b',sz:'l'}, {x:2,y:8,d:'d',c:'r',sz:'m'}, {x:1,y:8,d:'dr',c:'b',sz:'l'}, {x:7,y:2,d:'ul',c:'g'}, {x:6,y:1,d:'ul',c:'g',sz:'m'}, {x:8,y:7,d:'r',c:'b'} ],
-    queue:q('rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrpppppppprrrrppppppppppppbbbbbbbbbbbbrrrrrrrrpppppppppppppppppppppppprggggggggggggbbbbbbbbbbbbbpbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppbbbbyyyyyyyypppbbbbgggggggggggggyyyyyyyyyyyyyyyyrrrrrrrrrrrryrrrrrrrrrrrrpppppppppppppppbbbrrrrrrryyyyyyyyyyyyyyyyyyyypppppppppppppppppppppppppppppppppppppppprrrrrrrrrbbbbbbbbppppppppppppyyyyybbbbbbbbbbbbbbbbbrrrrrrrrrrrrggggggggggggggggpppgggggggggggggggggggggggrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyggggyyyyyyyyyyyyyyyyygggggggggggggggyyyyyyyrrrrgggggggggggggggrrrryyyyyyyyrrrrrrrrrrrrbbbbbbbbbbbbrrrrrrrrrrrrrrryyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggyyyyyyyyyyyyyyyyyyybbbbbbbbggggrrrrrrrgggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbyyyyyyyyyyyyyggggbbbggggggggggggbbbbbbbbbbbbggggggggggggggggggggbbbbbbbggggggggggggppppppppppppggggggggggggggggpppppppppppppppppppppppbbbbbbbbbbbbrrrrrrrrrrrrgpppppppppppppppppppprrrrrrrrrrrrrrrrppprrrrrrrppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbpppppppppppyyyyyyyybbbbbbbbbyyyyyyyypppppppprrrrrrrrrrrrrrryyyypppppyyyyy') },
+  { queueShape:'hexRing', queueSplit:720, w:10,h:10, gates:4, stars:true, par:52, planes:[
+      {x:8,y:0,d:'l',c:'g'}, {x:1,y:3,d:'l',c:'r'}, {x:0,y:1,d:'ul',c:'r'}, {x:9,y:0,d:'ur',c:'b',sz:'l'}, {x:6,y:6,d:'l',c:'y'}, {x:3,y:6,d:'dl',c:'r',sz:'l'}, {x:6,y:8,d:'l',c:'g',sz:'m'}, {x:2,y:1,d:'d',c:'p'}, {x:2,y:4,d:'dl',c:'b',sz:'m'}, {x:7,y:0,d:'d',c:'r',sz:'m'}, {x:8,y:1,d:'dr',c:'y'}, {x:9,y:4,d:'d',c:'y',sz:'l'}, {x:6,y:0,d:'ul',c:'p',sz:'l'}, {x:7,y:8,d:'d',c:'r',sz:'l'}, {x:8,y:7,d:'dr',c:'b',sz:'m'}, {x:5,y:8,d:'dl',c:'p',sz:'l'}, {x:6,y:1,d:'dl',c:'g'}, {x:6,y:9,d:'dl',c:'b',sz:'l'}, {x:2,y:6,d:'dl',c:'b',sz:'m'}, {x:1,y:7,d:'ul',c:'b',sz:'m'}, {x:9,y:2,d:'ur',c:'b',sz:'m'}, {x:0,y:4,d:'ul',c:'y',sz:'l'}, {x:8,y:4,d:'dr',c:'y',sz:'m'}, {x:3,y:5,d:'u',c:'g',sz:'l'}, {x:0,y:9,d:'dl',c:'g',sz:'m'}, {x:5,y:9,d:'dl',c:'p'}, {x:2,y:3,d:'ur',c:'p',sz:'l'}, {x:7,y:2,d:'l',c:'r',sz:'m'}, {x:5,y:3,d:'dr',c:'y'}, {x:4,y:5,d:'d',c:'b',sz:'m'}, {x:3,y:8,d:'ul',c:'g',sz:'m'}, {x:1,y:1,d:'u',c:'b'}, {x:7,y:4,d:'ul',c:'b'}, {x:4,y:3,d:'u',c:'y'}, {x:2,y:5,d:'l',c:'g',sz:'m'}, {x:4,y:7,d:'d',c:'r',sz:'m'}, {x:3,y:9,d:'d',c:'p',sz:'l'}, {x:7,y:6,d:'r',c:'p',sz:'l'}, {x:8,y:3,d:'r',c:'y',sz:'l'}, {x:1,y:5,d:'l',c:'r',sz:'m'}, {x:4,y:8,d:'d',c:'g',sz:'m'}, {x:1,y:6,d:'ul',c:'g'}, {x:2,y:0,d:'ur',c:'y',sz:'m'}, {x:0,y:2,d:'dl',c:'r',sz:'l'}, {x:9,y:6,d:'ur',c:'b',sz:'m'}, {x:3,y:0,d:'ul',c:'y'}, {x:7,y:9,d:'ur',c:'p',sz:'m'}, {x:8,y:2,d:'dl',c:'r',sz:'l'}, {x:6,y:5,d:'r',c:'p',sz:'m'}, {x:7,y:3,d:'ul',c:'g'}, {x:4,y:1,d:'u',c:'p',sz:'m'}, {x:8,y:9,d:'dr',c:'r',sz:'m'} ],
+    queue:q('pppppppppppprrrrrrrrrrrrrrrrrrrrrrrrpppppppppppprrrrrrrrrrrrpppppppppppppppppppppppprrrrrrrrrrrrrrrryyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyrrrrrrrrpppppppppppppppprrrrrrrrrrrrrrrrggggggggggggggggggggggggggggrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyypppppppprrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyggggggggggggrrrryyyyyyyyyyyyyyyyggggggggggggbbbbbbbbbbbbbbbbggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppggggbbbbbbbbbbbbbbbbpppppppppppprrrrrrrrrrrrrrrrppppppppppppggggggggggggggggggggggggrrrrrrrrggggggggggggppppbbbbbbbbbbbbbbbbbbbbggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbyyyyyyyyyyyyyyyyyyyyggggggggyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrpppppppppppprrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppyyyybbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggyyyyyyyyyyyyggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrryyyyggggggggggggrrrrrrrrrrrrrrrrrrrrgggg') },
 
   /* L18：10x10、54 機、5 色、8方向 */
-  { queueShape:'heart', w:10,h:10, gates:4, stars:true, par:54, milestone:'貴賓室終極擴建 Tier 3！', planes:[
-      {x:4,y:2,d:'dr',c:'g'}, {x:6,y:2,d:'dr',c:'y',sz:'m'}, {x:3,y:6,d:'u',c:'b'}, {x:4,y:7,d:'dl',c:'b',sz:'m'}, {x:0,y:6,d:'ul',c:'y',sz:'m'}, {x:1,y:9,d:'ur',c:'g',sz:'m'}, {x:9,y:9,d:'r',c:'p',sz:'l'}, {x:0,y:4,d:'ul',c:'b'}, {x:4,y:8,d:'ur',c:'r'}, {x:6,y:3,d:'dr',c:'r',sz:'l'}, {x:7,y:4,d:'dr',c:'g',sz:'m'}, {x:1,y:4,d:'ul',c:'g',sz:'m'}, {x:0,y:0,d:'r',c:'r',sz:'l'}, {x:4,y:1,d:'l',c:'b',sz:'m'}, {x:3,y:3,d:'u',c:'y',sz:'l'}, {x:8,y:7,d:'ul',c:'b',sz:'m'}, {x:9,y:3,d:'ur',c:'g',sz:'l'}, {x:9,y:8,d:'dl',c:'p'}, {x:1,y:0,d:'ur',c:'p'}, {x:7,y:7,d:'ur',c:'r'}, {x:6,y:7,d:'dr',c:'y'}, {x:2,y:9,d:'ul',c:'b'}, {x:7,y:9,d:'dl',c:'y',sz:'l'}, {x:9,y:7,d:'r',c:'p'}, {x:2,y:7,d:'l',c:'r',sz:'m'}, {x:1,y:2,d:'l',c:'r',sz:'l'}, {x:8,y:2,d:'u',c:'r',sz:'m'}, {x:6,y:1,d:'dl',c:'y',sz:'l'}, {x:2,y:8,d:'l',c:'g',sz:'l'}, {x:7,y:3,d:'dr',c:'g',sz:'m'}, {x:8,y:4,d:'dr',c:'g',sz:'l'}, {x:9,y:0,d:'dr',c:'p',sz:'m'}, {x:8,y:9,d:'d',c:'b',sz:'l'}, {x:4,y:4,d:'dl',c:'p',sz:'m'}, {x:5,y:0,d:'ul',c:'b',sz:'l'}, {x:5,y:9,d:'dl',c:'y',sz:'l'}, {x:1,y:7,d:'dl',c:'g',sz:'m'}, {x:3,y:0,d:'ul',c:'g',sz:'m'}, {x:7,y:1,d:'ur',c:'b',sz:'m'}, {x:6,y:8,d:'d',c:'b'}, {x:9,y:4,d:'ur',c:'b'}, {x:2,y:3,d:'l',c:'r',sz:'l'}, {x:8,y:1,d:'dr',c:'r',sz:'m'}, {x:5,y:8,d:'dl',c:'p'}, {x:3,y:8,d:'dr',c:'y',sz:'m'}, {x:9,y:5,d:'l',c:'p',sz:'m'}, {x:1,y:6,d:'dl',c:'g'}, {x:1,y:5,d:'l',c:'p',sz:'l'}, {x:1,y:3,d:'l',c:'y'}, {x:5,y:6,d:'r',c:'y',sz:'l'}, {x:0,y:9,d:'d',c:'p'}, {x:6,y:6,d:'r',c:'r',sz:'m'}, {x:7,y:8,d:'dl',c:'r',sz:'m'}, {x:5,y:1,d:'ur',c:'y',sz:'m'} ],
-    queue:q('rrrryyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppppppppppyyyyyyyypppppppppppppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyypppyyyyyyyyyyyyppppppppyyyyyyyyprrrrrrrrrrrrrrrggggggggggggggggyyyyyyyyrrrrrrrrrrrrrrrryyyyyyybbbbbbbbbbbbbbbbbbbbrrrrrrrryyyyyyyyryyyyyyyyyyyybbbbbggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggyyygggggggggggggggggggyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppyyyyyyyyyyyyppppppppyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyppprrrrrrrrrrrryyyygggggggggggggggrrrrrrrrrrrrrrrgggggggggggggggrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrpppprrrrppppppppppppyyyyyyyyyyyyyyyyppppyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrpppprrrrppppppppppppprrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppyyyyyyyybbbbbbbbbbbbpppbbbbbbbbbbbbpppppppppppbbbbggggggggggggbbbbbbbbbbbbyyyyyyyyyyyybbbrrrrrrrrrrrrrrrrggggggggggggggggyyyyyggggbbbbggggggggggggggggrrrrrrrrrrrrrrrrrrrgggggggrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbggggbbbbbbbrrrrbbbbbbbbbbbbbbbbgggggggggggrbbbbbbbbbbbbggggggggggggbbbbbbbbgggggggggggggbbbbbbbbggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbgggggggggggggbbbbbggggggggggggyyyyyyyyyyyyyyypppppppppppppppggggggggggggggggggggggggggggggggggggggggbbbbbrrrrrrrrrrrrrrryyyyyyyyyyyyyyygggggggggg') },
+  { queueShape:'heart', queueSplit:748, w:10,h:10, gates:4, stars:true, par:54, milestone:'貴賓室終極擴建 Tier 3！', planes:[
+      {x:2,y:5,d:'ul',c:'g',sz:'m'}, {x:0,y:7,d:'l',c:'b',sz:'m'}, {x:0,y:2,d:'ul',c:'y',sz:'l'}, {x:3,y:6,d:'r',c:'y',sz:'m'}, {x:1,y:9,d:'d',c:'r',sz:'l'}, {x:2,y:9,d:'r',c:'p',sz:'l'}, {x:9,y:5,d:'dr',c:'g'}, {x:3,y:5,d:'dr',c:'g',sz:'l'}, {x:8,y:2,d:'ul',c:'r',sz:'m'}, {x:7,y:4,d:'l',c:'y'}, {x:4,y:7,d:'dr',c:'b'}, {x:5,y:4,d:'l',c:'r',sz:'m'}, {x:3,y:4,d:'u',c:'p'}, {x:9,y:6,d:'d',c:'r',sz:'m'}, {x:4,y:2,d:'ur',c:'r',sz:'l'}, {x:5,y:9,d:'ul',c:'b',sz:'m'}, {x:9,y:1,d:'ur',c:'b',sz:'m'}, {x:5,y:3,d:'r',c:'p'}, {x:1,y:3,d:'u',c:'r',sz:'m'}, {x:6,y:2,d:'ur',c:'g',sz:'l'}, {x:3,y:9,d:'ur',c:'p',sz:'m'}, {x:9,y:0,d:'ul',c:'p',sz:'l'}, {x:2,y:4,d:'dl',c:'g',sz:'l'}, {x:3,y:2,d:'ul',c:'g',sz:'m'}, {x:2,y:8,d:'l',c:'r',sz:'m'}, {x:4,y:1,d:'l',c:'g'}, {x:7,y:6,d:'dl',c:'r',sz:'m'}, {x:4,y:6,d:'dr',c:'g'}, {x:5,y:7,d:'ur',c:'b',sz:'m'}, {x:1,y:4,d:'ul',c:'r'}, {x:8,y:3,d:'r',c:'p',sz:'m'}, {x:2,y:1,d:'u',c:'y'}, {x:8,y:5,d:'ur',c:'y',sz:'m'}, {x:0,y:3,d:'dl',c:'b',sz:'m'}, {x:4,y:4,d:'ul',c:'g'}, {x:9,y:9,d:'d',c:'b',sz:'m'}, {x:6,y:3,d:'d',c:'y',sz:'l'}, {x:0,y:6,d:'dl',c:'y',sz:'l'}, {x:8,y:8,d:'dl',c:'g',sz:'m'}, {x:8,y:7,d:'dr',c:'y'}, {x:5,y:1,d:'ul',c:'r',sz:'l'}, {x:5,y:0,d:'u',c:'p',sz:'l'}, {x:2,y:7,d:'dr',c:'y',sz:'m'}, {x:6,y:0,d:'u',c:'b',sz:'l'}, {x:3,y:3,d:'ul',c:'b',sz:'m'}, {x:2,y:3,d:'ul',c:'r'}, {x:0,y:4,d:'dl',c:'b',sz:'l'}, {x:7,y:7,d:'d',c:'y'}, {x:3,y:0,d:'u',c:'y',sz:'l'}, {x:0,y:9,d:'d',c:'p'}, {x:9,y:8,d:'ur',c:'p',sz:'m'}, {x:6,y:4,d:'d',c:'b'}, {x:7,y:2,d:'u',c:'p'}, {x:0,y:8,d:'ul',c:'g',sz:'l'} ],
+    queue:q('ppppppppppppppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppbbbbrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggyyyybbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrppppppppppppppppggggggggggggggggggggggggggggggggggggggggggggggggggggppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggbbbbbbbbbbbbbbbbbbbbpppppppppppppppppppppppprrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggrrrrggggggggggggggggppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyybbbb') },
 
   /* L19：10x10、56 機、5 色、8方向 */
-  { queueShape:'figure8', w:10,h:10, gates:4, stars:true, par:56, planes:[
-      {x:2,y:8,d:'ul',c:'b',sz:'l'}, {x:5,y:3,d:'l',c:'p'}, {x:0,y:5,d:'dl',c:'y'}, {x:5,y:0,d:'r',c:'g',sz:'m'}, {x:7,y:3,d:'ul',c:'g',sz:'m'}, {x:2,y:9,d:'dl',c:'r'}, {x:1,y:8,d:'ur',c:'g',sz:'m'}, {x:8,y:3,d:'dr',c:'b',sz:'l'}, {x:0,y:9,d:'dr',c:'y',sz:'m'}, {x:3,y:6,d:'u',c:'g',sz:'l'}, {x:7,y:9,d:'r',c:'r',sz:'l'}, {x:6,y:4,d:'r',c:'r'}, {x:3,y:8,d:'d',c:'y',sz:'m'}, {x:2,y:2,d:'u',c:'y',sz:'m'}, {x:4,y:7,d:'d',c:'b',sz:'l'}, {x:3,y:0,d:'ur',c:'r',sz:'m'}, {x:4,y:3,d:'ur',c:'y'}, {x:9,y:5,d:'dr',c:'g',sz:'m'}, {x:0,y:6,d:'dl',c:'y',sz:'m'}, {x:9,y:3,d:'dl',c:'b',sz:'m'}, {x:6,y:1,d:'ur',c:'r',sz:'m'}, {x:3,y:9,d:'d',c:'p',sz:'m'}, {x:7,y:7,d:'r',c:'b'}, {x:9,y:0,d:'u',c:'p',sz:'l'}, {x:1,y:1,d:'l',c:'r',sz:'m'}, {x:8,y:1,d:'dr',c:'p',sz:'l'}, {x:8,y:7,d:'dl',c:'b',sz:'m'}, {x:3,y:2,d:'ul',c:'p'}, {x:9,y:9,d:'d',c:'p'}, {x:7,y:1,d:'ur',c:'b',sz:'m'}, {x:1,y:7,d:'l',c:'y',sz:'m'}, {x:1,y:5,d:'dr',c:'r',sz:'m'}, {x:5,y:5,d:'d',c:'b',sz:'m'}, {x:7,y:0,d:'ul',c:'b',sz:'m'}, {x:6,y:8,d:'dl',c:'g',sz:'m'}, {x:5,y:9,d:'dl',c:'y'}, {x:1,y:0,d:'ur',c:'g'}, {x:0,y:4,d:'ul',c:'r',sz:'l'}, {x:0,y:7,d:'dl',c:'g',sz:'l'}, {x:0,y:8,d:'l',c:'r',sz:'l'}, {x:0,y:1,d:'dl',c:'b'}, {x:4,y:6,d:'r',c:'g',sz:'m'}, {x:6,y:9,d:'d',c:'b',sz:'m'}, {x:6,y:0,d:'ur',c:'p',sz:'l'}, {x:6,y:2,d:'ul',c:'y',sz:'m'}, {x:9,y:2,d:'ur',c:'p',sz:'m'}, {x:8,y:4,d:'r',c:'r'}, {x:8,y:9,d:'d',c:'p',sz:'l'}, {x:0,y:2,d:'dl',c:'y',sz:'l'}, {x:5,y:1,d:'ul',c:'r',sz:'l'}, {x:4,y:0,d:'u',c:'p'}, {x:8,y:2,d:'ur',c:'y',sz:'l'}, {x:5,y:8,d:'dl',c:'g'}, {x:7,y:8,d:'r',c:'r'}, {x:4,y:2,d:'ul',c:'p'}, {x:1,y:9,d:'d',c:'g',sz:'l'} ],
-    queue:q('rrrrrrrrrrrrggggggggggggpppppppppppprrrrrrrrrrrrrbbbbbbbbgggggggggggggggggggggggppppppppppppppppbbbbbbbbbbbbrrrrrrrrrrrrrrrrppppppprrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbggggbbbbbbbbbbbbbbbbrrrrbbbyyyyyyyyyyyyrrrrrrrrrrrrrrryyyrrrrrrrrrrrrrrrrggggbbbbrrrrrrrrrbbbbbbbbggggbbbbbbbbbbbbbgggppppppppppppppppppppbbbbbbbbbbbbpppppyyyyyyyyyyyyyyyybbbbbyyyyyyyyyyyyyyyyyyyyyyyyggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbrrrrrrrrrrrrgggggggggggggrrrrrrrryyyyyyyyyyyyrrrrryyyyyyyyyyyyyggggggggggggggggrrrrrrrrrrrrrrrryyypppprrrrrrrrrrrrrrrrrrrrrrrpppppppppppggggggggggggggggrrrrrrrrggggggggrrrrrrrrrrrrrrrgggggggggggggggggggggggggggggggggggggggbbbbbbbbbbbbbbbbggggggggggggrrrrrrrrrrrrrgggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyygggggggbbbbbbbbyyyyyyyyybbbbbbbbbbbbbbbgggppppppppppppppppbpppppppppppppppppppppbbbbrrrrrrrrppprrrrrrrrrrrrgggggggggggggggpppppppppppppppprrrrrrrrrrrrrrrrpppppppppppppppprrrrrrrrrrrrrrbbbbbbbbpppbbbbbbbbbbbbppppppppbbbbbbbbbbbbpppppppppppppppbbbbbbbbbbbbbbbpppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggbbbyyyyyyyyyyyyyyyygggggggggggggggggggggggggrrrrrrrrgggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrppppyyyyyyyyppppppppppppppppyyyyyyyyyyyyyyypppppppppppppppyyyyyyyyppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyypppggggggggggggggggggggyyyyrrrrrrrrrrrrppppgggggbbbbbbbbbbbbbbbbpppppppppppppppprrrpppppybbbbbbbbb') },
+  { queueShape:'figure8', queueSplit:776, w:10,h:10, gates:4, stars:true, par:56, planes:[
+      {x:0,y:1,d:'d',c:'y',sz:'m'}, {x:5,y:8,d:'l',c:'y',sz:'l'}, {x:4,y:7,d:'dl',c:'y'}, {x:5,y:5,d:'u',c:'g',sz:'m'}, {x:1,y:6,d:'d',c:'b',sz:'l'}, {x:5,y:6,d:'dr',c:'g',sz:'m'}, {x:8,y:2,d:'ur',c:'p'}, {x:2,y:2,d:'dl',c:'p',sz:'l'}, {x:8,y:1,d:'dr',c:'b'}, {x:1,y:0,d:'u',c:'y'}, {x:8,y:5,d:'ur',c:'y',sz:'m'}, {x:2,y:4,d:'dl',c:'y',sz:'l'}, {x:4,y:1,d:'ul',c:'b',sz:'m'}, {x:2,y:9,d:'dr',c:'r',sz:'m'}, {x:5,y:0,d:'ul',c:'y',sz:'l'}, {x:3,y:2,d:'u',c:'p'}, {x:9,y:1,d:'d',c:'b',sz:'l'}, {x:2,y:8,d:'l',c:'b'}, {x:0,y:2,d:'l',c:'p',sz:'m'}, {x:9,y:0,d:'u',c:'g',sz:'m'}, {x:7,y:4,d:'ur',c:'y',sz:'m'}, {x:5,y:7,d:'ur',c:'r',sz:'m'}, {x:8,y:3,d:'l',c:'g',sz:'m'}, {x:1,y:2,d:'ur',c:'r',sz:'m'}, {x:0,y:7,d:'d',c:'g',sz:'l'}, {x:7,y:6,d:'r',c:'r',sz:'m'}, {x:9,y:7,d:'r',c:'g'}, {x:4,y:5,d:'dl',c:'g'}, {x:9,y:9,d:'dr',c:'r'}, {x:1,y:1,d:'ur',c:'b',sz:'m'}, {x:3,y:8,d:'d',c:'b',sz:'m'}, {x:4,y:2,d:'ur',c:'b',sz:'l'}, {x:4,y:8,d:'dl',c:'y',sz:'m'}, {x:6,y:3,d:'u',c:'g',sz:'m'}, {x:5,y:9,d:'d',c:'b',sz:'l'}, {x:9,y:3,d:'ur',c:'r',sz:'m'}, {x:6,y:4,d:'d',c:'r',sz:'m'}, {x:2,y:0,d:'u',c:'g'}, {x:7,y:2,d:'u',c:'g'}, {x:5,y:1,d:'ul',c:'y',sz:'m'}, {x:0,y:6,d:'dl',c:'g'}, {x:0,y:0,d:'u',c:'p',sz:'m'}, {x:9,y:2,d:'r',c:'r'}, {x:7,y:1,d:'u',c:'p'}, {x:9,y:5,d:'dr',c:'p',sz:'l'}, {x:8,y:8,d:'r',c:'r',sz:'m'}, {x:3,y:1,d:'u',c:'r'}, {x:2,y:1,d:'ur',c:'p',sz:'l'}, {x:3,y:3,d:'l',c:'b',sz:'l'}, {x:4,y:9,d:'dl',c:'y',sz:'m'}, {x:3,y:4,d:'ur',c:'p',sz:'l'}, {x:6,y:9,d:'d',c:'b',sz:'m'}, {x:1,y:7,d:'d',c:'p',sz:'l'}, {x:4,y:3,d:'ur',c:'r'}, {x:6,y:2,d:'u',c:'r',sz:'l'}, {x:2,y:3,d:'l',c:'p',sz:'l'} ],
+    queue:q('rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrpppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrppppppppppppppppyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbpppppppppppprrrrrrrrrrrrrrrrrrrrrrrrpppppppppppppppppppppppprrrrrrrrrrrrpppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrggggggggggggggggrrrryyyyyyyyyyyyyyyyyyyyyyyyggggggggggggppppppppppppppppppppppppggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrppppppppggggggggggggggggggggggggbbbbbbbbbbbbbbbbggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggggggrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggggggggggbbbbbbbbbbbbggggbbbbbbbbbbbbbbbbppppppppppppppppppppppppppppppppppppggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppbbbbrrrrrrrrrrrryyyyyyyyyyyyrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbppppppppppppbbbbyyyyyyyyyyyybbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyppppppppppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyypppppppppppppppp') },
 
-  /* L20：10x10、57 機、5 色、8方向 形狀關（mask 座標未經美術落實，見 doc 第10節⚠️，呢度用幾何佔位輪廓） */
-  { queueShape:'spiral', w:10,h:10, gates:4, stars:true, par:57, milestone:'機庫終極擴建 Tier 3！第一章完成！', planes:[
-      {x:1,y:6,d:'ul',c:'p'}, {x:2,y:5,d:'u',c:'r',sz:'l'}, {x:5,y:1,d:'r',c:'g',sz:'l'}, {x:6,y:6,d:'dl',c:'b'}, {x:5,y:2,d:'r',c:'b',sz:'l'}, {x:3,y:6,d:'d',c:'g'}, {x:0,y:5,d:'l',c:'y'}, {x:5,y:7,d:'d',c:'b',sz:'m'}, {x:7,y:5,d:'dr',c:'b'}, {x:3,y:8,d:'d',c:'r',sz:'m'}, {x:5,y:9,d:'ur',c:'p',sz:'l'}, {x:5,y:8,d:'dl',c:'y',sz:'m'}, {x:7,y:4,d:'dr',c:'g',sz:'m'}, {x:8,y:3,d:'l',c:'b',sz:'m'}, {x:8,y:7,d:'ur',c:'r',sz:'m'}, {x:3,y:1,d:'u',c:'y',sz:'m'}, {x:1,y:5,d:'ul',c:'b',sz:'l'}, {x:6,y:2,d:'dr',c:'r'}, {x:4,y:9,d:'dr',c:'r',sz:'l'}, {x:7,y:3,d:'dl',c:'y',sz:'l'}, {x:3,y:9,d:'dr',c:'g',sz:'m'}, {x:3,y:3,d:'l',c:'g'}, {x:0,y:6,d:'l',c:'b',sz:'m'}, {x:5,y:5,d:'dl',c:'y'}, {x:4,y:1,d:'u',c:'b'}, {x:5,y:6,d:'ul',c:'g',sz:'m'}, {x:6,y:1,d:'ul',c:'r',sz:'l'}, {x:5,y:3,d:'dl',c:'g',sz:'m'}, {x:0,y:3,d:'l',c:'p',sz:'m'}, {x:9,y:7,d:'ur',c:'p',sz:'m'}, {x:3,y:4,d:'l',c:'g'}, {x:7,y:6,d:'ur',c:'b',sz:'l'}, {x:9,y:3,d:'r',c:'y',sz:'m'}, {x:3,y:5,d:'ul',c:'g',sz:'m'}, {x:6,y:9,d:'dl',c:'r',sz:'m'}, {x:8,y:5,d:'r',c:'b'}, {x:2,y:3,d:'ul',c:'b',sz:'m'}, {x:6,y:5,d:'ul',c:'y',sz:'m'}, {x:0,y:4,d:'dl',c:'y',sz:'l'}, {x:8,y:6,d:'ur',c:'y',sz:'m'}, {x:6,y:8,d:'dr',c:'g',sz:'l'}, {x:8,y:4,d:'dr',c:'r',sz:'l'}, {x:4,y:6,d:'dl',c:'r',sz:'l'}, {x:5,y:4,d:'ul',c:'g'}, {x:9,y:5,d:'r',c:'p',sz:'l'}, {x:6,y:3,d:'ur',c:'p',sz:'m'}, {x:4,y:3,d:'ul',c:'y',sz:'l'}, {x:2,y:6,d:'d',c:'p'}, {x:9,y:6,d:'dr',c:'b',sz:'m'}, {x:4,y:7,d:'l',c:'p'}, {x:3,y:2,d:'ul',c:'p'}, {x:9,y:4,d:'ur',c:'r',sz:'l'}, {x:3,y:7,d:'dl',c:'y'}, {x:1,y:3,d:'u',c:'p'}, {x:6,y:7,d:'dr',c:'p',sz:'l'}, {x:8,y:2,d:'u',c:'r',sz:'m'}, {x:9,y:2,d:'ul',c:'r',sz:'m'} ],
-    queue:q('rrrrrrrrggggggggrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggpppprrrrrrrrrrrrrrrrbbbbrrrrrrrrgpppprppppppppppppppppppppppppbbbbbbbbbbbbpppppppppppppppppppbbbbbbbbbbbbbbbbbpppppppppppppppppppppppppppbbbbbbbbbbbbbbbbppppppppppppppppppppbgggggggggggggggggggggggggprrrrrrrrrrrrrrrrppppppppppprrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbppppppppppppppppbbbbppppppppppppppppbbbbbpppbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrbbbbbpppppppppppppppppppppppppbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyygggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrryyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrggggggggggggrrrrrrrggggyyyggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyygggppppppppppppyyyggggrrrrrrrrppprrrrrrrrrrrrrrrrrggggggggggggggggggyyyyyyyyyyyyyyyyyyygggggggggggggggggggggggggggggyyyyyyyyyyyygggggggggggggggggggggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyggggyyyyyyyyyyyyyyyyyyyygggyyyyyyyyyyyygggggbbbbbbbbbbbbbbbbbbbbrrrryyyyyyyrrrrrrrryyyppppppppbbbbpppppppppppprrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbpppprbbbbbppppppppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyppppppppppppppppppppppppppppppppppppppyyyyyyyyyyyyyyyyprrrrrrrrrrrrrrrrrrrryyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrpppyyyrrrrrrrrrrrrrrrbbbbbbbbrbbbbbbbbbbbbrrrrrrrrggggggggrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbyyyyyyyybbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyggggggggggggggggg') },
+  /* L20：10x10、54 機、5 色、8方向 形狀關（mask 座標未經美術落實，見 doc 第10節⚠️，呢度用幾何佔位輪廓） */
+  { queueShape:'spiral', queueSplit:748, w:10,h:10, gates:4, stars:true, par:54, milestone:'機庫終極擴建 Tier 3！第一章完成！', planes:[
+      {x:8,y:3,d:'r',c:'g',sz:'m'}, {x:1,y:5,d:'r',c:'p',sz:'m'}, {x:5,y:2,d:'ul',c:'g',sz:'l'}, {x:7,y:4,d:'d',c:'b'}, {x:3,y:2,d:'l',c:'y',sz:'m'}, {x:3,y:1,d:'l',c:'r',sz:'m'}, {x:7,y:5,d:'r',c:'y',sz:'m'}, {x:4,y:5,d:'ul',c:'b',sz:'l'}, {x:0,y:4,d:'ul',c:'p',sz:'l'}, {x:4,y:2,d:'u',c:'p'}, {x:5,y:7,d:'dr',c:'r',sz:'l'}, {x:0,y:3,d:'dr',c:'y',sz:'m'}, {x:9,y:6,d:'l',c:'y',sz:'l'}, {x:1,y:3,d:'u',c:'b',sz:'m'}, {x:4,y:8,d:'dr',c:'r',sz:'m'}, {x:9,y:5,d:'ur',c:'r',sz:'l'}, {x:3,y:4,d:'d',c:'g'}, {x:1,y:6,d:'d',c:'r'}, {x:4,y:7,d:'l',c:'r',sz:'m'}, {x:8,y:2,d:'ur',c:'y',sz:'l'}, {x:4,y:4,d:'ul',c:'y'}, {x:2,y:6,d:'u',c:'g',sz:'l'}, {x:8,y:5,d:'d',c:'g',sz:'m'}, {x:6,y:7,d:'dl',c:'g',sz:'m'}, {x:9,y:2,d:'ur',c:'g',sz:'m'}, {x:2,y:3,d:'u',c:'r',sz:'m'}, {x:6,y:8,d:'d',c:'g',sz:'m'}, {x:8,y:6,d:'d',c:'b',sz:'l'}, {x:0,y:6,d:'dr',c:'b'}, {x:6,y:5,d:'dr',c:'g'}, {x:6,y:1,d:'u',c:'b',sz:'l'}, {x:4,y:6,d:'dl',c:'y'}, {x:3,y:8,d:'dr',c:'b'}, {x:6,y:3,d:'ur',c:'b',sz:'l'}, {x:5,y:9,d:'dl',c:'g',sz:'l'}, {x:9,y:3,d:'dr',c:'y',sz:'m'}, {x:5,y:8,d:'dl',c:'r',sz:'m'}, {x:6,y:2,d:'ur',c:'p'}, {x:9,y:7,d:'r',c:'b',sz:'m'}, {x:0,y:5,d:'dl',c:'b'}, {x:3,y:6,d:'dl',c:'y',sz:'m'}, {x:8,y:7,d:'dl',c:'p'}, {x:6,y:9,d:'dl',c:'y',sz:'m'}, {x:3,y:7,d:'dl',c:'g'}, {x:6,y:6,d:'dr',c:'p',sz:'m'}, {x:4,y:1,d:'ur',c:'p',sz:'m'}, {x:3,y:9,d:'d',c:'r',sz:'l'}, {x:8,y:4,d:'r',c:'p',sz:'l'}, {x:3,y:3,d:'ul',c:'r'}, {x:5,y:1,d:'u',c:'b',sz:'m'}, {x:4,y:9,d:'dr',c:'p',sz:'l'}, {x:9,y:4,d:'ur',c:'r'}, {x:7,y:6,d:'d',c:'y'}, {x:7,y:3,d:'u',c:'p',sz:'l'} ],
+    queue:q('ppppppppppppppppppppppppyyyyyyyyyyyyyyyyppppppppppppppppbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrpppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrpppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppppppppppppppppppggggggggggggggggpppprrrrbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyppppppppppppppppbbbbbbbbbbbbbbbbbbbbyyyyyyyyppppppppppppppppggggggggggggggggyyyyyyyyyyyyyyyyyyyyyyyybbbbrrrrrrrrrrrrrrrrrrrrrrrrbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyybbbbggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggrrrrrrrrrrrrggggggggggggggggggggggggggggggggggggyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrggggggggggggggggbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrrrrrggggggggggggrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrbbbbyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyrrrrrrrrrrrrrrrrrrrryyyyyyyyppppppppppppbbbbbbbbbbbbbbbbrrrrrrrrrrrrrrrrppppppppppppppppppppppppbbbbbbbbrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbyyyyyyyyyyyyyyyyyyyyyyyybbbbbbbbbbbbbbbbbbbbbbbbbbbbggggggggggggggggggggggggppppppppppppppppggggggggggggggggggggggggggggggggggggpppppppppppppppppppppppp') },
 ];
 
 const COLORS = {
@@ -936,7 +936,10 @@ function sprite(k){
 /* 機型／載客量（doc _12 第2/3節）：細＝3人／中＝5人／大＝7人，淨係
    影響滿員人數，唔影響格仔佔用／移動規則。細型沿用原有 plane_<色>
    sprite，中/大型各自有獨立機身設計（plane_<色>_m／plane_<色>_l）。 */
-const SIZE_CAP = {s:15, m:25, l:35};
+/* 2026-09-02 跟足 reference video：隊頭一列 4 個齊上齊落，載客量一定要係
+   4 嘅倍數，否則最後一列剩返 1-3 個，之後逐列錯位溝色。15/25/35 →
+   16/24/36（同 gen-levels.js 一致）。 */
+const SIZE_CAP = {s:16, m:24, l:36};
 function planeSpriteKey(p){
   return 'plane_'+p.c+(p.sz==='m'?'_m':p.sz==='l'?'_l':'');
 }
@@ -1157,17 +1160,20 @@ let hintOn = false;                    // L1 手指提示（首撳前）
    換做開闊留白＋一條淺色印刷橢圓線做視覺提示）——舊版係「頂＝飛機、
    中＝乘客圈、底＝閘位」，而家完全反轉。數值用 ffmpeg drawgrid 格仔
    覆蓋喺新圖度量出嚟。 */
+/* 2026-09-02 跟足 reference video 重新分配直向空間：4 排闊嘅迴旋處要有
+   足夠半徑（帶闊 ~70px，半徑至少 ~80px）先唔會內圈迫爆、外圈疏開，
+   所以排隊區由 240..480 放大到 250..590（迴旋處半徑 ≈ 83px），出口
+   樓梯（590→~680，啱啱好疊喺場景圖畫實嗰條樓梯上面）直落閘位一行
+   （750），飛機棋盤由 850 起。棋盤矮咗約 12%，格仔細少少，可接受。 */
 const SCENE_IMG = {
-  queueTop:  240,   // 樹籬/欄杆之下，乘客排隊區可用範圍開始（最頂）
-  queueBottom: 480, // 排隊區可用範圍底，留返啲淨空畀閘位行（用戶反饋：圈中間個窿太大、同埋同下面閘位卡撞埋，由560收到480）
-  gateRow:   620,   // 中間閘位／樓梯一行嘅中線
-  planeTop:  730,   // 樓梯之下，飛機棋盤區開始（最底，一路去到畫面底）
+  queueTop:  250,   // 樹籬/欄杆之下，乘客排隊區可用範圍開始（最頂）
+  queueBottom: 590, // 迴旋處最底（出口）——之下係落閘位嘅樓梯
+  gateRow:   750,   // 閘位一行嘅中線
+  planeTop:  850,   // 飛機棋盤區開始（最底，一路去到畫面底）
 };
-/* 乘客隊伍路徑嘅「擺位框」：橢圓印刷線大致座標，做 fit box 中心／
-   半闊（唔使追求同印刷線像素完全重疊——而家個路徑係逐關動態形狀，
-   印刷線淨係一個鬆散嘅視覺暗示，唔係要精準描邊嘅硬邊界）。用戶反饋
-   個圈太大、中間空洞太多，由 330 收到 250。 */
-const QUEUE_IMG = {cx: 470, halfW: 250};
+/* 迴旋處「擺位框」中心／半闊（場景圖 941 闊嘅座標）。半闊 190 ≈ 佔畫面
+   一半闊，同 reference video 個迴旋處比例差唔多。 */
+const QUEUE_IMG = {cx: 470, halfW: 190};
 function sceneY(imgY){
   const bg = sprite('scene');
   if(!bg) return null;
@@ -1224,7 +1230,7 @@ function layoutBoard(){
   /* 閘位擺落馬路面（場景圖量出嚟嘅位），大隻啲。已解鎖嘅佔足一格闊度，
      鎖住嘅只佔 0.72 格——噉樣可以將慳返嘅闊度撥返畀開放閘位，令佢哋
      大隻啲（用戶反饋：閘位要放大、唔使癡到咁密）。 */
-  slotH = Math.min(120, VH*0.115);
+  slotH = Math.min(120, VH*0.09);   // 2026-09-02：閘位矮少少，留位畀迴旋處出口樓梯
   const tp = totalPads(), lockedN = Math.max(0, tp-nSlots);
   const gap = 6;
   const units = nSlots + lockedN*0.72;
@@ -1274,8 +1280,10 @@ function slotAnchor(i){
    轉得慢，唔重新做的話乘客會有啲位疊埋有啲位散開）。 */
 const QUEUE_SHAPES_RAW = {
   /* Tier 1（簡單） */
-  oRing: t => { const a=t*Math.PI*2; return {x:Math.sin(a)*0.85, y:-Math.cos(a)*0.85}; },
-  ellipseRing: t => { const a=t*Math.PI*2; return {x:Math.sin(a)*1.0, y:-Math.cos(a)*0.6}; },
+  /* 擺位框而家近乎正方（見 QUEUE_IMG／SCENE_IMG），太扁嘅形狀頂／底
+     曲率會迫爆內圈，所以 y 方向唔好壓得太扁。 */
+  oRing: t => { const a=t*Math.PI*2; return {x:Math.sin(a)*0.95, y:-Math.cos(a)*0.95}; },
+  ellipseRing: t => { const a=t*Math.PI*2; return {x:Math.sin(a)*1.0, y:-Math.cos(a)*0.8}; },
   horseshoe: (()=>{
     const gapFrac = 0.22, squashY = 0.95;
     const arcFrac = 1-gapFrac;
@@ -1422,11 +1430,8 @@ function trackGeom(){
   const box = queueFitBox();
   return {cx: box.cx, cy: box.cy, a: box.halfW, r: box.halfH};
 }
-/* 出口位＝樓梯，而家喺排隊區嘅底部中央（新版面「頂＝乘客、中＝
-   閘位」，出口自然向低企，啱啱好同 buildQueueLUT() 自動旋轉去嘅
-   frac=0 一致）。 */
-const EXIT_FRAC = 0;
-function queueFrontPos(){ return trackPoint(EXIT_FRAC); }
+/* 出口位＝迴旋處底部中央＝LUT index 0（buildQueueLUT() 自動旋轉去嘅
+   位置）；由嗰度直落樓梯去閘位（見 buildQueuePath）。 */
 
 /* ---------- 可見循環圈 ＋ 隱藏隊列（doc _15 第 2 節重大修訂）----------
    **v1 漏洞（用戶 playtest 發現）：** 舊版成關全部乘客一開波擺晒落同一個
@@ -1446,104 +1451,142 @@ function queueFrontPos(){ return trackPoint(EXIT_FRAC); }
    座位平均分佈成個圈（slot/VISIBLE_CAP），所以任何時候得一個座位喺
    出口窗口——維持「一個一個經過出口判斷」嘅節奏，同時唔啱色嗰個唔會
    卡住後面（各座位獨立判斷，見 tryStartBoarding）。 */
-/* doc _29 v4 二次修訂（2026-08-31）：可見圈由 24→40→**密集 4 排、
-   一嚿實色色塊**（reference 圖係成嚿貼實冇縫隙，唔係疏落單行）。
-   **2026-08-31 用戶再反饋：見到中間有巷（沿路徑方向嘅座位間距太
-   闊，形成一格格輻射狀空隙）——問題唔喺「幾多人」，而係固定總數
-   140 人 ÷ 固定 35 列，喺唔同形狀／唔同螢幕嘅實際路徑長度下未必啱
-   啱好貼實。改做由路徑實際長度反推列數（`queueCols()`），確保沿路徑
-   同橫向都用返同一個貼實步距，總人數（`visibleCap()`）自動跟路徑
-   長度浮動，唔再係寫死嘅數字。 */
+/* ==================== 迴旋處排隊（2026-09-02 跟足用戶 reference video 逐格重寫）====================
+   video 0.5 秒一格睇到嘅真實機制：
+   - 迴旋處係一條**不停轉嘅閉合輸送帶**（冇人上機都照轉，約 3.5 秒轉四成圈），
+     出口喺底部中央。轉到出口嗰一列（4 個、同色）如果有泊緊、有位嘅同色機
+     就成列一齊上（齊上齊落）；唔啱色就照行過去，兜多個圈再嚟。
+   - 上咗機嗰列留低一個「窿」，個窿跟住輸送帶轉；轉到入口接位嗰陣，嗰條
+     入口尾巴嘅隊頭一列就入嚟補位。兩條入口（右上／左中）邊條先入，純粹
+     係邊個接位先俾個窿轉到——出口之後順住轉向嘅第一個接位會入晒先，
+     第二個接位先輪到（用戶：「通常右邊放晒先到左邊」＝預設逆時針）。
+   - 入口尾巴嘅人企定定，淨係補位嗰刻先向前行一格。
+   - 冇再分「可見／隱藏」：迴旋處 + 兩條尾巴就係成條隊，尾巴伸出畫面外。 */
 const QUEUE_ROWS = 4;
-/* 用戶反饋「貼啲細粒啲」——乘客畫圖 scale 由 0.95 收細到 0.68，排距
-   同步收窄先貼得實（原本 22px 係跟 0.95 嗰個大細校準嘅）。 */
-const QUEUE_PAX_SCALE = 0.68;
-const QUEUE_ROW_SPACING = 17;      // 排與排之間嘅側向身位（px，貼實冇縫隙）
-const QUEUE_PASSENGER_SPACING = 17; // 沿路徑方向嘅步距（px），同側向睇齊先貼實冇巷
-function queueCols(){
-  return Math.max(6, Math.round(beltTotal()/QUEUE_PASSENGER_SPACING));
+/* 2026-09-02 用戶對比 reference 圖：人仔要大粒、貼實成嚿（似氣球咁迫埋），
+   唔係細細粒疏疏落落。人仔 scale 0.68→1.15，排距 17→28、步距 17→26，
+   令 sprite 差唔多同間距一樣大（貼實）。 */
+const QUEUE_PAX_SCALE = 1.15;
+const QUEUE_ROW_SPACING = 28;       // 排與排之間嘅側向身位（px）
+const QUEUE_PASSENGER_SPACING = 26; // 一列同一列之間嘅步距（px）
+const BELT_PX_PER_MS = 20/150;      // 迴旋處轉速（px/ms）；配合 video 約 3.5 秒轉四成圈
+let ring = [];                      // 迴旋處每個位：null（窿）或 {c, n}
+let ringCols = 0;                   // 迴旋處有幾多個位（周長 ÷ 步距）
+let ringPhase = 0;                  // 已轉咗幾多（圈嘅比例，單調遞增）
+let ringLastMs = 0;
+let ringStep = 1;                   // +1/−1：LUT frac 遞增係咪前進方向
+let ringGeom = null;                // 幾何快取（見 buildRingGeom）
+let tailR = {cols:[], slack:0}, tailL = {cols:[], slack:0};   // 兩條入口尾巴（一列一個 {c,n}）
+let lastExitSlot = -1;
+
+function polyBuild(pts){
+  const cum=[0];
+  for(let i=1;i<pts.length;i++) cum.push(cum[i-1]+Math.hypot(pts[i].x-pts[i-1].x, pts[i].y-pts[i-1].y));
+  return {pts, cum, total: cum[cum.length-1]};
 }
-function visibleCap(){ return queueCols()*QUEUE_ROWS; }
-function queueRowOffsetPx(slot){
-  const row = slot % QUEUE_ROWS;
-  return (row - (QUEUE_ROWS-1)/2) * QUEUE_ROW_SPACING;
+/* 沿路徑弧長 s 攞返個點同切線（兩端線性外推） */
+function polyAt(poly, s){
+  const pts=poly.pts, cum=poly.cum, n=pts.length;
+  if(n<2) return {x:pts[0].x, y:pts[0].y, tx:1, ty:0};
+  let lo=1;
+  if(s>=cum[n-1]) lo=n-1;
+  else if(s>0){ let hi=n-1; while(lo<hi){ const mid=(lo+hi)>>1; if(cum[mid]<s) lo=mid+1; else hi=mid; } }
+  const a=pts[lo-1], b=pts[lo];
+  const segLen=(cum[lo]-cum[lo-1])||1;
+  const f=(s-cum[lo-1])/segLen;
+  return {x:a.x+(b.x-a.x)*f, y:a.y+(b.y-a.y)*f, tx:(b.x-a.x)/segLen, ty:(b.y-a.y)/segLen};
 }
-const BELT_PX_PER_MS = 20/150;   // rapid-fire 節奏（視覺轉速，用戶已接受）
-/* 出口判斷窗口闊度（× 座位間距）。2026-08-31 用戶反饋登機太慢，
-   要求好似 reference 遊戲咁可以幾個人（約 3 個）一齊上機，唔好淨係
-   一個一個。舊值 0.6（細過一個座位身位）令任何時刻通常淨係得一個
-   座位啱啱好行到出口窗口，配合下面 tryStartBoarding() 舊版「揾到一個
-   就即刻 return」，變成實際上真係一個一個上。而家兩樣一齊改：呢度
-   放寬到 3 個座位身位闊，令同一時刻可以有多個座位同時喺窗口入面；
-   tryStartBoarding() 改做一次過處理晒窗口入面全部啱色嘅座位（見下面）。 */
-const EXIT_WIN_MULT = 3.0;
-let hiddenQueue = [];            // 隱藏隊列：定死順序嘅顏色 array，玩家見唔到
-/* 側邊人龍「行一步」嘅動畫：平時企定，有人上到機先滑前一個身位 */
-const FEED_STEP_MS = 190;
-let feedShiftAt = -1e9;
-/* 唔同形狀嘅實際周長差好遠（心形/8 字形同橢圓唔可以共用一條公式），
-   所以直接沿住而家個 LUT 響 canvas 空間逐段加總。按（形狀 key + 擺位
-   框尺寸）快取，唔會逐 frame 重新加總 240 點。 */
-let beltTotalCache = null;
-function beltTotal(){
-  const {key, lut} = ensureQueueLUT();
-  const box = trackGeom();
-  if(beltTotalCache && beltTotalCache.key===key
-     && beltTotalCache.a===box.a && beltTotalCache.r===box.r){
-    return beltTotalCache.total;
+function chaikin(pts, iters){
+  let cur=pts;
+  for(let k=0;k<iters;k++){
+    const out=[cur[0]];
+    for(let i=0;i<cur.length-1;i++){
+      const a=cur[i], b=cur[i+1];
+      out.push({x:a.x*0.75+b.x*0.25, y:a.y*0.75+b.y*0.25});
+      out.push({x:a.x*0.25+b.x*0.75, y:a.y*0.25+b.y*0.75});
+    }
+    out.push(cur[cur.length-1]);
+    cur=out;
   }
-  let total = 0, prev = null;
-  for(const p of lut.pts){
-    const x = box.cx + p.x*box.a, y = box.cy + p.y*box.r;
-    if(prev) total += Math.hypot(x-prev.x, y-prev.y);
-    prev = {x, y};
-  }
-  beltTotalCache = {key, a:box.a, r:box.r, total};
-  return total;
+  return cur;
 }
-/* 「座位間距」而家指緊一「列」（4 個座位橫排）之間嘅間距，唔再係
-   逐個座位獨立間距——4 排一齊行、一齊到出口，先做到密集色塊效果。 */
-function beltBeadFrac(){ return 1/queueCols(); }
-function beltPhase(nowMs){ return (nowMs*BELT_PX_PER_MS)/beltTotal(); }
-function slotFrac(slot, nowMs){
-  const col = Math.floor(slot/QUEUE_ROWS);
-  return ((col/queueCols() - beltPhase(nowMs))%1+1)%1;
+function bezierPts(p0,p1,p2,n){
+  const out=[];
+  for(let i=1;i<=n;i++){ const t=i/n, u=1-t; out.push({x:u*u*p0.x+2*u*t*p1.x+t*t*p2.x, y:u*u*p0.y+2*u*t*p1.y+t*t*p2.y}); }
+  return out;
 }
-/* 4 排嘅擺位改做「以形狀自己中心做同心縮放」，唔再用切線法向量做
-   側向偏移——法向量偏移喺路徑曲率大嘅位（例如 O 形出口嗰個急彎、
-   心形嘅尖位）會令 4 排各自指向差好遠嘅方向，變成「一嚿人向外炸開」
-   嘅扇形/龍捲風效果（用戶反饋：「飛曬出嚟成個龍捲風咁」）。改用同心
-   縮放：每排係成個形狀圍住同一個中心，半徑放大/縮小少少嘅獨立
-   copy，無論幾急嘅彎，4 排永遠貼實跟住原本形狀嘅走勢，唔會散開。 */
-function queueRowScale(row){
-  const box = trackGeom();
-  const avgR = Math.max(1, (box.a+box.r)/2);
-  const off = (row - (QUEUE_ROWS-1)/2) * QUEUE_ROW_SPACING;
-  return 1 + off/avgR;
+function normv(v){ const l=Math.hypot(v.x,v.y)||1; return {x:v.x/l, y:v.y/l}; }
+function circDist(a,b){ const d=Math.abs(((a-b)%1+1)%1); return Math.min(d,1-d); }
+/* 第 j 個位而家喺圈嘅邊度（frac，出口＝0）。位 j 越大越「上游」（越遲到出口）。 */
+function slotFracOf(j){ return (((-ringStep*j/ringCols) + ringStep*ringPhase)%1+1)%1; }
+/* 第幾排嘅同心縮放（迴旋處係閉合圈，同心縮放先唔會喺急彎散開） */
+function ringRowScale(row){
+  const b = ensureRingGeom().box;
+  const avgR = Math.max(1,(b.hw+b.hh)/2);
+  return 1 + ((row-(QUEUE_ROWS-1)/2)*QUEUE_ROW_SPACING)/avgR;
 }
-function trackPointRow(frac, scale){
+function ringPoint(frac, rowScale){
   const {lut} = ensureQueueLUT();
   const p = lutPoint(lut, frac);
-  const box = trackGeom();
-  return {x: box.cx + p.x*box.a*scale, y: box.cy + p.y*box.r*scale};
+  const b = ensureRingGeom().box;
+  return {x: b.cx + p.x*b.hw*rowScale, y: b.cy + p.y*b.hh*rowScale};
 }
-/* 座位嘅實際畫面位置＝路徑中線 frac 位置 + 第幾排嘅同心縮放。取代
-   單純嘅 trackPoint(slotFrac(...))，畀 drawQueue／boarding 動畫起點
-   共用，確保「畫喺邊」同「由邊度飛去閘位」一致。 */
-function slotPos(slot, nowMs){
-  const frac = slotFrac(slot, nowMs);
-  const row = slot % QUEUE_ROWS;
-  const p = trackPointRow(frac, queueRowScale(row));
-  return {x: p.x, y: p.y, frac};
+/* 細關人少就縮細個迴旋處（目標：迴旋處裝到約六成人，其餘喺兩條尾巴），
+   唔好開波就半空。錨住底部（出口）位置唔郁。 */
+function buildRingGeom(){
+  const {lut} = ensureQueueLUT();
+  const base = queueFitBox();
+  let basePer=0;
+  for(let i=1;i<lut.pts.length;i++){ const a=lut.pts[i-1], b=lut.pts[i]; basePer+=Math.hypot((b.x-a.x)*base.halfW, (b.y-a.y)*base.halfH); }
+  const totalCols = Math.ceil(((L && L.queue) ? L.queue.length : 0)/QUEUE_ROWS);
+  const scale = Math.max(0.7, Math.min(1, (totalCols*0.62*QUEUE_PASSENGER_SPACING)/Math.max(1,basePer)));
+  const hw = base.halfW*scale, hh = base.halfH*scale;
+  const yE = lut.pts[0].y;
+  const cy = (base.cy + base.halfH*yE) - hh*yE;
+  const box = {cx: base.cx, cy, hw, hh};
+  const pts = lut.pts.map(p=>({x: box.cx+p.x*hw, y: box.cy+p.y*hh}));
+  let perim=0; for(let i=1;i<pts.length;i++) perim+=Math.hypot(pts[i].x-pts[i-1].x, pts[i].y-pts[i-1].y);
+  /* LUT 方向（shoelace，y 向下：正＝順時針）；配合呢關要求嘅轉向 */
+  let area=0; for(let i=0;i<pts.length-1;i++) area += pts[i].x*pts[i+1].y - pts[i+1].x*pts[i].y;
+  const lutCW = area>0;
+  const wantCW = !!(L && L.queueCW);
+  ringStep = (wantCW===lutCW) ? 1 : -1;
+  /* 接位：右上（右邊入口）／左中（左邊入口） */
+  let jR=0, bR=-Infinity, jL=0, bL=-Infinity;
+  const n = pts.length-1;
+  for(let i=0;i<n;i++){
+    const nx=(pts[i].x-box.cx)/hw, ny=(pts[i].y-box.cy)/hh;
+    const sR = nx - ny; if(sR>bR){bR=sR; jR=i;}
+    const sL = -nx - Math.abs(ny)*0.6; if(sL>bL){bL=sL; jL=i;}
+  }
+  const outerScale = 1 + (((QUEUE_ROWS-1)/2 + 0.55)*QUEUE_ROW_SPACING)/Math.max(1,(hw+hh)/2);
+  const mk = (idx, end)=>{
+    const P0 = pts[idx];
+    const out = normv({x:P0.x-box.cx, y:P0.y-box.cy});
+    /* 尾巴由迴旋處**外圍**起（唔係中線），尾巴隊頭先唔會同圈入面嘅人疊埋 */
+    const P = {x: box.cx + (P0.x-box.cx)*outerScale, y: box.cy + (P0.y-box.cy)*outerScale};
+    const ctrl = {x:P.x+out.x*70, y:P.y+out.y*70};
+    return {frac: idx/n, path: polyBuild(chaikin([P].concat(bezierPts(P, ctrl, end, 14)), 2))};
+  };
+  const tR = mk(jR, {x: VW+80, y: Math.max(16, pts[jR].y-12)});   // 近乎水平向右出畫面，唔好撞到右上角嘅道具 icon
+  const tL = mk(jL, {x: -80, y: pts[jL].y+40});
+  /* 出口嘅窿順住轉向行幾遠先到接位：細嗰個先入 */
+  const down = f => ((ringStep*f)%1+1)%1;
+  const first = down(tR.frac) <= down(tL.frac) ? 'R' : 'L';
+  const E = pts[0];
+  const stubEndY = Math.max(E.y + QUEUE_PASSENGER_SPACING, slotY - QUEUE_ROW_SPACING*1.1);
+  return {box, perim, tails:{R:tR, L:tL}, first, E, stubEndY};
 }
-/* 成關仲有幾多乘客未上機（可見＋隱藏＋登緊機嗰啲） */
-function passengersLeft(){ return queue.length + hiddenQueue.length + boardings.length; }
-/* 距離出口位（EXIT_FRAC）幾遠，0=啱啱好喺出口，0.5=正對面。用嚟
-   判斷「係咪入咗出口窗口」，取代舊版淨係睇 frac 貼唔貼近 0。 */
-function fracDistFromExit(frac){
-  const d = Math.abs(((frac-EXIT_FRAC)%1+1)%1);
-  return Math.min(d, 1-d);
+function ensureRingGeom(){
+  const key = levelIdx+'|'+VW+'x'+VH+'|'+slotY+'|'+(sprite('scene')?1:0);
+  if(ringGeom && ringGeom.key===key) return ringGeom;
+  ringGeom = buildRingGeom(); ringGeom.key = key;
+  return ringGeom;
 }
+function ringCount(){ let n=0; for(const s of ring) if(s) n+=s.n; return n; }
+function tailCount(t){ let n=0; for(const c of t.cols) n+=c.n; return n; }
+/* 成關仲有幾多乘客未上機（迴旋處＋兩條尾巴＋登緊機嗰啲） */
+function passengersLeft(){ return ringCount() + tailCount(tailR) + tailCount(tailL) + boardings.length; }
 
 /* 羅盤角度 → 單位向量（0°=N，順時針） */
 function angleVec(a){
@@ -1585,17 +1628,26 @@ function startLevel(i){
       prev = tp;
     });
   }
-  /* 頭 visibleCap() 個入可見圈（4 排貼實分佈落各座位），其餘全部入
-     隱藏隊列，順序照 L.queue 定死唔洗牌（doc _15：隱藏隊順序係關卡
-     設計嘅一部分）。visibleCap() 跟返呢關實際路徑長度反推，確保貼實
-     密度一致，唔會因為形狀/螢幕唔同而有時密有時疏。 */
+  /* 迴旋處排隊（reference video）：L.queue 順序＝出口嗰列先，之後逐列
+     上游擺入迴旋處；裝唔晒嘅分兩條入口尾巴（先入嗰條攞六成），右邊
+     定左邊先入由幾何決定（見 buildRingGeom）。 */
   {
     const all = L.queue.slice();
-    const nVis = Math.min(visibleCap(), all.length);
-    queue = [];
-    for(let k=0;k<nVis;k++) queue.push({c: all[k], slot:k});
-    hiddenQueue = all.slice(nVis);
-    feedShiftAt = -1e9;   // 換關重置，唔好承繼上一關個滑動狀態
+    ringGeom = null;
+    const g = ensureRingGeom();
+    ringCols = Math.max(8, Math.round(g.perim/QUEUE_PASSENGER_SPACING));
+    const cols = [];
+    for(let k=0;k<all.length;k+=QUEUE_ROWS) cols.push({c: all[k], n: Math.min(QUEUE_ROWS, all.length-k)});
+    ring = Array(ringCols).fill(null);
+    const nRing = Math.min(ringCols, cols.length);
+    for(let j=0;j<nRing;j++) ring[j] = cols[j];
+    const rest = cols.slice(nRing);
+    const nFirst = Math.round(rest.length*0.6);
+    const firstCols = rest.slice(0, nFirst), secondCols = rest.slice(nFirst);
+    tailR = {cols: g.first==='R' ? firstCols : secondCols, slack:0};
+    tailL = {cols: g.first==='L' ? firstCols : secondCols, slack:0};
+    ringPhase = 0; ringLastMs = 0; lastExitSlot = -1;
+    queue = [];   // 舊 array 唔再用（passengersLeft 直接數迴旋處＋尾巴）
   }
   slotPlanes = Array(nSlots).fill(null);
   moves = 0; score = 0; combo = 0; comboTimer = 0;
@@ -1790,78 +1842,63 @@ function dockPlane(p){
    因為每個人座位號固定、獨立判斷，佢哋各自輪到自己個座位號行到出口
    嗰刻先被check，唔啱嘅淨係自己繼續等，唔會焗住後面（其他座位號）
    嘅人一齊停晒（用戶明確要求：「唔啱就過，俾後面嘅人上」）。 */
-function tryStartBoarding(nowMs){
-  if(gameState!=='playing' || queue.length===0) return;
-  const bf = beltBeadFrac();
-  const win = bf*EXIT_WIN_MULT;
-  let anyAtExit = false, matched = false;
-  /* **成列一齊上機**（2026-08-31 用戶反饋：「你而家係逐個逐個走…
-     4 排一齊走咁就唔會侵咗其他顏色喺嗰一排」）。舊版逐個乘客獨立
-     配對，一個色塊會被逐粒食走，剩返零星幾個溝入下一段色嘅行度，
-     睇落好污糟。而家改做**以「列」為單位**：同一列（QUEUE_ROWS 個
-     座位）嘅 frac 完全一樣，一齊到出口、一齊配對、一齊起飛，色塊
-     就會成段成段咁乾淨噉消失。 */
-  const cols = new Map();
-  for(let i=0;i<queue.length;i++){
-    const e = queue[i];
-    const dist = fracDistFromExit(slotFrac(e.slot, nowMs));
-    /* `fresh` ＝啱啱由隱藏隊補入嚟、仲未行出過出口窗口嗰個。佢係喺
-       出口位置出世（見下面補位邏輯），如果唔擋住，佢下一個 tick 就
-       即刻可以配對上機，變咗「唔使行過個圈」——同 doc _15 要求嘅
-       「新入嚟要行完成個圈先到出口」相反。所以要等佢真係行出咗
-       窗口先解封，噉佢先要兜足一個圈返嚟。 */
-    if(e.fresh){ if(dist > win) e.fresh = false; continue; }
-    if(dist > win) continue;
-    anyAtExit = true;
-    const col = Math.floor(e.slot/QUEUE_ROWS);
-    if(!cols.has(col)) cols.set(col, []);
-    cols.get(col).push(i);
+/* 迴旋處出口＋入口補位（2026-09-02 跟足 reference video）：
+   1) 轉到出口嗰一列，有泊緊、同色、夠位嘅機就成列一齊上（齊上齊落）；
+      唔啱就照行過去（兜多個圈再嚟），行過嗰刻 check 一次有冇死局。
+   2) 有窿轉到入口接位，就由嗰條尾巴入一列補位（先入嗰條入晒先輪到第二條，
+      因為窿一定先經過佢）。 */
+/* 輸送帶不停轉（reference video：冇人上機都照轉）；尾巴補完位之後向前追返
+   一格，速度同輸送帶一樣。放喺 tryStartBoarding（tick 同 pump 兩條路都會
+   call）而唔係 drawQueue：背景 tab／rAF 停咗都要照轉照上機。 */
+function advanceQueue(nowMs){
+  const g = ensureRingGeom();
+  if(ringLastMs){
+    const dt = Math.max(0, nowMs-ringLastMs);
+    ringPhase += dt*BELT_PX_PER_MS/Math.max(1, g.perim);
+    for(const t of [tailR, tailL]) t.slack = Math.max(0, t.slack - dt*BELT_PX_PER_MS);
   }
-  /* 每個開放閘位每個 tick 淨係接一「列」（唔同色嘅列可以同時分別
-     去唔同閘位，維持 rapid-fire 節奏）。 */
-  const busyGates = new Set(boardings.map(b=>b.slotIdx));
-  const removeIdx = [];
-  for(const idxs of cols.values()){
-    /* 同一列理論上成列同色（gen-levels.js 個 run length 已經對齊
-       QUEUE_ROWS 嘅倍數），但保險起見逐色分開處理。 */
-    const byColor = new Map();
-    for(const i of idxs){
-      const c = queue[i].c;
-      if(!byColor.has(c)) byColor.set(c, []);
-      byColor.get(c).push(i);
+  ringLastMs = nowMs;
+}
+function tryStartBoarding(nowMs){
+  if(gameState!=='playing' || ringCols===0) return;
+  advanceQueue(nowMs);
+  const bead = 1/ringCols;
+  let jx=-1, bd=Infinity;
+  for(let j=0;j<ringCols;j++){ if(!ring[j]) continue; const d=circDist(slotFracOf(j),0); if(d<bd){bd=d; jx=j;} }
+  if(jx>=0 && bd < bead/2){
+    const col = ring[jx];
+    let gateIdx=-1;
+    for(let gi=0;gi<slotPlanes.length;gi++){
+      const s=slotPlanes[gi]; if(!s||s.state!=='docked'||s.c!==col.c) continue;
+      const inFlight = boardings.reduce((n,b)=>n+(b.slotIdx===gi?1:0),0);
+      if(s.cap - s.boarded - inFlight >= col.n){ gateIdx=gi; break; }
     }
-    for(const [c, group] of byColor){
-      const gateIdx = slotPlanes.findIndex((s,gi)=>
-        s && s.state==='docked' && s.c===c && s.boarded<s.cap && !busyGates.has(gi));
-      if(gateIdx===-1) continue;
-      const sp = slotPlanes[gateIdx];
-      const inFlight = boardings.reduce((n,b)=>n+(b.slotIdx===gateIdx?1:0), 0);
-      const room = sp.cap - sp.boarded - inFlight;
-      const take = Math.min(group.length, room);
-      if(take<=0) continue;
-      matched = true;
-      busyGates.add(gateIdx);
-      for(let k=0;k<take;k++){
-        const i = group[k];
-        boardings.push({c, slotIdx:gateIdx, start:nowMs,
-          from:slotPos(queue[i].slot, nowMs), to:slotAnchor(gateIdx)});
-        removeIdx.push(i);
+    if(gateIdx>=0){
+      const f = slotFracOf(jx);
+      for(let r=0;r<col.n;r++){
+        boardings.push({c:col.c, slotIdx:gateIdx, start:nowMs, from:ringPoint(f, ringRowScale(r)), to:slotAnchor(gateIdx)});
+      }
+      ring[jx] = null;
+      lastExitSlot = -1;
+    }else if(lastExitSlot!==jx){
+      lastExitSlot = jx;
+      checkStuck();
+    }
+  }
+  const g = ensureRingGeom();
+  for(const side of ['R','L']){
+    const tail = side==='R' ? tailR : tailL;
+    if(!tail.cols.length) continue;
+    const fJ = g.tails[side].frac;
+    for(let j=0;j<ringCols;j++){
+      if(ring[j]) continue;
+      if(circDist(slotFracOf(j), fJ) < bead/2){
+        ring[j] = tail.cols.shift();
+        tail.slack += QUEUE_PASSENGER_SPACING;   // 尾巴向前行一格（逐 frame 追返）
+        break;
       }
     }
   }
-  /* 由大到細 splice，唔會搞亂仲未處理嗰啲嘅 index */
-  removeIdx.sort((a,b)=>b-a);
-  for(const i of removeIdx){
-    const freedSlot = queue[i].slot;
-    queue.splice(i,1);
-    /* 隱藏隊即刻吐一個補返**同一個座位**（＝出口位置），配合上面個
-       `fresh` 閘，佢要行足一個圈先再輪到佢（doc _15）。 */
-    if(hiddenQueue.length){
-      queue.push({c: hiddenQueue.shift(), slot: freedSlot, fresh:true});
-      feedShiftAt = nowMs;   // 側邊人龍向前行一步（唯一會令佢郁嘅時刻）
-    }
-  }
-  if(anyAtExit && !matched) checkStuck();
 }
 
 function finishBoarding(b){
@@ -1955,22 +1992,18 @@ function checkStuck(){
      每一種色**都冇得救——即係冇一個已開放同色閘位（遲早排到都上到），
      亦都冇（空置閘位 + 跑道上仲有嗰隻色、路清嘅未放機）可以開新閘。
      只要有一種色仲有得救，遲早會到佢個座位號行到出口，成盤棋就未死。 */
-  if(gameState!=='playing' || queue.length===0 || boardings.length>0) return;
+  if(gameState!=='playing' || boardings.length>0) return;
   if(slotPlanes.some(s=>s && s.state!=='docked')) return;
+  /* 2026-09-02 迴旋處版：睇迴旋處入面**所有**色；如果有窿，尾巴隊頭嗰列
+     遲早入嚟，都計埋。每種色：(a) 有個未泊滿嘅同色閘位，或 (b) 有空閘
+     位而且跑道上有架同色、路清嘅機——有一種有得救就未死。 */
+  const present = new Set(ring.filter(Boolean).map(s=>s.c));
+  if(ring.some(s=>!s)){ for(const t of [tailR, tailL]) if(t.cols.length) present.add(t.cols[0].c); }
+  if(present.size===0) return;
   const hasEmptySlot = slotPlanes.some(s=>s===null);
-  /* ⚠️ 只可以計**可見圈**嘅色，唔可以計埋 hiddenQueue。關鍵：隱藏隊
-     淨係喺「有人上到機」嗰刻先會吐一個入可見圈——即係話如果可見圈
-     30 個色全部配唔到、閘位又泊滿，隱藏隊就永遠凍結，入面就算有啱色
-     都**永遠出唔到嚟**。舊版將 hidden 嘅色當成「遲早會到」計入 hope，
-     所以呢種死局判唔到，遊戲會表面上仲喺度轉但實際上永遠冇進展
-     （快轉模擬 L12/L13/L29 就係咁 livelock）。
-     用戶拍板：真死局就當難度，直接彈提示叫重玩／睇廣告加閘。 */
-  const visColors = new Set(queue.map(e=>e.c));
   let hope = false;
-  for(const c of visColors){
-    /* (a) 可見圈呢個色有個未泊滿嘅同色閘位 → 佢轉到出口就上到機 */
+  for(const c of present){
     if(slotPlanes.some(s=>s && s.boarded<s.cap && s.c===c)){ hope = true; break; }
-    /* (b) 仲有空閘位，而且跑道上有架同色、路又清嘅機可以放出去開閘 */
     if(hasEmptySlot && planes.some(p=>(p.state==='idle'||p.state==='covered') && p.c===c && pathClear(p))){ hope = true; break; }
   }
   if(!hope){
@@ -2358,134 +2391,106 @@ function drawPassenger(x, y, ckey, scale, glow, walkPhase){
   ctx.restore();
 }
 
-/* ---------- 側邊排隊人龍（doc _18 第2節「視覺呈現澄清」）----------
-   用戶指出「隱藏隊列玩家見唔到」寫得唔夠精準：參考遊戲入面，個環
-   以外仲有一條**肉眼見到嘅人龍伸出畫面外**，畀玩家知道「仲有大班人
-   排緊隊等入嚟」，並唔係得返環入面嗰廿幾個就乜都冇。精準講法係：
-   近身嗰幾個顏色睇得到（可以預判一兩手），成條隊後面幾百人就自然
-   伸出畫面外睇唔到——唔係刻意整成隱形數據。
-   實作：由圈嘅右邊沿住一條斜路排去畫面右上角外，畫 hiddenQueue 頭
-   嗰批人，越出畫面就自然裁走；成條龍慢慢向圈度爬，睇落好似真係
-   排緊隊入場。 */
-function drawFeedLine(now){
-  if(!hiddenQueue.length) return;
-  const box = trackGeom();               // 擺位框，a=半闊 r=半高
-  const step = QUEUE_PASSENGER_SPACING;  // 一「列」之間嘅步距，同主圈睇齊
-  /* 錨點由「貼住出口位」改做「貼住成個擺位框嘅右邊，留大截安全距離」
-   ——用戶反饋 squareSpiralTail 呢類有「尾巴」伸出嚟嘅形狀,個尾同呢條
-   出面等候線會交叉疊埋。出口位置企喺形狀自己嘅幾何入面,唔同形狀伸
-   出嚟嘅範圍差好遠(squareSpiralTail 尾巴仲伸出到 1.5 倍框闊之外),
-   改錨住喺框本身嘅右邊界 + 充足空間，先保證唔會撞到任何形狀。 */
-  const start = {x: box.cx + box.a*1.7, y: box.cy + box.r*0.55};
-  const dir = {x: 0.99, y: 0.12};        // 沿行人路向右伸出畫面
-  const dlen = Math.hypot(dir.x, dir.y)||1;
-  const dirN = {x: dir.x/dlen, y: dir.y/dlen};
-  const normal = {x: -dirN.y, y: dirN.x};
-  /* 用戶反饋：出面呢條「等候排隊」都要同主圈一樣 4 排、仲要有個圍欄
-     圈住（唔係得返單行企晒喺露天）。圍欄闊度跟返主圈嘅
-     QUEUE_ROW_SPACING 校準，先至同主圈嗰個圍欄粗細一致。 */
-  const fenceHalfSpan = ((QUEUE_ROWS-1)/2 + 0.7) * QUEUE_ROW_SPACING;
-  /* 條龍**唔會自己一路郁**（用戶反饋：「即使冇上去點解佢都不停郁緊」
-     「係咁循環係咁 loop 喎」）。舊版用 `(now*速度) % step`，個 modulo
-     令佢永遠滑一格又彈返轉頭，變成無限 loop 嘅假動作。
-     真實邏輯係：隱藏隊淨係喺**有人上到機**嗰刻先會前進一個身位。
-     所以而家平時完全企定，consumeFeed() 一被叫（見 tryStartBoarding）
-     就記低時間，喺 FEED_STEP_MS 內由 +1 身位滑返落 0，做一次「向前
-     行一步」，之後又企定——即係「要上飛機嗰刻先行」。 */
-  const t = (performance.now() - feedShiftAt) / FEED_STEP_MS;
-  const slide = t < 1 ? (1-t)*step : 0;
-  const maxCols = Math.ceil((VW-start.x)/step) + 2;
-  const nCols = Math.min(Math.ceil(hiddenQueue.length/QUEUE_ROWS), maxCols);
-  if(nCols<=0) return;
-
-  /* 圍欄：一條沿住 dir 方向嘅長方形色帶，同主圈嗰個圍欄用返同一套
-     視覺（淺色路面＋描邊），先畫底，乘客企喺上面。 */
-  const nearD = -step*0.7, farD = nCols*step + slide + step*0.7;
-  const A = {x:start.x+dirN.x*nearD - normal.x*fenceHalfSpan, y:start.y+dirN.y*nearD - normal.y*fenceHalfSpan};
-  const B = {x:start.x+dirN.x*farD  - normal.x*fenceHalfSpan, y:start.y+dirN.y*farD  - normal.y*fenceHalfSpan};
-  const C = {x:start.x+dirN.x*farD  + normal.x*fenceHalfSpan, y:start.y+dirN.y*farD  + normal.y*fenceHalfSpan};
-  const D = {x:start.x+dirN.x*nearD + normal.x*fenceHalfSpan, y:start.y+dirN.y*nearD + normal.y*fenceHalfSpan};
-  ctx.save();
+/* ---------- 排隊層繪製（2026-09-02 真排隊版）----------
+   舊版有一條獨立嘅「側邊人龍」畫隱藏隊；而家成條隊係一條 array、
+   路徑本身伸出畫面外（右邊入口／左邊入口兩條尾巴），後面嘅人自然
+   喺畫面外，唔使另外畫。 */
+/* 排隊圍欄／路軌：迴旋處（同心內外圈砌成環狀色帶）＋ 兩條入口尾巴（沿
+   切線法向量推開嘅色帶）＋ 出口樓梯（直落閘位）。先描邊、後填色：填色
+   會冚走交匯位入面嗰啲線，淨返最外圍嘅圍欄線。 */
+function queueRibbon(poly, halfSpan){
+  const n = poly.pts.length;
+  const step = Math.max(1, Math.floor(n/140));
+  const Lp=[], Rp=[];
+  const push = (s)=>{
+    const p = polyAt(poly, s);
+    Lp.push({x:p.x - p.ty*halfSpan, y:p.y + p.tx*halfSpan});
+    Rp.push({x:p.x + p.ty*halfSpan, y:p.y - p.tx*halfSpan});
+  };
+  for(let i=0;i<n;i+=step) push(poly.cum[i]);
+  push(poly.total);
   ctx.beginPath();
-  ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y); ctx.lineTo(C.x,C.y); ctx.lineTo(D.x,D.y); ctx.closePath();
-  ctx.fillStyle = 'rgba(238,242,250,0.94)';
-  ctx.fill();
-  ctx.lineWidth = 5;
-  ctx.strokeStyle = 'rgba(200,66,66,0.55)';
-  ctx.stroke();
-  ctx.restore();
-
-  const n = Math.min(hiddenQueue.length, nCols*QUEUE_ROWS);
-  for(let k=n-1;k>=0;k--){
-    const col = Math.floor(k/QUEUE_ROWS), row = k%QUEUE_ROWS;
-    const d = col*step + slide;
-    const off = (row - (QUEUE_ROWS-1)/2) * QUEUE_ROW_SPACING;
-    const x = start.x + dirN.x*d + normal.x*off, y = start.y + dirN.y*d + normal.y*off;
-    if(x > VW+30 || y < -30) continue;   // 出咗畫面就唔使畫
-    drawPassenger(x, y, hiddenQueue[k], QUEUE_PAX_SCALE, false);
-  }
-}
-
-/* 排隊圍欄／路軌（用戶反饋：要好似 reference 圖咁有個實體圍欄圈住
-   啲人，唔淨係一條幼虛線做提示）。做法：用 queueRowScale() 攞返
-   「貼實成 4 排嘅內外邊界」（第 -0.7 排到第 QUEUE_ROWS-1+0.7 排嘅
-   同心縮放，即係喺最貼邊嗰排之外再讓少少氣位做圍欄闊度），逐點沿
-   外圈、逆序沿內圈取樣，砌成一個閉合嘅「圈狀色帶」路徑，實色填底
-   （淺色路面）＋描邊（圍欄），先畫呢層做底，乘客再企喺上面。 */
-function drawQueueTrack(){
-  const SAMPLES = 96;
-  const innerScale = queueRowScale(-0.4);
-  const outerScale = queueRowScale(QUEUE_ROWS-1+0.4);
-  ctx.save();
-  ctx.beginPath();
-  for(let i=0;i<=SAMPLES;i++){
-    const p = trackPointRow(i/SAMPLES, outerScale);
-    if(i===0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
-  }
-  for(let i=SAMPLES;i>=0;i--){
-    const p = trackPointRow(i/SAMPLES, innerScale);
-    ctx.lineTo(p.x, p.y);
-  }
+  ctx.moveTo(Lp[0].x, Lp[0].y);
+  for(let i=1;i<Lp.length;i++) ctx.lineTo(Lp[i].x, Lp[i].y);
+  for(let i=Rp.length-1;i>=0;i--) ctx.lineTo(Rp[i].x, Rp[i].y);
   ctx.closePath();
-  ctx.fillStyle = 'rgba(238,242,250,0.94)';
-  ctx.fill();
-  ctx.lineWidth = 5;
-  ctx.strokeStyle = 'rgba(200,66,66,0.55)';
-  ctx.stroke();
+}
+function drawQueueTrack(){
+  const g = ensureRingGeom();
+  const halfSpan = ((QUEUE_ROWS-1)/2 + 0.55) * QUEUE_ROW_SPACING;
+  const inner = ringRowScale(-0.55), outer = ringRowScale(QUEUE_ROWS-1+0.55);
+  const ringPath = ()=>{
+    const S=96;
+    ctx.beginPath();
+    for(let i=0;i<=S;i++){ const p=ringPoint(i/S, outer); if(i===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y); }
+    for(let i=S;i>=0;i--){ const p=ringPoint(i/S, inner); ctx.lineTo(p.x,p.y); }
+    ctx.closePath();
+  };
+  const stubPath = ()=>{
+    const E=g.E;
+    ctx.beginPath();
+    ctx.rect(E.x-halfSpan, E.y-QUEUE_ROW_SPACING, halfSpan*2, Math.max(0, g.stubEndY-E.y+QUEUE_ROW_SPACING));
+  };
+  /* 真圍欄（用戶反饋：唔要一條紅邊，要好似 video 咁一堵凸起嘅矮牆）：
+     同一組路徑描三次——深色側面向下偏移（似牆身）、淺色頂面、然後填
+     路面。填色會冚走牆嘅內半邊同交匯位入面嘅線，淨返最外圍嗰圈牆。 */
+  const strokeAll = ()=>{
+    ringPath(); ctx.stroke();
+    queueRibbon(g.tails.R.path, halfSpan); ctx.stroke();
+    queueRibbon(g.tails.L.path, halfSpan); ctx.stroke();
+    stubPath(); ctx.stroke();
+  };
+  ctx.save();
+  ctx.lineJoin='round'; ctx.lineCap='round';
+  ctx.save(); ctx.translate(0, 9);
+  ctx.lineWidth=15; ctx.strokeStyle='#8a92a4'; strokeAll();
+  ctx.restore();
+  ctx.lineWidth=15; ctx.strokeStyle='#f7f8fb'; strokeAll();
+  ctx.fillStyle='#dfe3ec';
+  ringPath(); ctx.fill();
+  queueRibbon(g.tails.R.path, halfSpan); ctx.fill();
+  queueRibbon(g.tails.L.path, halfSpan); ctx.fill();
+  stubPath(); ctx.fill();
   ctx.restore();
 }
 
 function drawQueue(now){
-  const beadFrac = beltBeadFrac();
-  const phase = beltPhase(now);
-
+  const g = ensureRingGeom();
   drawQueueTrack();
 
-  /* 出口位＝隊形底部中央（EXIT_FRAC=0，buildQueueLUT() 自動旋轉去嘅
-     位置，貼近下方嘅登機閘位）。唔使加一個 procedural 閘口標記，淨係
-     靠隊頭行到嗰度先發光提示就夠。 */
-
-  drawFeedLine(now);
-
-  /* 可見圈：每人揸住一個座位號（0..VISIBLE_CAP-1），4 個一組（QUEUE_ROWS）
-     共用同一個沿路徑嘅「列」位置，橫向用切線法向量攤開做 4 排密集
-     色塊（doc 拍板，取代舊版逐個沿路徑攤開嘅單行）。座位號同陣列
-     index 脫鈎，所以邊個上咗機被 splice 走都唔會令第二個人跳位；
-     隱藏隊補人入返嗰個空咗嘅座位（見 tryStartBoarding）。邊個座位
-     啱啱行到出口窗口（樓梯位置），就邊個發光、邊個被判斷——同一列
-     4 個座位嘅 frac 一樣，會一齊到、一齊發光。 */
-  const winForGlow = beadFrac*EXIT_WIN_MULT;
-  for(let i=queue.length-1;i>=0;i--){
-    const e = queue[i];
-    const frac = slotFrac(e.slot, now);
-    /* `fresh`（啱啱補入、要行足一圈先算數）唔好發光，唔係會誤導玩家
-       以為佢而家可以上機 */
-    const atExit = !e.fresh && fracDistFromExit(frac) <= winForGlow;
-    const p = slotPos(e.slot, now);
-    drawPassenger(p.x, p.y, e.c, QUEUE_PAX_SCALE, atExit, phase*46 + e.slot*1.3);
+  /* 出口位淡淡發光，提示「轉到呢度嗰列先會上機」 */
+  {
+    const p = ringPoint(0, 1);
+    const pulse = 0.55+0.45*Math.sin(now*0.006);
+    ctx.save();
+    ctx.beginPath(); ctx.ellipse(p.x, p.y, 30, 22, 0, 0, Math.PI*2);
+    ctx.fillStyle=`rgba(245,200,76,${0.28*pulse})`; ctx.fill();
+    ctx.restore();
   }
-  /* 「剩餘乘客」而家擺咗上 HUD 做主要進度指標（參考遊戲左上角嗰個
-     顯眼 chip），呢度唔再重複畫一次細細粒嘅灰字。 */
+  /* 兩條入口尾巴（企定定；由遠畫到近） */
+  for(const side of ['R','L']){
+    const tail = side==='R' ? tailR : tailL, path = g.tails[side].path;
+    const maxCol = Math.ceil((path.total+60)/QUEUE_PASSENGER_SPACING);
+    for(let k=Math.min(tail.cols.length-1, maxCol); k>=0; k--){
+      const col = tail.cols[k];
+      const p = polyAt(path, (k+0.5)*QUEUE_PASSENGER_SPACING + tail.slack);
+      for(let r=0;r<col.n;r++){
+        const off=(r-(QUEUE_ROWS-1)/2)*QUEUE_ROW_SPACING;
+        const x=p.x - p.ty*off, y=p.y + p.tx*off;
+        if(x<-40||x>VW+40||y<-40||y>VH+40) continue;
+        drawPassenger(x, y, col.c, QUEUE_PAX_SCALE, false, 0);
+      }
+    }
+  }
+  /* 迴旋處入面嘅列 */
+  for(let j=0;j<ringCols;j++){
+    const col = ring[j]; if(!col) continue;
+    const f = slotFracOf(j);
+    for(let r=0;r<col.n;r++){
+      const p = ringPoint(f, ringRowScale(r));
+      drawPassenger(p.x, p.y, col.c, QUEUE_PAX_SCALE, false, 0);
+    }
+  }
 }
 
 /* ---------- 動畫（全部真實時鐘閉式） ---------- */
