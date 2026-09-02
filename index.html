@@ -173,7 +173,7 @@
     /* 加到主畫面／homescreen webapp 開（用戶反饋：standalone 模式冇
        瀏覽器自己嘅狀態列去自然讓開，iPhone 個 Dynamic Island 會直接
        疊喺內容度），用 env(safe-area-inset-top) 讓返個位。 */
-    padding:calc(11px + env(safe-area-inset-top)) 8px 11px;
+    padding:max(8px, calc(env(safe-area-inset-top) - 8px)) 8px 11px;
     pointer-events:none;
   }
   /* 加咗「剩餘乘客」之後一行放唔晒（實測兩邊都爆出 frame）。chip 改成
@@ -441,8 +441,12 @@
   #tabBar{
     position:absolute;left:0;right:0;bottom:0;
     display:flex;
-    background:linear-gradient(180deg,#1c2747,#0e1526);
-    border-top:2px solid #33436f;
+    background:linear-gradient(180deg,
+      rgba(14,21,38,0) 0%,
+      rgba(20,32,62,.62) 30%,
+      rgba(14,21,38,.93) 72%,
+      rgba(14,21,38,.97) 100%);
+    border-top:none;
     /* 用戶對比咗兩個情況，判斷返真正原因：喺一般 Safari 分頁開，
        底部本身有瀏覽器自己嘅網址列頂住，所以就算加咗安全區都睇唔出
        「多咗嚿嘢」；但 standalone webapp（加咗落主畫面）冇呢條網址列，
@@ -453,7 +457,7 @@
        2026-09-02 補充：嗰截空白真正原因係個 frame 本身短咗（見 fitStage），
        唔係呢個 padding。frame 修好之後 tab bar 會真正貼底，所以留返
        「安全區減 10px」畀 home indicator（iPhone ≈ 24px，唔會似一嚿嘢）。 */
-    padding:8px 4px max(8px, calc(env(safe-area-inset-bottom) - 10px));
+    padding:10px 4px max(6px, calc(env(safe-area-inset-bottom) - 18px));
     pointer-events:auto;
     z-index:7;
   }
@@ -464,6 +468,7 @@
     background:none;border:none;padding:6px 0;
     font-family:'Nunito',system-ui,sans-serif;font-weight:800;font-size:12px;
     color:var(--ink-dim);
+    text-shadow:0 1px 2px rgba(6,10,20,.85);   /* 漸層上半透明，字要撐得住淺色場景 */
   }
   /* 用戶反饋：「我哋本身有icon㗎嘛你做乜唔用」——主頁／地圖已有現成
      素材（分別係環球航線 icon `ui_world`、摺地圖 icon `ui_map`），
