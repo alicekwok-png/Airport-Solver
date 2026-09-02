@@ -394,8 +394,11 @@
        安全區就變成一截好明顯、灰藍色、唔知做咩嘅空白——用戶明確話
        「app 版本唔應該有最低嗰個 bar」，即係 standalone 模式要直接
        貼到底，唔使留呢截安全區（第一版 8px+inset、第二版 max(8px,
-       inset) 都仲係會留返一截,今次直接唔留)。 */
-    padding:8px 4px 8px;
+       inset) 都仲係會留返一截,今次直接唔留)。
+       2026-09-02 補充：嗰截空白真正原因係個 frame 本身短咗（見 fitStage），
+       唔係呢個 padding。frame 修好之後 tab bar 會真正貼底，所以留返
+       「安全區減 10px」畀 home indicator（iPhone ≈ 24px，唔會似一嚿嘢）。 */
+    padding:8px 4px max(8px, calc(env(safe-area-inset-bottom) - 10px));
     pointer-events:auto;
     z-index:7;
   }
@@ -1069,23 +1072,38 @@ let VW=0, VH=0, DPR=1;
    淨係網址列收/展唔一定會 fire resize——`visualViewport` 先係專門
    處理呢種狀況嘅 API，優先用佢；resize/orientationchange 做 fallback，
    再加幾次 delayed retry 保底捕捉個 toolbar 遲啲先穩定嘅情況。 */
+/* 2026-09-02 用戶真機（加咗落主畫面嘅 webapp）一直見到底部有一截藍色空白：
+   個 frame 高度之前係 JS 讀 visualViewport.height 再寫死做 px，iOS standalone
+   模式報返嚟嘅數值有時會細過實際畫面（好似仲扣咗 Safari 工具列咁），之後
+   又冇 resize 事件補救，個 frame 就短咗一截、tab bar 浮喺半空。而家高度改由
+   CSS 決定（#frame{height:100%} 跟住 #stage inset:0，即係真正嘅版面 viewport，
+   iOS 會自動跟工具列收放），JS 淨係讀返實際 clientHeight 去 set canvas；再用
+   ResizeObserver 睇住個 frame，任何原因改咗尺寸都即刻重 fit。 */
 function fitStage(){
   const vv = window.visualViewport;
   const ww = vv ? vv.width : window.innerWidth;
-  const wh = vv ? vv.height : window.innerHeight;
+  frame.style.height = '100%';
+  const wh = frame.clientHeight || (vv ? vv.height : window.innerHeight);
   let w = ww, h = wh;
   if (w/h > 9/16) w = Math.round(h*9/16);
   frame.style.width = w+'px';
-  frame.style.height = h+'px';
   DPR = Math.min(window.devicePixelRatio||1, 2);
   VW = w; VH = h;
-  cv.width = Math.round(w*DPR);
-  cv.height = Math.round(h*DPR);
+  const cw = Math.round(w*DPR), ch = Math.round(h*DPR);
+  if(cv.width!==cw) cv.width = cw;
+  if(cv.height!==ch) cv.height = ch;
   layoutBoard();
 }
 window.addEventListener('resize', fitStage);
 window.addEventListener('orientationchange', fitStage);
 if(window.visualViewport) window.visualViewport.addEventListener('resize', fitStage);
+if(window.ResizeObserver){
+  let lastW=-1, lastH=-1;
+  new ResizeObserver(()=>{
+    const r = frame.getBoundingClientRect();
+    if(Math.round(r.width)!==lastW || Math.round(r.height)!==lastH){ lastW=Math.round(r.width); lastH=Math.round(r.height); fitStage(); }
+  }).observe(frame);
+}
 for(const ms of [50,150,300,600,1200]) setTimeout(fitStage, ms);
 
 /* iOS Safari 由 iOS 10 開始，就算 viewport meta 寫咗 user-scalable=no，
