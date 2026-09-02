@@ -2755,6 +2755,9 @@ function startLevel(i){
       /* 情侶／團體連結（doc _37 韓國 L11 起）：linkPrev 指住「要等佢起飛
          先解鎖」嗰架機；null＝一開波就郁得。 */
       linkPrev: null, linkNext: null,
+      /* 盲摸格（doc _38 德國 L11 起）：true = 棋盤上顯示「?」，
+         停入閘位嗰刻先揭曉真色。淨係影響顯示，engine 一路都知真色。 */
+      mystery: !!p.mys,
       /* 冰封格（doc _33 第 2／11 節，日本 L14 起）：ice = 要全盤累計清走
          幾多架飛機先解凍。解凍之前顏色／方向都睇得到（已知但延後可用），
          同隧道格嘅「資訊不確定」係兩種唔同難度。 */
@@ -2812,6 +2815,18 @@ function startLevel(i){
     const firstCols = rest.slice(0, nFirst), secondCols = rest.slice(nFirst);
     tailR = {cols: g.first==='R' ? firstCols : secondCols, slack:0};
     tailL = {cols: g.first==='L' ? firstCols : secondCols, slack:0};
+    /* 乘客蒙面（doc _38 德國 L11 起）：揀 L.masked 列蒙起面，平均散開
+       喺個圈度（唔好集中一嚿，否則成邊都蒙晒、規劃唔到）。同盲摸格一樣
+       淨係影響顯示——上機邏輯照用真色，而且一定喺到達隊頭之前揭曉。 */
+    if(L.masked){
+      const live = [];
+      for(let j=0;j<ring.length;j++) if(ring[j]) live.push(j);
+      const step = Math.max(1, Math.floor(live.length / L.masked));
+      for(let k=0;k<L.masked;k++){
+        const col = ring[live[(k*step + Math.floor(step/2)) % live.length]];
+        if(col) col.masked = true;
+      }
+    }
     ringPhase = 0; ringLastMs = 0; lastExitSlot = -1;
     queue = [];   // 舊 array 唔再用（passengersLeft 直接數迴旋處＋尾巴）
   }
@@ -3007,6 +3022,7 @@ const I18N_EN = {
   "關閉 ✕": "Close ✕",
   "仲差 %1 架解凍": "Unlocks in %1 more",
   "解鎖！": "Unlocked!",
+  "揭曉！": "Revealed!",
   "要等另一架先": "Waiting on another plane",
   "+%1 建造材料": "+%1 materials",
   "已領取本關卡材料（獲得更高星級可補領差額）": "Materials already claimed (earn more stars to top up)",
@@ -3209,6 +3225,14 @@ function departPlane(p){
 }
 
 function dockPlane(p){
+  /* 盲摸格：停到閘位嗰一刻揭曉（doc：「送到出口／登機閘位嗰一刻先揭曉」） */
+  if(p.mystery){
+    p.mystery = false;
+    const c = planeCenter(p);
+    floats.push({x:c.x, y:c.y-cs*0.55, txt:T('揭曉！'), life:1, big:false, start:performance.now()});
+    spawnBurst(c.x, c.y, p.c);
+    ping(700,0.09); setTimeout(()=>ping(940,0.12),90);
+  }
   p.state='docked';
   ping(440,0.08,'triangle',0.08);
   checkStuck();
@@ -3245,6 +3269,15 @@ function tryStartBoarding(nowMs){
   const bead = 1/ringCols;
   let jx=-1, bd=Infinity;
   for(let j=0;j<ringCols;j++){ if(!ring[j]) continue; const d=circDist(slotFracOf(j),0); if(d<bd){bd=d; jx=j;} }
+  /* 蒙面乘客：行到接近隊頭（出口前約 3 個位）就揭曉，留返前置留意時間，
+     唔會冧盲到最後一刻（doc 明確要求） */
+  for(let j=0;j<ringCols;j++){
+    const col = ring[j];
+    if(col && col.masked && circDist(slotFracOf(j), 0) < bead*3){
+      col.masked = false;
+      ping(660,0.06,'triangle',0.05);
+    }
+  }
   if(jx>=0 && bd < bead/2){
     const col = ring[jx];
     let gateIdx=-1;
@@ -3643,6 +3676,7 @@ function drawIdlePlane(p, nowMs, dt){
   ctx.moveTo(ax-s, -s); ctx.lineTo(ax+s*0.6, 0); ctx.lineTo(ax-s, s);
   ctx.stroke();
   ctx.restore();
+  if(p.mystery) drawMysteryCover(p, nowMs);
   if(frozen(p)) drawIceCover(p, nowMs);
   else if(linkLocked(p)) drawLinkLock(p, nowMs);
   /* L1 教學提示：脈動圈 + 手指 pointer sprite（doc 第 15 節資產） */
@@ -3703,6 +3737,28 @@ function drawIceCover(p, nowMs){
   ctx.font = `800 ${Math.max(10, Math.round(r*1.25))}px 'Baloo 2',sans-serif`;
   ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText(String(n), bx, by+0.5);
+  ctx.restore();
+}
+
+/* 盲摸格（doc _38 德國 L11 起）：蓋住成架機，淨係見到「?」同方向箭咀。
+   刻意用中性灰白（唔係任何一隻遊戲色），免得玩家以為個蓋本身係提示。
+   箭咀留返喺蓋下面畫（方向唔係秘密，秘密淨係顏色）。 */
+function drawMysteryCover(p, nowMs){
+  const c = planeCenter(p);
+  const w = psz*0.90;
+  ctx.save();
+  ctx.translate(c.x, c.y);
+  roundRect(-w/2, -w/2, w, w, w*0.24);
+  ctx.fillStyle = 'rgba(228,232,240,.94)';
+  ctx.fill();
+  ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(90,104,130,.9)';
+  ctx.stroke();
+  const pulse = 1 + 0.05*Math.sin(nowMs*0.004);
+  ctx.scale(pulse, pulse);
+  ctx.fillStyle = '#5a6882';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font = `800 ${Math.round(w*0.58)}px 'Baloo 2',sans-serif`;
+  ctx.fillText('?', 0, w*0.03);
   ctx.restore();
 }
 
@@ -3824,7 +3880,24 @@ function drawSlotPlane(p, cx, cy, alpha){
   ctx.restore();
 }
 
-function drawPassenger(x, y, ckey, scale, glow, walkPhase){
+function drawPassenger(x, y, ckey, scale, glow, walkPhase, masked){
+  /* 蒙面乘客（doc _38 德國）：灰色剪影＋「?」，睇唔到色 */
+  if(masked){
+    const s = scale;
+    ctx.save();
+    ctx.translate(x, y);
+    roundRect(-6*s, -2*s, 12*s, 15*s, 6*s);
+    ctx.fillStyle = '#8b93a8'; ctx.fill();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = '#5a6274'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, -8*s, 5.5*s, 0, Math.PI*2);
+    ctx.fillStyle = '#9aa2b6'; ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#eef1f7';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font = `800 ${Math.round(9*s)}px 'Baloo 2',sans-serif`;
+    ctx.fillText('?', 0, -8*s);
+    ctx.restore();
+    return;
+  }
   const col = COLORS[ckey];
   const s = scale;
   ctx.save();
@@ -3950,7 +4023,7 @@ function drawQueue(now){
         const off=(r-(QUEUE_ROWS-1)/2)*QUEUE_ROW_SPACING;
         const x=p.x - p.ty*off, y=p.y + p.tx*off;
         if(x<-40||x>VW+40||y<-40||y>VH+40) continue;
-        drawPassenger(x, y, col.c, QUEUE_PAX_SCALE, false, 0);
+        drawPassenger(x, y, col.c, QUEUE_PAX_SCALE, false, 0, col.masked);
       }
     }
   }
@@ -3960,7 +4033,7 @@ function drawQueue(now){
     const f = slotFracOf(j);
     for(let r=0;r<col.n;r++){
       const p = ringPoint(f, ringRowScale(r));
-      drawPassenger(p.x, p.y, col.c, QUEUE_PAX_SCALE, false, 0);
+      drawPassenger(p.x, p.y, col.c, QUEUE_PAX_SCALE, false, 0, col.masked);
     }
   }
 }
