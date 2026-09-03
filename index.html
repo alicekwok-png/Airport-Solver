@@ -4121,9 +4121,17 @@ function paintPlane(Ln, W, col){
   ctx.fill();
 }
 
+/* 機型畫幾大（2026-09-03 用戶要求「大中小型飛機放落個 game 都要有份大細」）：
+   之前三款機型淨係換 sprite 圖案，畫出嚟一樣長，玩家分唔出邊架載多啲人。
+   而家以 psz 做「中型」基準，細型縮 16%、大型放大 15%、超大 25%。
+   格仔佔用、路徑規則、點擊範圍完全冇變（hit test 係計格唔係計圖）；
+   sprite 四邊有透明留白，大型疊到隔離格少少都撞唔到實物。 */
+const SZ_DRAW = {s:0.84, m:1.0, l:1.15, xl:1.25};
+function planeDrawLen(p){ return psz * (SZ_DRAW[p.sz] || 1); }
 function drawIdlePlane(p, nowMs, dt){
   const col = COLORS[p.c];
   const c = planeCenter(p);
+  const len = planeDrawLen(p);
   let ox=0, oy=0;
   if(p.shakeT>0){
     p.shakeT -= dt;
@@ -4137,14 +4145,14 @@ function drawIdlePlane(p, nowMs, dt){
   ctx.save();
   ctx.globalAlpha=0.25; ctx.fillStyle='#000';
   ctx.beginPath();
-  ctx.ellipse(c.x+ox, c.y+oy+psz*0.10, psz*0.37, psz*0.29, 0, 0, Math.PI*2);
+  ctx.ellipse(c.x+ox, c.y+oy+len*0.10, len*0.37, len*0.29, 0, 0, Math.PI*2);
   ctx.fill();
   ctx.restore();
-  if(!drawPlaneSprite(planeSpriteKey(p), c.x+ox, c.y+oy, psz, ang)){
+  if(!drawPlaneSprite(planeSpriteKey(p), c.x+ox, c.y+oy, len, ang)){
     ctx.save();
     ctx.translate(c.x+ox, c.y+oy);
     ctx.rotate(ang);
-    paintPlane(psz*0.90, psz*0.75, col);   // sprite 未載入嘅 fallback
+    paintPlane(len*0.90, len*0.75, col);   // sprite 未載入嘅 fallback
     ctx.restore();
   }
   /* 方向箭咀（機頭前少少） */
@@ -4154,7 +4162,7 @@ function drawIdlePlane(p, nowMs, dt){
   ctx.globalAlpha = 0.9;
   ctx.strokeStyle = col.lite;
   ctx.lineWidth = 2.5; ctx.lineCap='round'; ctx.lineJoin='round';
-  const ax = psz*0.66, s = psz*0.11;
+  const ax = len*0.66, s = len*0.11;
   ctx.beginPath();
   ctx.moveTo(ax-s, -s); ctx.lineTo(ax+s*0.6, 0); ctx.lineTo(ax-s, s);
   ctx.stroke();
@@ -4613,9 +4621,10 @@ function drawTransitPlanes(nowMs){
       const x = p.px0 + p.vx*easeOut(t)*esc;
       const y = p.py0 + p.vy*easeOut(t)*esc;
       const fa = Math.atan2(p.vy,p.vx);
-      if(!drawPlaneSprite(planeSpriteKey(p), x, y, psz, fa)){
+      const dl = planeDrawLen(p);
+      if(!drawPlaneSprite(planeSpriteKey(p), x, y, dl, fa)){
         ctx.save(); ctx.translate(x,y); ctx.rotate(fa);
-        paintPlane(psz*0.90, psz*0.75, COLORS[p.c]);
+        paintPlane(dl*0.90, dl*0.75, COLORS[p.c]);
         ctx.restore();
       }
       if(t>=1){
@@ -4629,7 +4638,7 @@ function drawTransitPlanes(nowMs){
       const e = easeOut(t);
       const x = p.tx0 + (a.x-p.tx0)*e;
       const y = p.ty0 + (a.y-p.ty0)*e - Math.sin(t*Math.PI)*38;
-      const L0 = psz, L1 = slotW*0.72;
+      const L0 = planeDrawLen(p), L1 = slotW*0.72;
       const a0 = Math.atan2(p.vy,p.vx);
       let da = ((0 - a0 + Math.PI*3) % (Math.PI*2)) - Math.PI;
       const fa = a0 + da*e, ln = L0+(L1-L0)*e;
