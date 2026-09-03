@@ -257,7 +257,7 @@
   .addgate-btn{
     pointer-events:auto;
     position:relative;
-    width:calc(var(--aidbar-h, 104px) - 22px); height:calc(var(--aidbar-h, 104px) - 22px);
+    width:calc(var(--aidbar-h, 104px) - 18px); height:calc(var(--aidbar-h, 104px) - 18px);
     padding:2px 2px 3px; margin:0;
     display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:0;
     border-radius:18px;
@@ -276,7 +276,7 @@
     filter:drop-shadow(0 3px 3px rgba(0,0,0,.4));
   }
   .aidname{
-    font-size:13px; font-weight:800; line-height:1; color:#fff; white-space:nowrap;
+    font-size:12px; font-weight:800; line-height:1; color:#fff; white-space:nowrap;
     text-shadow:0 2px 0 rgba(120,60,0,.55);
   }
   .aidbadge{
@@ -2803,9 +2803,12 @@ function layoutBoard(){
   const topPad = sceneY(SCENE_IMG.planeTop) ?? VH*0.42;
   /* 2026-09-02：畫面最底留一條畀道具列（加開閘位／指揮飛機），
      高度跟 VH 縮放，同 CSS --aidbar-h 同步，棋盤唔會再同道具重疊。 */
-  const aidH = Math.round(Math.min(112, Math.max(84, VH*0.125)));
+  /* 2026-09-03 用戶：兩個道具框太大，最底一行飛船俾佢遮住撳唔到——
+     框縮細（0.125→0.105 VH，上限 96px），棋盤底部再多留 14px 畀大型機
+     （畫到 1.32×）露出嚟嗰截，唔會伸入道具列。 */
+  const aidH = Math.round(Math.min(96, Math.max(72, VH*0.105)));
   frame.style.setProperty('--aidbar-h', aidH+'px');
-  const availW = VW - 20, availH = Math.max(60, VH - topPad - aidH - 6);
+  const availW = VW - 20, availH = Math.max(60, VH - topPad - aidH - 20);
   if(L && L.type==='radial'){
     radialR = Math.min(availW, availH)*0.335;
     /* 雙圈（doc L1 拍板：內外各 8 位）：cs 要遷就最擠嗰個圈嘅弧長，
@@ -3082,9 +3085,12 @@ function sceneScale(){
 }
 function applyQueueMetrics(){
   const s = sceneScale();
-  QUEUE_ROW_SPACING = 26*s;         // 一排 5 個：排距收窄少少，帶闊維持 ≈ 130 場景單位
-  QUEUE_PASSENGER_SPACING = 24*s;   // 人仔係高窄嘅 chibi（唔係圓波），步距要比排距窄少少先貼實
-  QUEUE_PAX_SCALE = 1.2*s;          // drawPassenger 高 34×scale ⇒ ≈ 41 場景單位
+  /* 2026-09-03 用戶（參考 Bus Jam 截圖）：人仔要大啲、密到見唔到白色帶底。
+     人仔放大 1.2→1.45（闊 ≈ 17 場景單位），列距收到 19（列同列貼實），
+     排距反而放闊到 29 令四排鋪滿成條 ~130 闊嘅帶。 */
+  QUEUE_ROW_SPACING = 29*s;
+  QUEUE_PASSENGER_SPACING = 19*s;
+  QUEUE_PAX_SCALE = 1.45*s;
   BELT_PX_PER_MS = 0.133*s;
 }
 let ring = [];                      // 迴旋處每個位：null（窿）或 {c, n}
@@ -4126,7 +4132,8 @@ function paintPlane(Ln, W, col){
    而家以 psz 做「中型」基準，細型縮 16%、大型放大 15%、超大 25%。
    格仔佔用、路徑規則、點擊範圍完全冇變（hit test 係計格唔係計圖）；
    sprite 四邊有透明留白，大型疊到隔離格少少都撞唔到實物。 */
-const SZ_DRAW = {s:0.84, m:1.0, l:1.15, xl:1.25};
+/* 2026-09-03 用戶：大型 1.15× 仲係睇唔出——拉開到 0.80 / 1.0 / 1.32 / 1.45 */
+const SZ_DRAW = {s:0.80, m:1.0, l:1.32, xl:1.45};
 function planeDrawLen(p){ return psz * (SZ_DRAW[p.sz] || 1); }
 /* 冰封格真素材（2026-09-03 用戶出咗 7 色 plane_<色>_ice：成架機封喺冰磚入面，
    機頭向上）：凍住嗰陣直接用呢張圖代替普通飛機 sprite，唔再喺飛機上面疊
