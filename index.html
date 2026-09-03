@@ -3276,7 +3276,13 @@ function startLevel(i){
     const all = L.queue.slice();
     ringGeom = null;
     const g = ensureRingGeom();
-    ringCols = Math.max(8, Math.round(g.perim/QUEUE_PASSENGER_SPACING));
+    /* 保底：如果 startLevel() 喺個 frame 仲係 0 尺寸嗰陣行（iOS standalone
+       報錯高度、或者頁面喺背景 tab 開），perim 同步距都會係 0，
+       0/0 = NaN ⇒ Array(NaN) 會直接 throw RangeError 令成關開唔到。
+       跌返個合理預設，之後 fitStage() 重算幾何嗰陣自然會補正。 */
+    const step = QUEUE_PASSENGER_SPACING > 0 ? QUEUE_PASSENGER_SPACING : 24;
+    const per = g.perim > 0 ? g.perim : 0;
+    ringCols = Math.max(8, Math.round(per/step) || 8);
     const cols = [];
     for(let k=0;k<all.length;k+=QUEUE_ROWS) cols.push({c: all[k], n: Math.min(QUEUE_ROWS, all.length-k)});
     ring = Array(ringCols).fill(null);
@@ -4126,6 +4132,7 @@ function drawIdlePlane(p, nowMs, dt){
     ox = vx*s; oy = vy*s;              // 沿自己方向震
   }
   const ang = planeAngle(p);
+  drawTunnelPile(p);          /* 隧道格：後面露出嚟嘅疊層邊 */
   /* 陰影 */
   ctx.save();
   ctx.globalAlpha=0.25; ctx.fillStyle='#000';
@@ -4155,6 +4162,7 @@ function drawIdlePlane(p, nowMs, dt){
   if(p.mystery && !sprite('plane_mystery')) drawMysteryCover(p, nowMs);
   if(frozen(p)) drawIceCover(p, nowMs);
   else if(linkLocked(p)) drawLinkLock(p, nowMs);
+  drawTunnelBadge(p);         /* 隧道格：左上角「疊層 ×N」 */
   /* L1 教學提示：脈動圈 + 手指 pointer sprite（doc 第 15 節資產） */
   if(hintOn && p.id===0){
     const pulse = 1 + Math.sin(nowMs*0.005)*0.12;
@@ -4286,11 +4294,69 @@ function checkTunnelReveals(){
     if(p.state==='covered' && pathClear(p)) p.state='idle';
   }
 }
+/* 隧道格嘅「仲有幾多架喺下面」持續視覺（2026-09-03 用戶回報「點解我睇唔到
+   有隧道關卡」）：之前個疊層數字牌淨係喺 drawTunnelCover 度畫，即係淨係
+   state==='covered' 先見到。但 checkTunnelReveals() 係「出口一通就即刻揭曉」，
+   而關卡生成器係靠「有條清晰嘅射線出邊界」嚟擺隧道，所以隧道頭幾乎一開波
+   就已經 pathClear ⇒ 即刻變 idle ⇒ 個蓋同數字牌一幀都冇出現過。結果玩家
+   淨係見到一架好普通嘅飛機，完全睇唔出下面仲疊住四五架，成個隧道機制隱形。
+   而家改成：只要嗰格仲有多過一架（tunnelRemaining ≥ 2），無論揭咗未都會畫
+   ── 後面露出嚟嘅疊層邊 ＋ 左上角深藍「疊層 ×N」牌。位置揀左上角係為咗
+   避開冰封格（右上藍色）同道具（紅色）嗰啲數字牌。 */
+function tunnelStackLeft(p){
+  return p.tunnel ? (p.tunnelRemaining||0) : 0;
+}
+/* 飛機後面露出嚟嘅疊層邊：畫喺飛機之前（所以睇落係壓住下面嗰幾架） */
+function drawTunnelPile(p){
+  const n = tunnelStackLeft(p);
+  if(n < 2) return;
+  const c = planeCenter(p);
+  const layers = Math.min(3, n-1);
+  const r = psz*0.40;
+  ctx.save();
+  for(let k=layers; k>=1; k--){
+    const o = psz*0.052*k;
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(c.x-r+o, c.y-r+o, r*2, r*2, r*0.34);
+    else ctx.rect(c.x-r+o, c.y-r+o, r*2, r*2);
+    ctx.globalAlpha = 0.34 - k*0.06;
+    ctx.fillStyle = '#0e1526'; ctx.fill();
+    ctx.globalAlpha = 0.50 - k*0.10;
+    ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1.5; ctx.stroke();
+  }
+  ctx.restore();
+}
+/* 左上角「×N」牌：N ＝連自己計，呢格仲有幾多架 */
+function drawTunnelBadge(p){
+  const n = tunnelStackLeft(p);
+  if(n < 2) return;
+  const c = planeCenter(p);
+  const r = Math.max(10, psz*0.19);
+  const bx = c.x - psz*0.31, by = c.y - psz*0.31;
+  ctx.save();
+  ctx.beginPath(); ctx.arc(bx, by, r, 0, Math.PI*2);
+  ctx.fillStyle = '#243157'; ctx.fill();
+  ctx.lineWidth = 2; ctx.strokeStyle = '#ffffff'; ctx.stroke();
+  /* 細細個疊層符號（三條橫線）擺喺數字上面，一眼睇出係「疊住」唔係「倒數」 */
+  ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = Math.max(1, r*0.11);
+  ctx.lineCap = 'round';
+  for(let k=0;k<2;k++){
+    const yy = by - r*0.52 + k*r*0.24;
+    ctx.beginPath(); ctx.moveTo(bx - r*0.34, yy); ctx.lineTo(bx + r*0.34, yy); ctx.stroke();
+  }
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `800 ${Math.max(9, Math.round(r*1.05))}px 'Baloo 2',sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(String(n), bx, by + r*0.30);
+  ctx.restore();
+}
+
 /* 隧道格未揭曉嗰架嘅畫法：蓋住嘅格仔＋「?」＋剩餘數字牌（doc 明言
    呢個視覺方向未拍板，呢度用返成個 code 一路慣用嘅圓形紅色數字徽章
    做暫時方案，同 .aidbadge 嗰套視覺語言一致）。 */
 function drawTunnelCover(p, nowMs, dt){
   const c = planeCenter(p);
+  drawTunnelPile(p);
   ctx.save();
   ctx.globalAlpha=0.25; ctx.fillStyle='#000';
   ctx.beginPath();
@@ -4311,17 +4377,8 @@ function drawTunnelCover(p, nowMs, dt){
   ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText('?', 0, r*0.05);
   ctx.restore();
-  const n = p.tunnelRemaining||1;
-  const bx = c.x + psz*0.30, by = c.y - psz*0.30, br = Math.max(11, psz*0.20);
-  ctx.save();
-  ctx.beginPath(); ctx.arc(bx,by,br,0,Math.PI*2);
-  ctx.fillStyle='#e2432c'; ctx.fill();
-  ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
-  ctx.fillStyle='#fff';
-  ctx.font=`700 ${Math.round(br*1.1)}px 'Baloo 2',sans-serif`;
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(String(n), bx, by+1);
-  ctx.restore();
+  /* 數字牌同揭咗嗰陣用返同一個（左上角深藍疊層牌），玩家唔使學兩套視覺 */
+  drawTunnelBadge(p);
 }
 
 function drawSlotPlane(p, cx, cy, alpha){
