@@ -4192,7 +4192,7 @@ function drawIdlePlane(p, nowMs, dt){
   if(p.mystery && !sprite('plane_mystery')) drawMysteryCover(p, nowMs);
   if(frozen(p)) drawIceCover(p, nowMs);
   else if(linkLocked(p)) drawLinkLock(p, nowMs);
-  drawTunnelBadge(p);         /* 隧道格：左上角「疊層 ×N」 */
+  /* 隧道數字牌唔喺呢度畫——改喺主循環之後另一輪畫，否則畫得後嘅鄰格飛機會蓋住佢 */
   /* L1 教學提示：脈動圈 + 手指 pointer sprite（doc 第 15 節資產） */
   if(hintOn && p.id===0){
     const pulse = 1 + Math.sin(nowMs*0.005)*0.12;
@@ -4357,7 +4357,10 @@ function tunnelStackLeft(p){
    畫到最後一架都照畫——機庫係棋盤固定設施，唔會無端端消失；數字牌就
    淨係 ≥ 2 先顯示（見 drawTunnelBadge）。冇素材就跌返畫 code 版疊層邊。 */
 function tunnelTileSide(){
-  return Math.min(psz*1.04, csX*1.0);
+  /* 2026-09-03 用戶：兩個上下相鄰嘅隧道格黐埋一齊。psz 可以去到 1.35×csY，
+     跟 psz 畫嘅機庫就會伸入上下格。機庫係「格」唔係「飛機」，所以要鎖喺
+     自己格嘅範圍入面（兩軸都留 6% 邊）；飛機照舊按 psz 畫，露出機庫都冇問題。 */
+  return Math.min(psz*1.04, csX*0.94, csY*0.94);
 }
 function drawTunnelPile(p){
   const n = tunnelStackLeft(p);
@@ -4426,7 +4429,7 @@ function drawTunnelCover(p, nowMs, dt){
   drawTunnelPile(p);
   /* 有機庫素材嘅話，閘門入面嗰個灰色機鼻已經講晒「入面有架唔知咩機」，
      唔使再疊個「?」方塊上去；淨係加返疊層數字牌就夠。 */
-  if(sprite('tile_tunnel')){ drawTunnelBadge(p); return; }
+  if(sprite('tile_tunnel')) return;   /* 數字牌喺主循環之後統一畫 */
   ctx.save();
   ctx.globalAlpha=0.25; ctx.fillStyle='#000';
   ctx.beginPath();
@@ -4447,8 +4450,7 @@ function drawTunnelCover(p, nowMs, dt){
   ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText('?', 0, r*0.05);
   ctx.restore();
-  /* 數字牌同揭咗嗰陣用返同一個（左上角深藍疊層牌），玩家唔使學兩套視覺 */
-  drawTunnelBadge(p);
+  /* 數字牌喺主循環之後統一畫（見 drawGameplay 主循環） */
 }
 
 function drawSlotPlane(p, cx, cy, alpha){
@@ -5144,6 +5146,11 @@ function tickInner(now){
     for(const p of planes){
       if(p.state==='idle') drawIdlePlane(p, now, dt);
       else if(p.state==='covered') drawTunnelCover(p, now, dt);
+    }
+    /* 隧道「疊層 ×N」牌第二輪先畫：一定浮喺所有飛機之上，唔會俾鄰格
+       畫得後嘅飛機蓋住（用戶截圖：上下兩個隧道格，下面嗰個牌被遮咗一半） */
+    for(const p of planes){
+      if(p.state==='idle' || p.state==='covered') drawTunnelBadge(p);
     }
     drawTransitPlanes(now);
     drawBoarding(gNow);
