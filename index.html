@@ -4453,14 +4453,20 @@ function drawTunnelCover(p, nowMs, dt){
   /* 數字牌喺主循環之後統一畫（見 drawGameplay 主循環） */
 }
 
+/* 閘位上嘅飛機大細（2026-09-03 用戶：細飛機飛到閘位唔可以變大，要維持細）：
+   以前一律畫 slotH×0.82，三款機型泊埋一齊一樣大。而家跟機型縮放，但比棋盤
+   嗰套（0.80/1.0/1.32）收窄，因為閘位格闊度固定，大型再放大會撞埋隔離閘。
+   飛去閘位嘅過渡動畫終點同起飛動畫起點都用同一個數，唔會有大細跳變。 */
+const SZ_SLOT = {s:0.78, m:0.92, l:1.06, xl:1.14};
+function slotPlaneLen(p){ return slotH*0.82*(SZ_SLOT[p.sz] || 0.92); }
 function drawSlotPlane(p, cx, cy, alpha){
   const col = COLORS[p.c];
   /* 機頭朝上泊喺閘位 */
-  if(!drawPlaneSprite(planeSpriteKey(p), cx, cy - slotH*0.06, slotH*0.82, -Math.PI/2, alpha)){
+  if(!drawPlaneSprite(planeSpriteKey(p), cx, cy - slotH*0.06, slotPlaneLen(p), -Math.PI/2, alpha)){
     ctx.save();
     ctx.globalAlpha = alpha;
     ctx.translate(cx, cy - slotH*0.08);
-    paintPlane(slotW*0.84, slotH*0.5, col);
+    paintPlane(slotPlaneLen(p)*1.02, slotPlaneLen(p)*0.6, col);
     ctx.restore();
   }
   /* 上客進度：冇咗深色底板之後，36 粒座位點鋪喺地台上面會花，改成
@@ -4680,7 +4686,7 @@ function drawTransitPlanes(nowMs){
       const e = easeOut(t);
       const x = p.tx0 + (a.x-p.tx0)*e;
       const y = p.ty0 + (a.y-p.ty0)*e - Math.sin(t*Math.PI)*38;
-      const L0 = planeDrawLen(p), L1 = slotW*0.72;
+      const L0 = planeDrawLen(p), L1 = slotPlaneLen(p);
       const a0 = Math.atan2(p.vy,p.vx);
       let da = ((0 - a0 + Math.PI*3) % (Math.PI*2)) - Math.PI;
       const fa = a0 + da*e, ln = L0+(L1-L0)*e;
@@ -4698,9 +4704,9 @@ function drawTransitPlanes(nowMs){
       const d = 60*t + 900*t*t;
       const x = a.x + d*0.35, y = a.y - d;
       const fa = -Math.PI/2 + 0.25*t, sc = 1+t*0.5;
-      if(!drawPlaneSprite(planeSpriteKey(p), x, y, slotW*0.72*sc, fa)){
+      if(!drawPlaneSprite(planeSpriteKey(p), x, y, slotPlaneLen(p)*sc, fa)){
         ctx.save(); ctx.translate(x,y); ctx.rotate(fa);
-        paintPlane(slotW*0.84*sc, slotH*0.5*sc, COLORS[p.c]);
+        paintPlane(slotPlaneLen(p)*1.02*sc, slotPlaneLen(p)*0.6*sc, COLORS[p.c]);
         ctx.restore();
       }
       ctx.save();
