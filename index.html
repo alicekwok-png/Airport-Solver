@@ -384,9 +384,13 @@
   }
   /* 用戶反饋 logo 擠喺左上角太細粒「完全睇唔到」——改做置中、放大，
      材料 chip 拆出嚟獨立擺返右上角，唔再同 logo 爭返同一行位置。 */
-  #hubTop .chip.gold{position:absolute; right:14px; top:12px}
+  /* 2026-09-03 用戶真機（加咗落主畫面）：齒輪同材料 chip 升到頂，同手機
+     狀態列（時鐘／訊號）疊埋，撳唔到。原因：#hubTop 嘅 padding 有計
+     safe-area-inset-top，但呢兩粒係 position:absolute，top 值直接由 #hubTop
+     頂邊起計，完全冇食到個 padding。要自己加返 env(safe-area-inset-top)。 */
+  #hubTop .chip.gold{position:absolute; right:14px; top:calc(12px + env(safe-area-inset-top, 0px))}
   /* 設定齒輪（doc _35 拍板：Home 同 Gameplay 共用同一粒 icon） */
-  #hubTop .gear-btn{position:absolute; left:14px; top:10px}
+  #hubTop .gear-btn{position:absolute; left:14px; top:calc(10px + env(safe-area-inset-top, 0px))}
   .gear-btn{
     background:none;border:none;box-shadow:none;padding:0;margin:0;
     display:flex;align-items:center;justify-content:center;
