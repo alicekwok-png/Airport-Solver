@@ -4016,7 +4016,10 @@ function drawSlots(){
     const occupied = !!slotPlanes[i];
     const pad = sprite('gate'+(i+1)) || sprite('gatepad');
     ctx.save();
-    if(pad && !occupied){
+    /* 2026-09-03 用戶：泊咗機嗰陣唔要再蓋一塊深色底板——閘位地台
+       （gate1-7）本身就係飛機停低嘅位，飛機直接泊喺地台上面就得，
+       同 Bus Jam 巴士泊喺自己編號格一樣。深色底板淨係留畀冇 pad 素材嘅 fallback。 */
+    if(pad){
       /* 完整原圖，冇裁剪——素材本身已經係乾淨透明底，裁到嚿嚿聲好核突
          （用戶反饋）。新版正面視角閘位圖（gate1-7）構圖大致置中
          （同 gatelock 嗰張一致），直接置中喺 anchor 度就啱；
@@ -4458,25 +4461,28 @@ function drawSlotPlane(p, cx, cy, alpha){
     paintPlane(slotW*0.84, slotH*0.5, col);
     ctx.restore();
   }
-  /* 座位點（已上客亮起）＋ n/cap */
+  /* 上客進度：冇咗深色底板之後，36 粒座位點鋪喺地台上面會花，改成
+     一條幼身進度條（半透明深色軌 + 黃色填充）＋ 右上角細細個 n/cap 藥丸。 */
   ctx.save();
   ctx.globalAlpha = alpha;
-  const seats = p.cap;
-  const sw = Math.min(slotW*0.7, seats*9), x0 = cx - sw/2;
-  for(let s=0;s<seats;s++){
-    const sx = x0 + (seats===1?sw/2:(s/(seats-1))*sw);
-    ctx.beginPath();
-    ctx.arc(sx, cy + slotH*0.30, 3.4, 0, Math.PI*2);
-    ctx.fillStyle = s < p.boarded ? '#ffe066' : 'rgba(244,239,230,.28)';
-    ctx.fill();
+  const bw = slotW*0.62, bh = Math.max(4, slotH*0.07), bx = cx - bw/2, by = cy + slotH*0.30;
+  roundRect(bx, by, bw, bh, bh/2);
+  ctx.fillStyle = 'rgba(12,17,30,.45)'; ctx.fill();
+  const frac = Math.max(0, Math.min(1, p.boarded / Math.max(1, p.cap)));
+  if(frac > 0){
+    roundRect(bx, by, Math.max(bh, bw*frac), bh, bh/2);
+    ctx.fillStyle = '#ffe066'; ctx.fill();
   }
-  ctx.font=`800 ${Math.round(slotH*0.2)}px 'Baloo 2',sans-serif`;
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillStyle='#f4efe6';
-  ctx.strokeStyle='rgba(12,17,30,.7)'; ctx.lineWidth=4; ctx.lineJoin='round';
   const txt = `${p.boarded}/${p.cap}`;
-  ctx.strokeText(txt, cx + slotW*0.30, cy - slotH*0.26);
-  ctx.fillText(txt, cx + slotW*0.30, cy - slotH*0.26);
+  const fs = Math.round(slotH*0.17);
+  ctx.font=`800 ${fs}px 'Baloo 2',sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const tw = ctx.measureText(txt).width, ph = fs*1.35, pw = tw + fs*0.9;
+  const px = cx + slotW*0.30 - pw/2, py = cy - slotH*0.30 - ph/2;
+  roundRect(px, py, pw, ph, ph/2);
+  ctx.fillStyle='rgba(12,17,30,.72)'; ctx.fill();
+  ctx.fillStyle='#f4efe6';
+  ctx.fillText(txt, cx + slotW*0.30, cy - slotH*0.30 + 0.5);
   ctx.restore();
 }
 
